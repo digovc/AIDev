@@ -1,5 +1,7 @@
 # AIDev: Automatize seus Projetos com IA
 
+![Exemplo](exemple.png)
+
 [![Licença](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 **Uma ferramenta para automatizar tarefas de projetos com o poder da Inteligência Artificial, diretamente no seu computador.**
