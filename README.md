@@ -63,8 +63,8 @@ O AIDev é composto por dois projetos distintos:
 
 **Pré-requisitos:**
 
-* **Node.js e NPM (Gerenciador de Pacotes do Node.js) Instalados:
-  ** AIDev utiliza Node.js e NPM. Se você não os tiver instalados, siga as instruções em [https://nodejs.org/](https://nodejs.org/) para instalar a versão mais recente recomendada.
+* **Node.js e NPM** (Gerenciador de Pacotes do Node.js) Instalados:
+  AIDev utiliza Node.js e NPM. Se você não os tiver instalados, siga as instruções em [https://nodejs.org/](https://nodejs.org/) para instalar a versão mais recente recomendada.
 
 **Instalação:**
 
@@ -104,8 +104,8 @@ Você pode contribuir de diversas formas:
 
 * **Desenvolvimento de Funcionalidades:**  Adicione novas funcionalidades, otimize o código existente, corrija bugs.
 * **Documentação:** Melhore a documentação, crie tutoriais, traduza o README para outros idiomas.
-* **Testes:**  Crie e execute testes para garantir a qualidade e estabilidade do projeto.
-* **Design:**  Contribua com melhorias na interface e experiência do usuário.
+* **Testes:** Crie e execute testes para garantir a qualidade e estabilidade do projeto.
+* **Design:** Contribua com melhorias na interface e experiência do usuário.
 * **Ideias e Sugestões:** Compartilhe suas ideias para novas funcionalidades e melhorias.
 
 **Como Contribuir:**
