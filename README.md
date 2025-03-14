@@ -44,12 +44,37 @@ AIDev é perfeito para:
 
 Está pronto para começar a automatizar seus projetos com AIDev? Siga estes passos simples para executar o AIDev localmente:
 
+**Estrutura do Projeto:**
+
+O AIDev é composto por dois repositórios distintos:
+* **AIDev-Backend:** Contém a API e a lógica de negócios do sistema
+* **AIDev-Frontend:** Contém a interface de usuário e componentes visuais
+
 **Pré-requisitos:**
 
 * **Node.js e NPM (Gerenciador de Pacotes do Node.js) Instalados:** AIDev utiliza Node.js e NPM. Se você não os tiver instalados, siga as instruções em [https://nodejs.org/](https://nodejs.org/) para instalar a versão mais recente recomendada.
 * **Configuração via Arquivos `.env`:** Tanto o Frontend quanto o Backend do AIDev possuem arquivos `.env` em seus respectivos diretórios. Estes arquivos permitem configurar diversas opções, incluindo as portas de execução dos servidores.
 
-**Instalação e Execução:**
+**Opções de Instalação:**
+
+Você tem duas opções para instalar e executar o AIDev:
+
+### Opção 1: Usando os Scripts de Instalação Automática
+
+Para uma instalação mais rápida e automatizada, você pode usar os scripts fornecidos:
+
+* **No Windows:** Execute o arquivo `aidev-run-win.cmd`
+* **No Linux/Mac:** Execute o arquivo `aidev-run-linux-mac.sh`
+
+Estes scripts cuidarão de todo o processo, incluindo:
+- Clonar ambos os repositórios (frontend e backend)
+- Instalar todas as dependências necessárias
+- Iniciar os servidores automaticamente
+- Abrir o navegador na aplicação
+
+### Opção 2: Instalação Manual Passo a Passo
+
+Se preferir instalar manualmente ou caso encontre problemas com os scripts automáticos, siga estas instruções:
 
 1. **Clone o Repositório do Backend:**
    Abra seu terminal (ou prompt de comando) e execute o seguinte comando para clonar o repositório do backend:
