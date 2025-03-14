@@ -1,0 +1,30 @@
+{
+  "name": "aidev",
+  "version": "1.0.0",
+  "description": "Backend do projeto AIDdev",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "watch": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.38.0",
+    "@google/generative-ai": "^0.24.0",
+    "chokidar": "^3.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "ignore": "^7.0.3",
+    "multi-llm-ts": "^2.15.2",
+    "nunjucks": "^3.2.4",
+    "openai": "^4.86.2",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

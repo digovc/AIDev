@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+/* Form Elements */
+.form-label {
+    @apply block text-sm font-medium text-gray-300 mb-1;
+}
+
+.form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500;
+}
+
+textarea.form-input {
+    @apply text-xs;
+}
+
+/* Buttons */
+.btn {
+    @apply px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+}
+
+.btn-primary {
+    @apply border-transparent text-white bg-blue-600 hover:bg-blue-700;
+}
+
+.btn-secondary {
+    @apply border-gray-300 text-gray-700 bg-white hover:bg-gray-50;
+}
