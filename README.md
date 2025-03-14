@@ -63,8 +63,8 @@ Você tem duas opções para instalar e executar o AIDev:
 
 Para uma instalação mais rápida e automatizada, você pode usar os scripts fornecidos:
 
-* **No Windows:** Execute o arquivo `aidev-run-win.cmd`
-* **No Linux/Mac:** Execute o arquivo `aidev-run-linux-mac.sh`
+* **No Windows:** Execute o arquivo [aidev-run-win.cmd](https://raw.githubusercontent.com/digovc/AIDev/refs/heads/main/aidev-run-win.cmd)
+* **No Linux/Mac:** Execute o arquivo [aidev-run-linux-mac.sh](https://raw.githubusercontent.com/digovc/AIDev/refs/heads/main/aidev-run-linux-mac.sh)
 
 Estes scripts cuidarão de todo o processo, incluindo:
 - Clonar ambos os repositórios (frontend e backend)
