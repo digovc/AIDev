@@ -118,7 +118,7 @@ class AgentService {
       type: event.blockType,
       tool: event.tool,
       toolUseId: event.toolUseId,
-      content: ''
+      content: event.content || ''
     };
 
     assistantMessage.blocks.push(block);

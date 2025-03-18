@@ -28,9 +28,17 @@ class GoogleService {
         tools: this.formatTools(tools),
       });
 
+      let isFirstChunk = true;
+
       for await (const chunk of result.stream) {
         if (cancelationToken.isCanceled()) {
           return result.stream.cancel();
+        }
+
+        // Iniciamos o bloco de texto na primeira mensagem
+        if (isFirstChunk) {
+          streamCallback({ type: 'block_start', blockType: 'text' });
+          isFirstChunk = false;
         }
 
         await this.translateStreamEvent(chunk, streamCallback);
@@ -40,11 +48,42 @@ class GoogleService {
     }
   }
 
-  translateStreamEvent(chunk, currentBlock, streamCallback) {
-    if (chunk.candidates.length === 0) return;
+  translateStreamEvent(chunk, streamCallback) {
+    if (chunk.candidates?.length === 0 || !chunk.candidates) return;
     const candidate = chunk.candidates[0];
-    console.log(JSON.stringify(candidate, null, 2));
 
+    // Se não há conteúdo, ignoramos este chunk
+    if (!candidate.content) return;
+
+    const content = candidate.content;
+    const parts = content.parts[0];
+
+    // Verificamos se é uma chamada de função
+    if (parts.functionCall) {
+      const functionCall = parts.functionCall;
+
+      // Se temos um finishReason STOP, significa que esta é a mensagem completa da função
+      if (candidate.finishReason === 'STOP') {
+        streamCallback({
+          type: 'block_start',
+          blockType: 'tool_use',
+          tool: functionCall.name,
+          toolUseId: `google-function-${Date.now()}`, // Geramos um ID único
+          content: JSON.stringify(functionCall.args)
+        });
+
+        // Indicamos que o bloco está completo
+        streamCallback({ type: 'block_stop' });
+      }
+    }
+    // Se é texto normal
+    else if (parts.text) {
+      // Enviamos o texto como delta
+      streamCallback({
+        type: 'block_delta',
+        delta: parts.text
+      });
+    }
   }
 
 
