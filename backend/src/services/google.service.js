@@ -60,19 +60,17 @@ class GoogleService {
     if (parts.functionCall) {
       const functionCall = parts.functionCall;
 
-      // Se temos um finishReason STOP, significa que esta é a mensagem completa da função
-      if (candidate.finishReason === 'STOP') {
-        streamCallback({
-          type: 'block_start',
-          blockType: 'tool_use',
-          tool: functionCall.name,
-          toolUseId: `google-function-${ Date.now() }`, // Geramos um ID único
-          content: JSON.stringify(functionCall.args)
-        });
+      streamCallback({
+        type: 'block_start',
+        blockType: 'tool_use',
+        tool: functionCall.name,
+        toolUseId: `google-function-${ Date.now() }`, // Geramos um ID único
+        content: JSON.stringify(functionCall.args)
+      });
 
-        // Indicamos que o bloco está completo
-        streamCallback({ type: 'block_stop' });
-      }
+      // Indicamos que o bloco está completo
+      streamCallback({ type: 'block_stop' });
+      streamCallback({ type: 'block_start', blockType: 'text' });
     }
     // Se é texto normal
     else if (parts.text) {
@@ -124,9 +122,9 @@ class GoogleService {
           for (const block of message.blocks) {
             switch (block.type) {
               case 'text':
-                formattedMessage.parts.push({
-                  text: block.content
-                });
+                if (block.content?.trim()) {
+                  formattedMessage.parts.push({ text: block.content });
+                }
                 break;
               case 'tool_use':
                 formattedMessage.parts.push({
@@ -153,11 +151,9 @@ class GoogleService {
           }
 
           // Se não tiver partes, adiciona um texto vazio
-          if (formattedMessage.parts.length === 0) {
-            formattedMessage.parts.push({ text: '' });
+          if (formattedMessage.parts.length) {
+            formattedMessages.push(formattedMessage);
           }
-
-          formattedMessages.push(formattedMessage);
       }
     }
 
