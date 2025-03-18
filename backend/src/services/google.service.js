@@ -16,13 +16,12 @@ class GoogleService {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: assistent.model || 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: assistent.model || 'gemini-2.0-flash' });
 
     const promptContent = this.buildPromptContent(formattedMessages);
 
     try {
       streamCallback({ type: 'message_start', inputTokens: 0 }); // Google API não fornece contagem de tokens
-      streamCallback({ type: 'block_start', blockType: 'text' });
 
       const result = await model.generateContentStream({
         contents: [{ role: 'user', parts: [{ text: promptContent }] }],
@@ -34,18 +33,20 @@ class GoogleService {
           return result.stream.cancel();
         }
 
-        const chunkText = chunk.text();
-        streamCallback({ type: 'block_delta', delta: chunkText });
+        await this.translateStreamEvent(chunk, streamCallback);
       }
-
-      streamCallback({ type: 'block_stop' });
+    } finally {
       streamCallback({ type: 'message_stop' });
-    } catch (error) {
-      streamCallback({ type: 'block_stop' });
-      streamCallback({ type: 'message_stop' });
-      throw error;
     }
   }
+
+  translateStreamEvent(chunk, currentBlock, streamCallback) {
+    if (chunk.candidates.length === 0) return;
+    const candidate = chunk.candidates[0];
+    console.log(JSON.stringify(candidate, null, 2));
+
+  }
+
 
   formatTools(tools) {
     if (!tools || !tools.length) return [];

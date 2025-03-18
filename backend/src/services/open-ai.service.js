@@ -17,11 +17,6 @@ class OpenAIService {
       baseURL = 'https://api.deepseek.com';
     }
 
-    if (assistent.provider === 'google') {
-      apiKey = settings.gemini.apiKey;
-      baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/';
-    }
-
     if (!apiKey) {
       throw new Error('API key is required');
     }
@@ -31,23 +26,29 @@ class OpenAIService {
       baseURL: baseURL,
     });
 
-    const stream = await openai.chat.completions.create({
-      messages: formattedMessages,
-      model: assistent.model,
-      // max_tokens: 4096,
-      stream: true,
-      tools: tools,
-    });
+    streamCallback({ type: 'message_start', inputTokens: 0 });
 
-    const currentBlock = {}
+    try {
+      const stream = await openai.chat.completions.create({
+        messages: formattedMessages,
+        model: assistent.model,
+        stream: true,
+        tools: tools,
+      });
 
-    for await (const chunk of stream) {
-      if (cancelationToken.isCanceled()) {
-        return stream.controller.abort();
+      const currentBlock = {}
+
+      for await (const chunk of stream) {
+        if (cancelationToken.isCanceled()) {
+          return stream.controller.abort();
+        }
+
+        this.translateStreamEvent(chunk, currentBlock, streamCallback);
       }
-
-      this.translateStreamEvent(chunk, currentBlock, streamCallback);
+    } finally {
+      streamCallback({ type: 'message_stop' });
     }
+
   }
 
   translateStreamEvent(chunk, currentBlock, streamCallback) {
@@ -57,7 +58,6 @@ class OpenAIService {
 
     if (delta.role === 'assistant') {
       currentBlock.type = delta.tool_calls ? 'tool_use' : 'text';
-      streamCallback({ type: 'message_start', inputTokens: 0 });
 
       if (currentBlock.type === 'tool_use') {
         const toolCall = delta.tool_calls[0];
@@ -74,8 +74,6 @@ class OpenAIService {
         currentBlock.toolUseId = undefined;
         streamCallback({ type: 'block_start', blockType: 'text' });
       }
-    } else if (choice.finish_reason) {
-      streamCallback({ type: 'message_stop' });
     } else if (currentBlock.type === 'tool_use' && delta.tool_calls) {
       const toolCall = delta.tool_calls[0];
       streamCallback({ type: 'block_delta', delta: toolCall.function.arguments });

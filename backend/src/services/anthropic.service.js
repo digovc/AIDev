@@ -17,21 +17,24 @@ class AnthropicService {
 
     const anthropic = new Anthropic({ apiKey: apiKey, });
 
-    const stream = await anthropic.messages.create({
-      messages: formattedMessages,
-      model: assistent.model,
-      max_tokens: 8192,
-      stream: true,
-      tools: tools,
-    });
+    try {
+      const stream = await anthropic.messages.create({
+        messages: formattedMessages,
+        model: assistent.model,
+        max_tokens: 8192,
+        stream: true,
+        tools: tools,
+      });
 
-    for await (const event of stream) {
+      for await (const event of stream) {
+        if (cancelationToken.isCanceled()) {
+          return stream.controller.abort();
+        }
 
-      if (cancelationToken.isCanceled()) {
-        return stream.controller.abort();
+        this.translateStreamEvent(event, streamCallback);
       }
-
-      this.translateStreamEvent(event, streamCallback);
+    } finally {
+      streamCallback({ type: 'message_stop' });
     }
   }
 
@@ -41,9 +44,6 @@ class AnthropicService {
     switch (type) {
       case 'message_start':
         streamCallback({ type: 'message_start', inputTokens: event.message.usage.input_tokens });
-        break;
-      case 'message_stop':
-        streamCallback({ type: 'message_stop' });
         break;
       case 'content_block_start':
         switch (event.content_block.type) {
