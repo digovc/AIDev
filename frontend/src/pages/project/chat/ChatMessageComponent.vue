@@ -9,17 +9,15 @@
         {{ formatTime(message.timestamp) }}
       </span>
     </div>
-    <div class="text-gray-300 overflow-y-auto pt-4">
-      <div v-for="(block, index) in message.blocks" :key="index">
-        <div v-if="block.type === 'text'">
-          <ChatMessageTextComponent :content="block.content"/>
-        </div>
-        <div v-if="block.type === 'tool_use'">
-          <ChatMessageToolComponent :block="block"/>
-        </div>
-        <div v-if="block.type === 'tool_result'">
-          <ChatMessageToolResultComponent :block="block"/>
-        </div>
+    <div v-for="(block, index) in message.blocks" :key="index" class="text-gray-300 overflow-y-auto">
+      <div v-if="block.type === 'text'">
+        <ChatMessageTextComponent :content="block.content"/>
+      </div>
+      <div v-if="block.type === 'tool_use'">
+        <ChatMessageToolComponent :block="block"/>
+      </div>
+      <div v-if="block.type === 'tool_result'">
+        <ChatMessageToolResultComponent :block="block"/>
       </div>
     </div>
   </div>

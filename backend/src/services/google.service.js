@@ -169,6 +169,8 @@ class GoogleService {
       case 'tool':
       case 'user_system':
         return 'user';
+      case 'assistant':
+        return 'model';
       default:
         return sender;
     }
