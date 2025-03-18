@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const settingsStore = require('../stores/settings.store');
 
-class GoogleService {
+class GoogleProvider {
   async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
@@ -177,4 +177,4 @@ class GoogleService {
   }
 }
 
-module.exports = new GoogleService();
+module.exports = new GoogleProvider();

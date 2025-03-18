@@ -1,6 +1,6 @@
-const anthropicService = require('../providers/anthropic.service');
-const openAIService = require('../providers/open-ai.service');
-const googleService = require('../providers/google.service');
+const anthropicProvider = require('../providers/anthropic.provider');
+const openAIProvider = require('../providers/open-ai.provider');
+const googleProvider = require('../providers/google.provider');
 const listFilesTool = require("../tools/list-files.tool");
 const listTasksTool = require("../tools/list-tasks.tool");
 const messagesStore = require('../stores/messages.store');
@@ -38,14 +38,14 @@ class AgentService {
       model: 'gpt-4o-2024-08-06'
     };
 
-    let providerService = openAIService;
+    let providerService = openAIProvider;
 
     switch (assistant.provider) {
       case 'anthropic':
-        providerService = anthropicService;
+        providerService = anthropicProvider;
         break;
       case 'google':
-        providerService = googleService;
+        providerService = googleProvider;
         break;
     }
 

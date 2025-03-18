@@ -1,7 +1,7 @@
 const OpenAI = require('openai');
 const settingsStore = require('../stores/settings.store');
 
-class OpenAIService {
+class OpenAiProvider {
   async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
@@ -172,4 +172,4 @@ class OpenAIService {
   }
 }
 
-module.exports = new OpenAIService();
+module.exports = new OpenAiProvider();

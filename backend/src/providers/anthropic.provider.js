@@ -1,7 +1,7 @@
 const { Anthropic } = require('@anthropic-ai/sdk');
 const settingsStore = require('../stores/settings.store');
 
-class AnthropicService {
+class AnthropicProvider {
   async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
@@ -136,4 +136,4 @@ class AnthropicService {
   }
 }
 
-module.exports = new AnthropicService();
+module.exports = new AnthropicProvider();
