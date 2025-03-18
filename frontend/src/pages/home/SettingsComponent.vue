@@ -33,6 +33,16 @@
         <input v-if="settings.deepseek.enabled" type="text" id="deepseekApiKey" v-model="settings.deepseek.apiKey" placeholder="Cole sua API Key do DeepSeek" class="form-input w-full"/>
       </div>
 
+      <!-- Google Gemini Provider -->
+      <div class="mb-6">
+        <div class="flex items-center mb-3">
+          <input type="checkbox" id="geminiEnabled" v-model="settings.gemini.enabled" class="mr-2 bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-600"/>
+          <label for="geminiEnabled">Ativar Google Gemini</label>
+        </div>
+
+        <input v-if="settings.gemini.enabled" type="text" id="geminiApiKey" v-model="settings.gemini.apiKey" placeholder="Cole sua API Key do Google Gemini" class="form-input w-full"/>
+      </div>
+
       <div class="flex justify-end space-x-3">
         <button type="button" @click="resetSettings" class="btn btn-secondary">
           Cancelar
@@ -63,6 +73,10 @@ const settings = reactive({
   deepseek: {
     enabled: false,
     apiKey: ''
+  },
+  gemini: {
+    enabled: false,
+    apiKey: ''
   }
 });
 
@@ -87,6 +101,8 @@ const resetSettings = () => {
   settings.openai.apiKey = '';
   settings.deepseek.enabled = false;
   settings.deepseek.apiKey = '';
+  settings.gemini.enabled = false;
+  settings.gemini.apiKey = '';
 };
 
 onMounted(async () => {

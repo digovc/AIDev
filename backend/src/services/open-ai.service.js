@@ -17,6 +17,11 @@ class OpenAIService {
       baseURL = 'https://api.deepseek.com';
     }
 
+    if (model.includes('gemini')) {
+      apiKey = settings.gemini.apiKey;
+      baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/';
+    }
+
     if (!apiKey) {
       throw new Error('API key is required');
     }
