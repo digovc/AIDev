@@ -4,8 +4,6 @@
   "description": "Uma ferramenta para automatizar tarefas de projetos com o poder da Inteligência Artificial, diretamente no seu computador.",
   "main": "backend/index.js",
   "scripts": {
-    "build-linux-mac": "./build-linux-mac.sh",
-    "build-windows": "./build-windows.sh",
     "start": "node backend/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

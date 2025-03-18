@@ -50,7 +50,7 @@ Execute o AIDev localmente:
     ```bash
     git clone https://github.com/digovc/AIDev
     ```
-2.  Instale as dependências usando o script `install.sh` (localizado na raiz do projeto).
+2.  Instale as dependências e prepare o projeto usando o script `build.sh` (localizado na raiz do projeto).
 
 **Execução:**
 

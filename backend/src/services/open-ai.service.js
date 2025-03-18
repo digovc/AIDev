@@ -2,7 +2,7 @@ const OpenAI = require('openai');
 const settingsStore = require('../stores/settings.store');
 
 class OpenAIService {
-  async chatCompletion(model, messages, cancelationToken, tools, streamCallback) {
+  async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
     }
@@ -12,12 +12,12 @@ class OpenAIService {
     let apiKey = settings.openai.apiKey;
     let baseURL = undefined;
 
-    if (model.includes('deepseek')) {
+    if (assistent.provider === 'deepseek') {
       apiKey = settings.deepseek.apiKey;
       baseURL = 'https://api.deepseek.com';
     }
 
-    if (model.includes('gemini')) {
+    if (assistent.provider === 'google') {
       apiKey = settings.gemini.apiKey;
       baseURL = 'https://generativelanguage.googleapis.com/v1beta/openai/';
     }
@@ -33,7 +33,7 @@ class OpenAIService {
 
     const stream = await openai.chat.completions.create({
       messages: formattedMessages,
-      model: model,
+      model: assistent.model,
       // max_tokens: 4096,
       stream: true,
       tools: tools,

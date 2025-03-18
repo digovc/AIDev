@@ -25,6 +25,7 @@
             <option value="anthropic">Anthropic</option>
             <option value="openai">OpenAI</option>
             <option value="deepseek">DeepSeek</option>
+            <option value="google">Google</option>
           </select>
         </div>
 
@@ -97,7 +98,7 @@ const saveAssistant = async () => {
   try {
     loading.value = true;
     let response;
-    
+
     if (isEditing.value) {
       response = await assistantsApi.updateAssistant(assistant.id, assistant);
       emit('assistant-updated', response.data);
@@ -105,7 +106,7 @@ const saveAssistant = async () => {
       response = await assistantsApi.createAssistant(assistant);
       emit('assistant-created', response.data);
     }
-    
+
     close();
   } catch (error) {
     console.error('Erro ao salvar assistente:', error);

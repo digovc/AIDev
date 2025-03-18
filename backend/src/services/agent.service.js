@@ -37,12 +37,11 @@ class AgentService {
       model: 'gpt-4o-2024-08-06'
     };
 
-    let providerService = anthropicService;
+    let providerService = openAIService;
 
     switch (assistant.provider) {
-      case 'openai':
-      case 'deepseek':
-        providerService = openAIService;
+      case 'anthropic':
+        providerService = anthropicService;
         break;
     }
 
@@ -52,7 +51,7 @@ class AgentService {
       return toolFormatterService.formatToolForProvider(baseDefinition, assistant.provider);
     });
 
-    await providerService.chatCompletion(assistant.model, messages, cancelationToken, toolDefinitions, (event) => this.receiveStream(conversation, cancelationToken, assistantMessage, tools, event));
+    await providerService.chatCompletion(assistant, messages, cancelationToken, toolDefinitions, (event) => this.receiveStream(conversation, cancelationToken, assistantMessage, tools, event));
   }
 
   async continueConversation(conversation) {
