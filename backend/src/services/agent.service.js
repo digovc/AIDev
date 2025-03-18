@@ -1,5 +1,6 @@
 const anthropicService = require('./anthropic.service');
 const openAIService = require('./open-ai.service');
+const googleService = require('./google.service');
 const listFilesTool = require("../tools/list-files.tool");
 const listTasksTool = require("../tools/list-tasks.tool");
 const messagesStore = require('../stores/messages.store');
@@ -42,6 +43,9 @@ class AgentService {
     switch (assistant.provider) {
       case 'anthropic':
         providerService = anthropicService;
+        break;
+      case 'google':
+        providerService = googleService;
         break;
     }
 

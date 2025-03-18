@@ -2,6 +2,8 @@ class ToolFormatterService {
   formatToolForProvider(toolDefinition, provider) {
     if (['deepseek', 'openai'].includes(provider)) {
       return this.formatToolForOpenAI(toolDefinition);
+    } else if (provider === 'google') {
+      return this.formatToolForGoogle(toolDefinition);
     } else {
       // Formato padrão é Anthropic
       return this.formatToolForAnthropic(toolDefinition);
@@ -26,6 +28,16 @@ class ToolFormatterService {
   formatToolForAnthropic(toolDefinition) {
     // O formato interno já é baseado no Anthropic, então apenas retornamos a definição
     return toolDefinition;
+  }
+
+  formatToolForGoogle(toolDefinition) {
+    return {
+      function: {
+        name: toolDefinition.name,
+        description: toolDefinition.description,
+        parameters: toolDefinition.input_schema
+      }
+    };
   }
 }
 
