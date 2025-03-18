@@ -18,13 +18,11 @@ class GoogleService {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: assistent.model || 'gemini-2.0-flash' });
 
-    const promptContent = this.buildPromptContent(formattedMessages);
-
     try {
       streamCallback({ type: 'message_start', inputTokens: 0 }); // Google API não fornece contagem de tokens
 
       const result = await model.generateContentStream({
-        contents: [{ role: 'user', parts: [{ text: promptContent }] }],
+        contents: formattedMessages,
         tools: this.formatTools(tools),
       });
 
@@ -68,7 +66,7 @@ class GoogleService {
           type: 'block_start',
           blockType: 'tool_use',
           tool: functionCall.name,
-          toolUseId: `google-function-${Date.now()}`, // Geramos um ID único
+          toolUseId: `google-function-${ Date.now() }`, // Geramos um ID único
           content: JSON.stringify(functionCall.args)
         });
 
@@ -86,7 +84,6 @@ class GoogleService {
     }
   }
 
-
   formatTools(tools) {
     if (!tools || !tools.length) return [];
 
@@ -99,84 +96,72 @@ class GoogleService {
     }));
   }
 
-  buildPromptContent(messages) {
-    let promptContent = '';
-
-    for (const message of messages) {
-      const role = message.role;
-      const content = typeof message.content === 'string' ? message.content : this.formatComplexContent(message.content);
-
-      promptContent += `${ role.toUpperCase() }: ${ content }\n\n`;
-    }
-
-    return promptContent;
-  }
-
-  formatComplexContent(content) {
-    if (Array.isArray(content)) {
-      return content.map(item => {
-        if (item.type === 'text') {
-          return item.text;
-        } else if (item.type === 'tool_use') {
-          return `Using tool: ${ item.name } with parameters: ${ JSON.stringify(item.input) }`;
-        } else if (item.type === 'tool_result') {
-          return `Tool result: ${ item.content }`;
-        }
-        return '';
-      }).join('\n');
-    }
-    return content.toString();
-  }
-
   getMessages(messages) {
-    const formattedMessages = []
+    const formattedMessages = [];
 
     for (const message of messages) {
       if (!message.blocks?.length) {
-        continue
+        continue;
       }
 
       switch (message.sender) {
         case 'system':
           formattedMessages.push({
-            role: 'system',
-            content: this.getTextContent(message.blocks)
+            role: 'user',
+            parts: [{
+              text: this.getTextContent(message.blocks)
+            }]
           });
           break;
         case 'log':
           break;
         default:
-          formattedMessages.push({
+          const formattedMessage = {
             role: this.getRole(message.sender),
-            content: this.getContent(message.blocks)
-          });
+            parts: []
+          };
+
+          for (const block of message.blocks) {
+            switch (block.type) {
+              case 'text':
+                formattedMessage.parts.push({
+                  text: block.content
+                });
+                break;
+              case 'tool_use':
+                formattedMessage.parts.push({
+                  functionCall: {
+                    name: block.tool,
+                    args: block.content
+                  }
+                });
+                break;
+              case 'tool_result':
+                // Para resultados de ferramentas, o Google usa uma estrutura diferente
+                formattedMessage.role = 'user';
+                formattedMessage.parts = [{
+                  functionResponse: {
+                    name: block.tool,
+                    response: {
+                      name: block.tool,
+                      content: block.content
+                    }
+                  }
+                }];
+                break;
+            }
+          }
+
+          // Se não tiver partes, adiciona um texto vazio
+          if (formattedMessage.parts.length === 0) {
+            formattedMessage.parts.push({ text: '' });
+          }
+
+          formattedMessages.push(formattedMessage);
       }
     }
 
     return formattedMessages;
-  }
-
-  getContent(blocks) {
-    const content = [];
-
-    for (const block of blocks) {
-      switch (block.type) {
-        case 'text':
-          content.push({ type: 'text', text: block.content });
-          break;
-        case 'tool_use':
-          content.push({ type: 'tool_use', name: block.tool, input: block.content });
-          break;
-        case 'tool_result':
-          content.push({
-            type: 'tool_result',
-            content: typeof block.content === 'string' ? block.content : JSON.stringify(block.content)
-          });
-          break;
-      }
-    }
-
-    return content;
   }
 
   getTextContent(blocks) {

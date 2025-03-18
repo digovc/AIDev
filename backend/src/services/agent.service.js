@@ -171,6 +171,7 @@ class AgentService {
       }
 
       return {
+        tool: toolBlock.tool,
         toolUseId: toolBlock.toolUseId,
         result: result,
         isError: result.isError
@@ -184,6 +185,7 @@ class AgentService {
       sender: 'tool',
       blocks: toolResults.map(result => ({
         type: 'tool_result',
+        tool: result.tool,
         toolUseId: result.toolUseId,
         content: result.result,
         isError: result.isError
