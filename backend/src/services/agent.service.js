@@ -92,8 +92,6 @@ class AgentService {
           return this.createBlock(assistantMessage, event);
         case 'block_delta':
           return this.appendBlockContent(assistantMessage, event.delta);
-        case 'block_stop':
-          return this.closeBlock(conversation, cancelationToken, assistantMessage);
       }
     } catch (e) {
       const message = `Erro ao processar stream: ${ e.message }`;
@@ -134,21 +132,6 @@ class AgentService {
       messageId: lastBlock.messageId,
       delta: content
     });
-  }
-
-  async closeBlock(conversation, cancelationToken, assistantMessage) {
-    const lastBlock = assistantMessage.blocks[assistantMessage.blocks.length - 1];
-
-    if (lastBlock.type !== 'tool_use') {
-      return await messagesStore.update(assistantMessage.id, assistantMessage);
-    }
-
-    if (['', undefined, null].includes(lastBlock.content?.trim())) {
-      lastBlock.content = '{}';
-    }
-
-    lastBlock.content = JSON.parse(lastBlock.content);
-    await messagesStore.update(assistantMessage.id, assistantMessage);
   }
 
   async useTool(conversation, cancelationToken, assistantMessage, tools) {

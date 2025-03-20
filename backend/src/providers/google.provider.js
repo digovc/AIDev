@@ -26,59 +26,55 @@ class GoogleProvider {
         tools: this.formatTools(tools),
       });
 
-      let isFirstChunk = true;
+      const currentBlock = {};
 
       for await (const chunk of result.stream) {
         if (cancelationToken.isCanceled()) {
-          return result.stream.cancel();
+          throw new Error('Stream canceled');
         }
 
-        // Iniciamos o bloco de texto na primeira mensagem
-        if (isFirstChunk) {
-          streamCallback({ type: 'block_start', blockType: 'text' });
-          isFirstChunk = false;
-        }
-
-        await this.translateStreamEvent(chunk, streamCallback);
+        await this.translateStreamEvent(chunk, currentBlock, streamCallback);
       }
     } finally {
       streamCallback({ type: 'message_stop' });
     }
   }
 
-  translateStreamEvent(chunk, streamCallback) {
+  translateStreamEvent(chunk, currentBlock, streamCallback) {
     if (chunk.candidates?.length === 0 || !chunk.candidates) return;
     const candidate = chunk.candidates[0];
 
     // Se não há conteúdo, ignoramos este chunk
     if (!candidate.content) return;
-
     const content = candidate.content;
+
+    // Se não há partes, ignoramos
+    if (!content.parts || !content.parts.length) return;
     const parts = content.parts[0];
 
-    // Verificamos se é uma chamada de função
-    if (parts.functionCall) {
-      const functionCall = parts.functionCall;
+    // Se não há texto ou chamada de função, ignoramos
+    if (!parts.text && !parts.functionCall) return;
 
-      streamCallback({
+    if (parts.functionCall) {
+      currentBlock.isBlockOpen = false;
+      const functionCall = parts.functionCall;
+      return streamCallback({
         type: 'block_start',
         blockType: 'tool_use',
         tool: functionCall.name,
-        toolUseId: `google-function-${ Date.now() }`, // Geramos um ID único
-        content: JSON.stringify(functionCall.args)
+        toolUseId: `google-function-${ Date.now() }`,
+        content: functionCall.args
       });
-
-      // Indicamos que o bloco está completo
-      streamCallback({ type: 'block_stop' });
-      streamCallback({ type: 'block_start', blockType: 'text' });
     }
-    // Se é texto normal
-    else if (parts.text) {
-      // Enviamos o texto como delta
-      streamCallback({
-        type: 'block_delta',
-        delta: parts.text
-      });
+
+
+    if (!currentBlock.isBlockOpen && parts.text) {
+      currentBlock.isBlockOpen = true;
+      return streamCallback({ type: 'block_start', blockType: 'text', content: parts.text ?? '' });
+    }
+
+    if (currentBlock.isBlockOpen && parts.text) {
+      return streamCallback({ type: 'block_delta', delta: parts.text });
     }
   }
 
