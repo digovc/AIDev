@@ -7,6 +7,12 @@ class ProjectsController extends CrudControllerBase {
     super('projects', 'project', projectsStore);
   }
 
+  async list(req, res) {
+    const assistants = await this.store.getAllSortedByName();
+    res.json(assistants);
+  }
+
+
   async get(req, res) {
     const project = await this.store.getById(req.params.id);
 

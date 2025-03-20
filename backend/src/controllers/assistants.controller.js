@@ -5,6 +5,11 @@ class AssistantsController extends CrudControllerBase {
   constructor() {
     super('assistants', 'assistant', assistantsStore);
   }
+
+  async list(req, res) {
+    const assistants = await this.store.getAllSortedByName();
+    res.json(assistants);
+  }
 }
 
 module.exports = new AssistantsController();
