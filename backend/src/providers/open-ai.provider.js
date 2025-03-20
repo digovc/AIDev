@@ -147,6 +147,9 @@ class OpenAiProvider {
       for (const block of message.blocks) {
         switch (block.type) {
           case 'text':
+            if (!block.content || !block.content.trim()) {
+              continue;
+            }
             formattedMessage.content = formattedMessage.content || [];
             formattedMessage.content.push({ type: 'text', text: block.content });
             break;

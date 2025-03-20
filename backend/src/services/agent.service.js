@@ -138,8 +138,9 @@ class AgentService {
     // Coletar todos os blocos de uso de ferramentas
     const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
 
-    // Executar todas as ferramentas em paralelo
-    const toolResults = await Promise.all(toolUseBlocks.map(async (toolBlock) => {
+    const toolResults = [];
+
+    for (const toolBlock of toolUseBlocks) {
       const tool = tools.find(tool => tool.getDefinition().name === toolBlock.tool);
       let result;
 
@@ -149,17 +150,18 @@ class AgentService {
         }
 
         result = await tool.executeTool(conversation, toolBlock.content);
+        await new Promise(resolve => setTimeout(resolve, 1));
       } catch (e) {
         result = { error: e.message, isError: true };
       }
 
-      return {
+      toolResults.push({
         tool: toolBlock.tool,
         toolUseId: toolBlock.toolUseId,
         result: result,
         isError: result.isError
-      };
-    }));
+      });
+    }
 
     // Criar mensagem de resultado das ferramentas
     const toolMessage = {

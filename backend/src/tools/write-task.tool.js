@@ -52,6 +52,10 @@ class WriteTaskTool {
       throw new Error("Para criar uma tarefa, o campo 'title' é obrigatório");
     }
 
+    if (input.appendDescription) {
+      input.appendDescription = `\n\nAssistente:\n${ input.appendDescription }`;
+    }
+
     const task = {
       projectId: conversation.projectId,
       title: input.title,
@@ -76,6 +80,10 @@ class WriteTaskTool {
     const task = await tasksStore.getById(input.id);
     if (!task) {
       throw new Error("Tarefa não encontrada");
+    }
+
+    if (input.appendDescription) {
+      input.appendDescription = `\n\nAssistente:\n${ input.appendDescription }`;
     }
 
     if (input.title) task.title = input.title;
