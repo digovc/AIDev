@@ -9,6 +9,7 @@ const CancelationToken = require("./cancelation.token");
 
 class TaskRunnerService {
   executingTasks = [];
+  cancelationTokens = [];
 
   async runTask(taskId) {
     if (this.executingTasks.includes(taskId)) {
@@ -17,6 +18,7 @@ class TaskRunnerService {
 
     this.executingTasks.push(taskId);
     const cancelationToken = this.getCancelationToken(taskId);
+    this.cancelationTokens.push(cancelationToken);
     socketIOService.io.emit('task-executing', taskId);
 
     const task = await tasksStore.getById(taskId);
@@ -41,6 +43,8 @@ class TaskRunnerService {
 
   stopTask(taskId) {
     this.executingTasks = this.executingTasks.filter(t => t !== taskId);
+    const cancelationToken = this.cancelationTokens.find(t => t.taskId === taskId);
+    cancelationToken.cancel();
     socketIOService.io.emit('task-not-executing', taskId);
   }
 

@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { tasksApi } from '@/api/tasks.api.js';
 import ReferencesDialog from '@/pages/project/taks/ReferencesDialog.vue';
@@ -150,6 +150,7 @@ const saveTask = async () => {
     alert(`Ocorreu um erro ao ${ isEditing.value ? 'atualizar' : 'salvar' } a tarefa. Por favor, tente novamente.`);
   } finally {
     loading.value = false;
+    window.removeEventListener('keydown', handleKeyPress);
   }
 };
 
@@ -274,6 +275,14 @@ const removeReference = (index) => {
   task.references.splice(index, 1);
 };
 
+const handleKeyPress = (event) => {
+  const isPressed = event.ctrlKey && event.shiftKey && event.key === 'E';
+  if (isPressed && !loading.value) {
+    event.preventDefault(); // Prevent default browser behavior like opening search
+    saveAndRunTask();
+  }
+};
+
 // Observar mudanças na rota para recarregar a tarefa quando o parâmetro taskId mudar
 watch(() => route.params.taskId, async (newTaskId) => {
   if (newTaskId) {
@@ -300,8 +309,13 @@ const loadAssistants = async () => {
 };
 
 onMounted(async () => {
+  window.addEventListener('keydown', handleKeyPress);
   await loadTask();
   await loadAssistants();
   await titleInput.value.focus();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyPress);
 });
 </script>
