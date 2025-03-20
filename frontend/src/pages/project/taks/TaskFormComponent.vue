@@ -252,6 +252,8 @@ const duplicateTask = async () => {
 
     // Navegar para a página de edição da nova tarefa
     await router.push(`/projects/${ props.project.id }/tasks/${ result.data.id }`);
+
+    setTimeout(() => titleInput.value.focus(), 100);
   } catch (error) {
     console.error('Erro ao duplicar tarefa:', error);
     alert('Ocorreu um erro ao duplicar a tarefa. Por favor, tente novamente.');

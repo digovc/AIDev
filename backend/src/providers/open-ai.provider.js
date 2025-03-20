@@ -40,7 +40,7 @@ class OpenAiProvider {
 
       for await (const chunk of stream) {
         if (cancelationToken.isCanceled()) {
-          return stream.controller.abort();
+          throw new Error('Stream canceled');
         }
 
         this.translateStreamEvent(chunk, currentBlock, streamCallback);
@@ -52,46 +52,68 @@ class OpenAiProvider {
   }
 
   translateStreamEvent(chunk, currentBlock, streamCallback) {
-    if (chunk.choices.length === 0) return;
+    if (!chunk.choices || !chunk.choices.length) return;
     const choice = chunk.choices[0];
+
+    if (!choice.delta) return;
     const delta = choice.delta;
 
-    if (delta.role === 'assistant') {
+    if (currentBlock.isOpen && currentBlock.type === 'text' && delta.tool_calls?.length) {
+      currentBlock.isOpen = false;
+      currentBlock.type = undefined;
+      currentBlock.toolUseId = undefined;
+    }
+
+    if (currentBlock.isOpen && currentBlock.type === 'tool_use' && delta.content) {
+      currentBlock.isOpen = false;
+      currentBlock.type = undefined;
+      currentBlock.toolUseId = undefined;
+    }
+
+    if (!currentBlock.isOpen) {
+      currentBlock.isOpen = true;
       currentBlock.type = delta.tool_calls ? 'tool_use' : 'text';
 
-      if (currentBlock.type === 'tool_use') {
+      if (currentBlock.type === 'text') {
+        currentBlock.toolUseId = undefined;
+        return streamCallback({ type: 'block_start', blockType: 'text', content: delta.content ?? '' });
+      }
+
+      if (currentBlock.type === 'tool_use' && delta.tool_calls && delta.tool_calls.length) {
         const toolCall = delta.tool_calls[0];
         currentBlock.toolUseId = toolCall.id;
 
-        streamCallback({
+        return streamCallback({
           type: 'block_start',
           blockType: 'tool_use',
           tool: toolCall.function.name,
           toolUseId: toolCall.id,
           content: toolCall.function.arguments,
         });
-      } else {
-        currentBlock.toolUseId = undefined;
-        streamCallback({ type: 'block_start', blockType: 'text' });
       }
-    } else if (currentBlock.type === 'tool_use' && delta.tool_calls) {
+    }
+
+    if (currentBlock.isOpen && currentBlock.type === 'text' && delta.content) {
+      return streamCallback({ type: 'block_delta', delta: delta.content });
+    }
+
+    if (currentBlock.isOpen && currentBlock.type === 'tool_use' && delta.tool_calls?.length && !delta.tool_calls[0].id) {
       const toolCall = delta.tool_calls[0];
-      streamCallback({ type: 'block_delta', delta: toolCall.function.arguments });
-    } else if (delta.tool_calls && delta.tool_calls[0].id !== currentBlock.toolUseId) {
+      return streamCallback({ type: 'block_delta', delta: toolCall.function.arguments });
+    }
+
+    if (currentBlock.isOpen && currentBlock.type === 'tool_use' && delta.tool_calls?.length && currentBlock.toolUseId !== delta.tool_calls[0].id) {
       const toolCall = delta.tool_calls[0];
-      currentBlock.type = 'tool_use';
       currentBlock.toolUseId = toolCall.id;
       streamCallback({ type: 'block_stop' });
 
-      streamCallback({
+      return streamCallback({
         type: 'block_start',
         blockType: 'tool_use',
         tool: toolCall.function.name,
         toolUseId: toolCall.id,
         content: toolCall.function.arguments,
       });
-    } else if (currentBlock.type === 'text' && delta.content) {
-      streamCallback({ type: 'block_delta', delta: delta.content });
     }
   }
 

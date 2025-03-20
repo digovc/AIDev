@@ -18,8 +18,9 @@ class GoogleProvider {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: assistent.model || 'gemini-2.0-flash' });
 
+    streamCallback({ type: 'message_start', inputTokens: 0 });
+
     try {
-      streamCallback({ type: 'message_start', inputTokens: 0 }); // Google API não fornece contagem de tokens
 
       const result = await model.generateContentStream({
         contents: formattedMessages,
@@ -56,7 +57,7 @@ class GoogleProvider {
     if (!parts.text && !parts.functionCall) return;
 
     if (parts.functionCall) {
-      currentBlock.isBlockOpen = false;
+      currentBlock.isOpen = false;
       const functionCall = parts.functionCall;
       return streamCallback({
         type: 'block_start',
@@ -68,12 +69,12 @@ class GoogleProvider {
     }
 
 
-    if (!currentBlock.isBlockOpen && parts.text) {
-      currentBlock.isBlockOpen = true;
+    if (!currentBlock.isOpen && parts.text) {
+      currentBlock.isOpen = true;
       return streamCallback({ type: 'block_start', blockType: 'text', content: parts.text ?? '' });
     }
 
-    if (currentBlock.isBlockOpen && parts.text) {
+    if (currentBlock.isOpen && parts.text) {
       return streamCallback({ type: 'block_delta', delta: parts.text });
     }
   }
