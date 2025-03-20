@@ -38,6 +38,36 @@ class WriteTaskTool {
     };
   }
 
+  async executeTool(conversation, input) {
+    // Mantém compatibilidade retroativa, direcionando para o método adequado
+    if (input.id) {
+      return this.updateTask(conversation, input);
+    } else {
+      return this.createTask(conversation, input);
+    }
+  }
+
+  async createTask(conversation, input) {
+    if (!input.title) {
+      throw new Error("Para criar uma tarefa, o campo 'title' é obrigatório");
+    }
+
+    const task = {
+      projectId: conversation.projectId,
+      title: input.title,
+      description: (input.description || "") + (input.appendDescription || ""),
+      status: input.status || "backlog"
+    };
+
+    const taskCreated = await tasksStore.create(task);
+
+    return {
+      success: true,
+      message: "Tarefa criada com sucesso",
+      taskId: taskCreated.id
+    }
+  }
+
   async updateTask(conversation, input) {
     if (!input.id) {
       throw new Error("Para atualizar uma tarefa, o campo 'id' é obrigatório");
@@ -53,30 +83,11 @@ class WriteTaskTool {
     if (input.appendDescription) task.description += input.appendDescription;
     if (input.status) task.status = input.status;
 
-    return await tasksStore.update(input.id, task);
-  }
+    await tasksStore.update(input.id, task);
 
-  async createTask(conversation, input) {
-    if (!input.title) {
-      throw new Error("Para criar uma tarefa, o campo 'title' é obrigatório");
-    }
-
-    const task = {
-      projectId: conversation.projectId,
-      title: input.title,
-      description: (input.description || "") + (input.appendDescription || ""),
-      status: input.status || "backlog"
-    };
-
-    return await tasksStore.create(task);
-  }
-
-  async executeTool(conversation, input) {
-    // Mantém compatibilidade retroativa, direcionando para o método adequado
-    if (input.id) {
-      return this.updateTask(conversation, input);
-    } else {
-      return this.createTask(conversation, input);
+    return {
+      success: true,
+      message: "Tarefa atualizada com sucesso"
     }
   }
 }
