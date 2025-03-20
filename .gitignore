@@ -141,3 +141,6 @@ docs/_book
 # TODO: where does this rule come from?
 test/
 
+backend/static
+backend/.aidev
+frontend/dist
