@@ -103,9 +103,7 @@ class GoogleProvider {
         case 'system':
           formattedMessages.push({
             role: 'user',
-            parts: [{
-              text: this.getTextContent(message.blocks)
-            }]
+            parts: [{ text: this.getTextContent(message.blocks) }]
           });
           break;
         case 'log':
