@@ -27,8 +27,7 @@
 
       <!-- Lista de referências adicionadas -->
       <div class="grow">
-        <div v-if="references.length === 0"
-             class="text-gray-400 text-center py-4 h-full flex items-center justify-center">
+        <div v-if="references.length === 0" class="text-gray-400 text-center py-4 h-full flex items-center justify-center">
           Nenhuma referência adicionada
         </div>
 
@@ -41,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import { referencesApi } from '@/api/references.api';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { debounce } from 'lodash'
@@ -109,7 +108,7 @@ const searchReferences = debounce(async () => {
     const response = await referencesApi.search(props.project.id, searchQuery.value);
     // Filtra referências que ainda não foram adicionadas
     searchResults.value = (response.data || []).filter(
-      result => !references.value.some(ref => ref.path === result.path)
+        result => !references.value.some(ref => ref.path === result.path)
     );
     selectedIndex.value = searchResults.value.length > 0 ? 0 : -1;
   } catch (error) {
@@ -122,7 +121,7 @@ const searchReferences = debounce(async () => {
 
 const scrollToSelectedItem = () => {
   if (searchResultsRef.value && selectedIndex.value !== -1) {
-    const selectedElement = searchResultsRef.value.querySelector(`:nth-child(${selectedIndex.value + 1})`);
+    const selectedElement = searchResultsRef.value.querySelector(`:nth-child(${ selectedIndex.value + 1 })`);
     if (selectedElement) {
       selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
@@ -159,13 +158,13 @@ const addSelectedReference = () => {
       name: selected.name,
       path: selected.path
     });
-    
+
     // Removemos apenas a referência selecionada da lista de resultados
     searchResults.value = searchResults.value.filter(result => result.path !== selected.path);
-    
+
     // Atualizamos a seleção para o primeiro item se ainda houver resultados
     selectedIndex.value = searchResults.value.length > 0 ? 0 : -1;
-    
+
     // Não limpamos o query para permitir adicionar mais referências
     // da mesma pesquisa, mas emitimos a atualização
     emit('update:references', references.value);
