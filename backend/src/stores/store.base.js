@@ -63,6 +63,20 @@ class StoreBase {
     return updatedItem;
   }
 
+  async prepareBeforeSave(data) {
+    return data;
+  }
+
+  async getById(id) {
+    const filePath = await this.getItemFilePath(id);
+    try {
+      const content = await fs.readFile(filePath, 'utf8');
+      return JSON.parse(content);
+    } catch (error) {
+      return null;
+    }
+  }
+
   async list() {
     const dataDir = await this.getDataDir();
     const files = await fs.readdir(dataDir);
@@ -80,14 +94,14 @@ class StoreBase {
     return items;
   }
 
-  async getById(id) {
-    const filePath = await this.getItemFilePath(id);
-    try {
-      const content = await fs.readFile(filePath, 'utf8');
-      return JSON.parse(content);
-    } catch (error) {
-      return null;
-    }
+  async getItemFilePath(id) {
+    const dataDir = await this.getDataDir();
+    return path.join(dataDir, `${ this.modelPrefix }_${ id }.json`);
+  }
+
+  async getAllSortedByName() {
+    const items = await this.list();
+    return items.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   async delete(id) {
@@ -113,15 +127,6 @@ class StoreBase {
     }
 
     return dataDir;
-  }
-
-  async prepareBeforeSave(data) {
-    return data;
-  }
-
-  async getItemFilePath(id) {
-    const dataDir = await this.getDataDir();
-    return path.join(dataDir, `${ this.modelPrefix }_${ id }.json`);
   }
 }
 
