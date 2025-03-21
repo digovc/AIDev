@@ -109,7 +109,7 @@ class AnthropicProvider {
           content.push({ type: 'text', text: block.content });
           break;
         case 'tool_use':
-          content.push({ type: 'tool_use', id: block.toolUseId, name: block.tool, input: block.content });
+          content.push({ type: 'tool_use', id: block.toolUseId, name: block.tool, input: JSON.parse(block.content) });
           break;
         case 'tool_result':
           content.push({
