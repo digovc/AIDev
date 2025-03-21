@@ -44,7 +44,7 @@ class TaskRunnerService {
   stopTask(taskId) {
     this.executingTasks = this.executingTasks.filter(t => t !== taskId);
     const cancelationToken = this.cancelationTokens.find(t => t.taskId === taskId);
-    cancelationToken.cancel();
+    cancelationToken?.cancel();
     socketIOService.io.emit('task-not-executing', taskId);
   }
 
