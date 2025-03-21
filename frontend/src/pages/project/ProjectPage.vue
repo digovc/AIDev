@@ -9,12 +9,12 @@
     </div>
 
     <div v-else class="flex h-full">
-      <!-- Coluna da esquerda (tarefas) -->
+
       <div class="space-y-2 flex flex-col" :style="{ width: `${leftWidth}%` }">
-        <!-- Componente de informações do projeto -->
+
         <ProjectInfoComponent :project="project" @project-updated="handleProjectUpdated"/>
         <div class="relative grow overflow-y-auto">
-          <!-- Router view para exibir tarefas ou formulário de tarefa -->
+
           <RouterView v-if="project" :project="project" class="h-full absolute inset-0" @taskSelected="handleTaskSelected"></RouterView>
         </div>
       </div>
@@ -24,7 +24,7 @@
 
       <!-- Coluna da direita (chat) -->
       <div class="flex-1">
-        <!-- Componente de chat -->
+
         <ChatComponent ref="chatComponent" :project="project" class="h-full"/>
       </div>
     </div>
@@ -45,12 +45,12 @@ const loading = ref(true);
 const error = ref(null);
 const chatComponent = ref(null);
 
-// Estado para controlar o redimensionamento
+
 const leftWidth = ref(66); // Padrão: 66% para a esquerda (aprox. 2/3)
 const isResizing = ref(false);
 const containerRef = ref(null);
 
-// Carregar a proporção salva do localStorage ou usar o valor padrão
+
 const loadSavedLayout = () => {
   try {
     const savedWidth = localStorage.getItem('aidev.layout.leftWidth');
@@ -62,7 +62,7 @@ const loadSavedLayout = () => {
   }
 };
 
-// Salvar a proporção atual no localStorage
+
 const saveLayout = () => {
   try {
     localStorage.setItem('aidev.layout.leftWidth', leftWidth.value.toString());
@@ -71,29 +71,29 @@ const saveLayout = () => {
   }
 };
 
-// Lidar com o início do redimensionamento
+
 const startResize = (e) => {
   isResizing.value = true;
-  // Armazenar a referência ao container
+
   containerRef.value = e.target.closest('.flex.h-full');
   document.addEventListener('mousemove', onResize);
   document.addEventListener('mouseup', stopResize);
-  // Evitar seleção de texto durante o redimensionamento
+
   e.preventDefault();
 };
 
-// Calcular a nova largura durante o redimensionamento
+
 const onResize = (e) => {
   if (!isResizing.value || !containerRef.value) return;
 
   const containerRect = containerRef.value.getBoundingClientRect();
   const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
 
-  // Limitar a largura entre 30% e 80%
+  
   leftWidth.value = Math.max(30, Math.min(80, newWidth));
 };
 
-// Parar o redimensionamento e salvar a configuração
+
 const stopResize = () => {
   isResizing.value = false;
   document.removeEventListener('mousemove', onResize);
@@ -110,7 +110,7 @@ const handleTaskSelected = (task) => {
 const handleProjectUpdated = (updatedProject) => {
   if (updatedProject) {
     project.value = updatedProject;
-    // Atualizar o título da página com o nome atualizado do projeto
+
     if (updatedProject.name) {
       document.title = `${ updatedProject.name } - AIDev`;
     }
@@ -127,7 +127,7 @@ const loadProject = async () => {
     const response = await projectsApi.getProjectById(route.params.id);
     project.value = response.data;
 
-    // Atualizar o título da página com o nome do projeto
+
     if (project.value && project.value.name) {
       document.title = `${ project.value.name } - AIDev`;
     }
@@ -147,12 +147,12 @@ const conversationCreated = (conversation) => {
 };
 
 onMounted(async () => {
-  // Carregar a proporção salva
+
   loadSavedLayout();
 
   await loadProject();
 
-  // Atualizar o título da página com o nome do projeto
+
   if (project.value && project.value.name) {
     document.title = `${ project.value.name } - AIDev`;
   }
@@ -163,11 +163,11 @@ onMounted(async () => {
 onUnmounted(() => {
   socketIOService.socket.off('conversation-created', conversationCreated);
 
-  // Limpar os event listeners de redimensionamento se ainda estiverem ativos
+
   document.removeEventListener('mousemove', onResize);
   document.removeEventListener('mouseup', stopResize);
 
-  // Resetar o título da página quando sair da página do projeto
+
   document.title = 'AIDev';
 });
 </script>
