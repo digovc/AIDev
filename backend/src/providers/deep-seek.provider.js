@@ -139,14 +139,16 @@ class DeepSeekProvider {
         role: this.getRole(message.sender),
       };
 
+      // Coletar todos os blocos de texto para unir depois, se necessário
+      const textBlocks = [];
+
       for (const block of message.blocks) {
         switch (block.type) {
           case 'text':
             if (!block.content || !block.content.trim()) {
               continue;
             }
-            formattedMessage.content = formattedMessage.content || [];
-            formattedMessage.content.push({ type: 'text', text: block.content });
+            textBlocks.push(block.content);
             break;
           case 'tool_use':
             const toolCall = {
@@ -170,6 +172,11 @@ class DeepSeekProvider {
             });
             break;
         }
+      }
+
+      // Verificar se temos blocos de texto e adicionar como string única
+      if (textBlocks.length > 0) {
+        formattedMessage.content = textBlocks.join('\n');
       }
 
       if (formattedMessage.empty) {
