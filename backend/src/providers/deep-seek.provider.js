@@ -1,7 +1,7 @@
 const OpenAI = require('openai');
 const settingsStore = require('../stores/settings.store');
 
-class OpenAiProvider {
+class DeepSeekProvider {
   async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
@@ -9,14 +9,16 @@ class OpenAiProvider {
 
     const formattedMessages = this.getMessages(messages);
     const settings = await settingsStore.getSettings();
-    const apiKey = settings.openai.apiKey;
+    const apiKey = settings.deepseek.apiKey;
+    const baseURL = 'https://api.deepseek.com';
 
     if (!apiKey) {
-      throw new Error('OpenAI API key is required');
+      throw new Error('DeepSeek API key is required');
     }
 
     const openai = new OpenAI({
       apiKey: apiKey,
+      baseURL: baseURL,
     });
 
     streamCallback({ type: 'message_start', inputTokens: 0 });
@@ -196,4 +198,4 @@ class OpenAiProvider {
   }
 }
 
-module.exports = new OpenAiProvider();
+module.exports = new DeepSeekProvider();

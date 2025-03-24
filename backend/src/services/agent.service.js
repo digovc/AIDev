@@ -1,5 +1,6 @@
 const anthropicProvider = require('../providers/anthropic.provider');
 const openAIProvider = require('../providers/open-ai.provider');
+const deepSeekProvider = require('../providers/deep-seek.provider');
 const googleProvider = require('../providers/google.provider');
 const listFilesTool = require("../tools/list-files.tool");
 const listTasksTool = require("../tools/list-tasks.tool");
@@ -46,6 +47,9 @@ class AgentService {
         break;
       case 'google':
         providerService = googleProvider;
+        break;
+      case 'deepseek':
+        providerService = deepSeekProvider;
         break;
     }
 
