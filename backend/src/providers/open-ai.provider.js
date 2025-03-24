@@ -175,7 +175,6 @@ class OpenAiProvider {
             });
             break;
         }
-
       }
 
       if (formattedMessage.empty) {
