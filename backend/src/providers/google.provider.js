@@ -21,10 +21,11 @@ class GoogleProvider {
     streamCallback({ type: 'message_start', inputTokens: 0 });
 
     try {
+      const toolsFormatted = this.formatTools(tools);
 
       const result = await model.generateContentStream({
         contents: formattedMessages,
-        tools: this.formatTools(tools),
+        tools: [{ functionDeclarations: toolsFormatted }],
       });
 
       const currentBlock = {};
@@ -83,11 +84,9 @@ class GoogleProvider {
     if (!tools || !tools.length) return [];
 
     return tools.map(tool => ({
-      functionDeclarations: [{
         name: tool.function.name,
         description: tool.function.description,
         parameters: tool.function.parameters
-      }]
     }));
   }
 

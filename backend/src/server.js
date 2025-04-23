@@ -8,7 +8,7 @@ const path = require('path');
 class Server {
   start() {
     this.app = express();
-    this.port = process.env.PORT || 3040;
+    this.port = process.env.PORT || 3030;
 
     // Criar servidor HTTP
     this.server = http.createServer(this.app);
