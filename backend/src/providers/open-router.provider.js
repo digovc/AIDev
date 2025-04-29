@@ -34,8 +34,6 @@ class OpenRouterProvider {
       const currentBlock = {}
 
       for await (const chunk of stream) {
-        console.log(JSON.stringify(chunk, null, 2));
-
         if (cancelationToken.isCanceled()) {
           throw new Error('Stream canceled');
         }

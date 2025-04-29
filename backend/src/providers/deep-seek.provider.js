@@ -2,7 +2,7 @@ const OpenAI = require('openai');
 const settingsStore = require('../stores/settings.store');
 
 class DeepSeekProvider {
-  async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
+  async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
     }
@@ -26,7 +26,7 @@ class DeepSeekProvider {
     try {
       const stream = await openai.chat.completions.create({
         messages: formattedMessages,
-        model: assistent.model,
+        model: assistant.model,
         stream: true,
         tools: tools,
       });
@@ -43,7 +43,6 @@ class DeepSeekProvider {
     } finally {
       streamCallback({ type: 'message_stop' });
     }
-
   }
 
   translateStreamEvent(chunk, currentBlock, streamCallback) {
@@ -139,7 +138,6 @@ class DeepSeekProvider {
         role: this.getRole(message.sender),
       };
 
-      // Coletar todos os blocos de texto para unir depois, se necessário
       const textBlocks = [];
 
       for (const block of message.blocks) {
@@ -174,7 +172,6 @@ class DeepSeekProvider {
         }
       }
 
-      // Verificar se temos blocos de texto e adicionar como string única
       if (textBlocks.length > 0) {
         formattedMessage.content = textBlocks.join('\n');
       }
@@ -196,7 +193,7 @@ class DeepSeekProvider {
   getRole(sender) {
     switch (sender) {
       case 'tool':
-        return 'toll';
+        return 'tool';
       case 'user_system':
         return 'user';
       default:
