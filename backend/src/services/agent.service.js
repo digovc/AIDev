@@ -1,3 +1,4 @@
+const alibabaProvider = require('../providers/alibaba.provider');
 const anthropicProvider = require('../providers/anthropic.provider');
 const openAIProvider = require('../providers/open-ai.provider');
 const deepSeekProvider = require('../providers/deep-seek.provider');
@@ -43,6 +44,9 @@ class AgentService {
     let providerService = openAIProvider;
 
     switch (assistant.provider) {
+      case 'alibaba':
+        providerService = alibabaProvider;
+        break;
       case 'anthropic':
         providerService = anthropicProvider;
         break;
@@ -124,7 +128,7 @@ class AgentService {
       type: event.blockType,
       tool: event.tool,
       toolUseId: event.toolUseId,
-      content: event.content || ''
+      content: event.content ?? ''
     };
 
     assistantMessage.blocks.push(block);
@@ -133,17 +137,16 @@ class AgentService {
 
   async appendBlockContent(assistantMessage, content) {
     const lastBlock = assistantMessage.blocks[assistantMessage.blocks.length - 1];
-    lastBlock.content += content;
+    lastBlock.content += content ?? '';
 
     socketIOService.io.emit('block-delta', {
       id: lastBlock.id,
       messageId: lastBlock.messageId,
-      delta: content
+      delta: content ?? ''
     });
   }
 
   async useTool(conversation, cancelationToken, assistantMessage, tools) {
-    // Coletar todos os blocos de uso de ferramentas
     const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
 
     const toolResults = [];

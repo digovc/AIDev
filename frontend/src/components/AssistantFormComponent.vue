@@ -22,11 +22,12 @@
         <div class="mb-4">
           <label for="provider" class="form-label">Provider</label>
           <select id="provider" v-model="assistant.provider" class="form-input" required>
+            <option value="alibaba">Alibaba</option>
             <option value="anthropic">Anthropic</option>
-            <option value="openai">OpenAI</option>
-            <option value="openrouter">OpenRouter</option>
             <option value="deepseek">DeepSeek</option>
             <option value="google">Google</option>
+            <option value="openai">OpenAI</option>
+            <option value="openrouter">OpenRouter</option>
           </select>
         </div>
 

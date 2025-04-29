@@ -52,6 +52,15 @@
         <input v-if="settings.openrouter.enabled" type="text" id="openrouterApiKey" v-model="settings.openrouter.apiKey" placeholder="Cole sua API Key do OpenRouter" class="form-input w-full"/>
       </div>
 
+      <div class="mb-6">
+        <div class="flex items-center mb-3">
+          <input type="checkbox" id="alibabaEnabled" v-model="settings.alibaba.enabled" class="mr-2 bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-600"/>
+          <label for="alibabaEnabled">Ativar Alibaba</label>
+        </div>
+
+        <input v-if="settings.alibaba.enabled" type="text" id="alibabaApiKey" v-model="settings.alibaba.apiKey" placeholder="Cole sua API Key do Alibaba" class="form-input w-full"/>
+      </div>
+
       <div class="flex justify-end space-x-3">
         <button type="button" @click="resetSettings" class="btn btn-secondary">
           Cancelar
@@ -90,6 +99,10 @@ const settings = reactive({
   openrouter: {
     enabled: false,
     apiKey: ''
+  },
+  alibaba: {
+    enabled: false,
+    apiKey: ''
   }
 });
 
@@ -116,6 +129,8 @@ const resetSettings = () => {
   settings.deepseek.apiKey = '';
   settings.gemini.enabled = false;
   settings.gemini.apiKey = '';
+  settings.alibaba.enabled = false;
+  settings.alibaba.apiKey = '';
 };
 
 onMounted(async () => {
