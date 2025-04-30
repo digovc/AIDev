@@ -2,6 +2,11 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const settingsStore = require('../stores/settings.store');
 
 class GoogleProvider {
+  constructor(props) {
+    this.retryCount = 0;
+    this.delay = 1000;
+  }
+
   async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
@@ -19,6 +24,7 @@ class GoogleProvider {
     const model = genAI.getGenerativeModel({ model: assistent.model || 'gemini-2.0-flash' });
 
     streamCallback({ type: 'message_start', inputTokens: 0 });
+    let isTooManyRequests = false;
 
     try {
       const toolsFormatted = this.formatTools(tools);
@@ -37,9 +43,31 @@ class GoogleProvider {
 
         await this.translateStreamEvent(chunk, currentBlock, streamCallback);
       }
+
+      this.retryCount = 0;
+      this.delay = 1000;
+    } catch (error) {
+      if (error.status === 429 && this.retryCount < 3) {
+        isTooManyRequests = true;
+      } else {
+        throw error;
+      }
     } finally {
-      streamCallback({ type: 'message_stop' });
+      if (!isTooManyRequests) {
+        streamCallback({ type: 'message_stop' });
+      }
     }
+
+    if (isTooManyRequests) {
+      await this.retry(assistent, messages, cancelationToken, tools, streamCallback);
+    }
+  }
+
+  async retry(assistent, messages, cancelationToken, tools, streamCallback) {
+    this.retryCount++;
+    await new Promise(resolve => setTimeout(resolve, this.delay));
+    this.delay *= 2; // Exponential backoff
+    await this.chatCompletion(assistent, messages, cancelationToken, tools, streamCallback);
   }
 
   translateStreamEvent(chunk, currentBlock, streamCallback) {
@@ -69,7 +97,6 @@ class GoogleProvider {
       });
     }
 
-
     if (!currentBlock.isOpen && parts.text) {
       currentBlock.isOpen = true;
       return streamCallback({ type: 'block_start', blockType: 'text', content: parts.text ?? '' });
@@ -84,9 +111,9 @@ class GoogleProvider {
     if (!tools || !tools.length) return [];
 
     return tools.map(tool => ({
-        name: tool.function.name,
-        description: tool.function.description,
-        parameters: tool.function.parameters
+      name: tool.function.name,
+      description: tool.function.description,
+      parameters: tool.function.parameters
     }));
   }
 

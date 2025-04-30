@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite build && serve -p 3030 dist",
+    "start": "vite build && serve dist",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -16,7 +16,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@tailwindcss/vite": "^4.0.9",
-    "axios": "^1.8.1",
+    "axios": "1.8.2",
     "lodash": "^4.17.21",
     "pinia": "^3.0.1",
     "socket.io-client": "^4.8.1",
@@ -30,7 +30,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
     "serve": "^14.2.4",
-    "vite": "^6.1.0",
+    "vite": "6.2.6",
     "vite-plugin-vue-devtools": "^7.7.2"
   }
 }

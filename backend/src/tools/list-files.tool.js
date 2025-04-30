@@ -9,6 +9,7 @@ class ListFilesTool {
       "description": "Lista os diretórios e arquivos do projeto",
       "input_schema": {
         "type": "object",
+        "required": ["folder"],
         "properties": {
           "folder": {
             "description": "Diretório que deseja listar",

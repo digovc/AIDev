@@ -7,6 +7,7 @@ class WriteTaskTool {
       "description": "Adiciona ou atualiza uma tarefa do projeto",
       "input_schema": {
         "type": "object",
+        "required": ["title", "description"],
         "properties": {
           "id": {
             "description": "ID da tarefa (obrigatório para atualização)",
