@@ -2,7 +2,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const settingsStore = require('../stores/settings.store');
 
 class GoogleProvider {
-  constructor(props) {
+  constructor() {
     this.retryCount = 0;
     this.delay = 1000;
   }
@@ -161,10 +161,7 @@ class GoogleProvider {
                 formattedMessage.parts = [{
                   functionResponse: {
                     name: block.tool,
-                    response: {
-                      name: block.tool,
-                      content: block.content
-                    }
+                    response: { result: block.content }
                   }
                 }];
                 break;
