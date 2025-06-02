@@ -186,7 +186,7 @@ class OpenAICompatibleProvider {
       }
 
       if (formattedMessage.empty) continue;
-      if (!formattedMessage.content) continue;
+      if (!formattedMessage.content && !formattedMessage.tool_calls) continue;
 
       formattedMessages.push(formattedMessage);
     }

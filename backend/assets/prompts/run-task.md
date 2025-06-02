@@ -20,7 +20,7 @@ Resolva a tarefa **{{ task.id }}**:
 {{ task.description }}
 
 {% endif %}
-{% if task.references %}
+{% if task.references and task.references|length > 0 %}
 ## Referências
 
 {% for reference in task.references %}

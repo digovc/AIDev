@@ -3,32 +3,32 @@ const tasksStore = require('../stores/tasks.store');
 class WriteTaskTool {
   getDefinition() {
     return {
-      "name": "write_task",
-      "description": "Adiciona ou atualiza uma tarefa do projeto",
-      "input_schema": {
-        "type": "object",
-        "required": ["title", "description"],
-        "properties": {
-          "id": {
-            "description": "ID da tarefa (obrigatório para atualização)",
-            "type": "string"
+      name: "write_task",
+      description: "Adiciona ou atualiza uma tarefa do projeto",
+      input_schema: {
+        type: "object",
+        required: ["title", "description"],
+        properties: {
+          id: {
+            description: "ID da tarefa (obrigatório para atualização)",
+            type: "string"
           },
-          "title": {
-            "description": "Título da tarefa (obrigatório para criação)",
-            "type": "string"
+          title: {
+            description: "Título da tarefa (obrigatório para criação)",
+            type: "string"
           },
-          "description": {
-            "description": "Descrição detalhada da tarefa",
-            "type": "string"
+          description: {
+            description: "Descrição detalhada da tarefa",
+            type: "string"
           },
-          "appendDescription": {
-            "description": "Adiciona texto à descrição atual da tarefa",
-            "type": "string"
+          appendDescription: {
+            description: "Adiciona texto à descrição atual da tarefa",
+            type: "string"
           },
-          "status": {
-            "description": "Status da tarefa",
-            "type": "string",
-            "enum": [
+          status: {
+            description: "Status da tarefa",
+            type: "string",
+            enum: [
               "backlog",
               "running",
               "done"

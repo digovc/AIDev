@@ -1,46 +1,50 @@
-const fs = require('fs').promises;
-const path = require('path');
-const projectsStore = require('../stores/projects.store');
-
 class WriteFileTool {
   getDefinition() {
     return {
-      "name": "write_file",
-      "description": "Cria ou atualiza um arquivo no projeto",
-      "input_schema": {
-        "type": "object",
-        "required": [
-          "file",
-          "blocks"
-        ],
-        "properties": {
-          "file": {
-            "type": "string",
-            "description": "Diretório do arquivo a ser criado ou atualizado"
+      name: "write_file",
+      description: [
+        "Cria ou atualiza um arquivo no projeto.",
+        "Permite substituir trechos de texto EXATOS (não é utilizado regex) ou inserir novo conteúdo."
+      ].join(" "),
+      input_schema: {
+        type: "object",
+        required: ["file", "blocks"],
+        properties: {
+          file: {
+            type: "string",
+            description: "Caminho relativo do arquivo a ser criado ou atualizado."
           },
-          "blocks": {
-            "type": "array",
-            "description": "Array de blocos de a serem escritos ou substituídos no arquivo",
-            "items": {
-              "type": "object",
-              "required": [
-                "replace"
-              ],
-              "properties": {
-                "search": {
-                  "type": "string",
-                  "description": "Bloco de texto a ser substituído"
+          blocks: {
+            type: "array",
+            description: [
+              "Lista de blocos de operação de escrita.",
+              "Cada bloco pode substituir um trecho existente ou inserir novo conteúdo."
+            ].join(" "),
+            items: {
+              type: "object",
+              required: ["replace"],
+              properties: {
+                search: {
+                  type: "string",
+                  description: [
+                    "Texto literal a ser substituído no arquivo.",
+                    "A busca é EXATA e não admite sintaxe de regex.",
+                    "Se não encontrar esse texto no conteúdo atual, será lançado um erro."
+                  ].join(" ")
                 },
-                "replace": {
-                  "type": "string",
-                  "description": "Bloco de texto a ser inserido ou substituído"
+                replace: {
+                  type: "string",
+                  description: [
+                    "Texto literal que irá substituir o bloco identificado em `search`.",
+                    "Se `search` não for fornecido, o valor aqui será inserido como conteúdo completo."
+                  ].join(" ")
                 }
               }
             }
           }
         }
       }
-    }
+    };
   }
 
   async executeTool(conversation, input) {
