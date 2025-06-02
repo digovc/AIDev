@@ -11,7 +11,7 @@
         <FontAwesomeIcon :icon="faPlay" class="h-6 w-6"/>
       </button>
       <button v-if="task.status === 'running'" @click="$emit('stop', task.id)" class="text-gray-400 hover:text-gray-200" title="Parar">
-        <FontAwesomeIcon :icon="faStop" class="h-6 w-6 text-red-500"/>
+        <FontAwesomeIcon :icon="faStop" class="h-6 w-6"/>
       </button>
       <button v-if="task.status !== 'done'" @click.stop="$emit('done', task.id)" class="text-gray-400 hover:text-gray-200" title="Concluir">
         <FontAwesomeIcon :icon="faCheck" class="h-6 w-6"/>
