@@ -1,5 +1,6 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300 cursor-pointer hover:scale-105" @click="navigateToProject">
+  <div
+      class="bg-gray-900 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300 cursor-pointer hover:scale-102" @click="navigateToProject">
     <h2 class="text-xl font-semibold mb-2">{{ project.name }}</h2>
     <p v-if="project.description" class="text-sm text-gray-400 mb-2 line-clamp-2">{{ project.description }}</p>
     <div class="text-sm text-gray-300 text-xs">
