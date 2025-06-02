@@ -1,7 +1,7 @@
 <template>
   <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col h-full space-y-2">
     <div class="flex justify-between items-center">
-      <h2 class="text-xl font-bold">{{ isEditing ? `Editar Tarefa (${ task.id })` : 'Nova Tarefa' }}</h2>
+      <h2 class="text-lg font-bold">{{ isEditing ? `Editar Tarefa (${ task.id })` : 'Nova Tarefa' }}</h2>
       <button @click="goBack" class="text-gray-400 hover:text-gray-200">
         <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
       </button>
@@ -81,7 +81,7 @@ import ReferencesDialog from '@/pages/project/taks/ReferencesDialog.vue';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { assistantsApi } from '@/api/assistants.api.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faCog, faCopy, faPlay, faPlus, faSave, faStop, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faCopy, faPlay, faPlus, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { conversationsApi } from '@/api/conversations.api.js';
 import { socketIOService } from "@/services/socket.io.js";
 import { runningTasksService } from "@/services/running-tasks.service.js";
@@ -288,10 +288,17 @@ const removeReference = (index) => {
 };
 
 const handleKeyPress = (event) => {
-  const isPressed = event.ctrlKey && event.shiftKey && event.key === 'E';
-  if (isPressed && !loading.value) {
-    event.preventDefault(); // Prevent default browser behavior like opening search
+  const isRunPressed = event.ctrlKey && event.shiftKey && event.key === 'E';
+
+  if (isRunPressed && !loading.value) {
+    event.preventDefault();
     saveAndRunTask();
+  }
+
+  const isScapePressed = event.key === 'Escape';
+  if (isScapePressed) {
+    event.preventDefault();
+    goBack();
   }
 };
 
