@@ -2,7 +2,7 @@ const OpenAI = require('openai');
 const settingsStore = require('../stores/settings.store');
 
 class OpenAiProvider {
-  async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
+  async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
     }
@@ -24,7 +24,7 @@ class OpenAiProvider {
     try {
       const stream = await openai.chat.completions.create({
         messages: formattedMessages,
-        model: assistent.model,
+        model: assistant.model,
         stream: true,
         tools: tools,
       });
@@ -41,7 +41,6 @@ class OpenAiProvider {
     } finally {
       streamCallback({ type: 'message_stop' });
     }
-
   }
 
   translateStreamEvent(chunk, currentBlock, streamCallback) {
@@ -50,6 +49,12 @@ class OpenAiProvider {
 
     if (!choice.delta) return;
     const delta = choice.delta;
+
+    if (currentBlock.isOpen && currentBlock.type === 'reasoning' && delta.content) {
+      currentBlock.isOpen = false;
+      currentBlock.type = undefined;
+      currentBlock.toolUseId = undefined;
+    }
 
     if (currentBlock.isOpen && currentBlock.type === 'text' && delta.tool_calls?.length) {
       currentBlock.isOpen = false;
@@ -67,9 +72,11 @@ class OpenAiProvider {
       currentBlock.isOpen = true;
 
       if (!delta.tool_calls || !delta.tool_calls.length) {
-        currentBlock.type = 'text';
+        const type = delta.content != null ? 'text' : 'reasoning';
+        currentBlock.type = type;
         currentBlock.toolUseId = undefined;
-        return streamCallback({ type: 'block_start', blockType: 'text', content: delta.content ?? '' });
+        const content = delta.content ?? delta.reasoning_content ?? '';
+        return streamCallback({ type: 'block_start', blockType: type, content: content });
       }
 
       if (delta.tool_calls && delta.tool_calls.length) {
@@ -86,6 +93,10 @@ class OpenAiProvider {
           content: toolCall.function.arguments,
         });
       }
+    }
+
+    if (currentBlock.isOpen && currentBlock.type === 'reasoning' && delta.reasoning_content) {
+      return streamCallback({ type: 'block_delta', delta: delta.reasoning_content });
     }
 
     if (currentBlock.isOpen && currentBlock.type === 'text' && delta.content) {
@@ -116,13 +127,8 @@ class OpenAiProvider {
     const formattedMessages = [];
 
     for (const message of messages) {
-      if (!message.blocks?.length) {
-        continue;
-      }
-
-      if (message.sender === 'log') {
-        continue;
-      }
+      if (!message.blocks?.length) continue;
+      if (message.sender === 'log') continue;
 
       if (message.sender === 'system') {
         formattedMessages.push({
@@ -137,14 +143,13 @@ class OpenAiProvider {
         role: this.getRole(message.sender),
       };
 
+      const textBlocks = [];
+
       for (const block of message.blocks) {
         switch (block.type) {
           case 'text':
-            if (!block.content || !block.content.trim()) {
-              continue;
-            }
-            formattedMessage.content = formattedMessage.content || [];
-            formattedMessage.content.push({ type: 'text', text: block.content });
+            if (!block.content || !block.content.trim()) continue;
+            textBlocks.push(block.content);
             break;
           case 'tool_use':
             const toolCall = {
@@ -170,9 +175,12 @@ class OpenAiProvider {
         }
       }
 
-      if (formattedMessage.empty) {
-        continue;
+      if (textBlocks.length > 0) {
+        formattedMessage.content = textBlocks.join('\n');
       }
+
+      if (formattedMessage.empty) continue;
+      if (!formattedMessage.content) continue;
 
       formattedMessages.push(formattedMessage);
     }
@@ -187,7 +195,7 @@ class OpenAiProvider {
   getRole(sender) {
     switch (sender) {
       case 'tool':
-        return 'toll';
+        return 'tool';
       case 'user_system':
         return 'user';
       default:

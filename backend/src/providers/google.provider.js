@@ -7,7 +7,7 @@ class GoogleProvider {
     this.delay = 1000;
   }
 
-  async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
+  async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
     }
@@ -21,7 +21,7 @@ class GoogleProvider {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: assistent.model || 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: assistant.model || 'gemini-2.0-flash' });
 
     streamCallback({ type: 'message_start', inputTokens: 0 });
     let isTooManyRequests = false;
@@ -59,15 +59,15 @@ class GoogleProvider {
     }
 
     if (isTooManyRequests) {
-      await this.retry(assistent, messages, cancelationToken, tools, streamCallback);
+      await this.retry(assistant, messages, cancelationToken, tools, streamCallback);
     }
   }
 
-  async retry(assistent, messages, cancelationToken, tools, streamCallback) {
+  async retry(assistant, messages, cancelationToken, tools, streamCallback) {
     this.retryCount++;
     await new Promise(resolve => setTimeout(resolve, this.delay));
     this.delay *= 2; // Exponential backoff
-    await this.chatCompletion(assistent, messages, cancelationToken, tools, streamCallback);
+    await this.chatCompletion(assistant, messages, cancelationToken, tools, streamCallback);
   }
 
   translateStreamEvent(chunk, currentBlock, streamCallback) {

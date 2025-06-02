@@ -73,11 +73,11 @@ class TasksController extends CrudControllerBase {
 
     task.status = 'done';
     await tasksStore.update(task.id, task);
-    
+
     console.log(`Completing task ${taskId}. Will check queue after stopping.`);
     await taskRunnerService.stopTask(taskId);
     // O processamento da próxima tarefa é feito no método stopTask
-    
+
     res.json({ success: true, message: 'Task completed', task });
   }
 
@@ -95,8 +95,8 @@ class TasksController extends CrudControllerBase {
     }
 
     taskRunnerService.stopTask(taskId);
-    task.status = 'backlog';
 
+    task.status = 'backlog';
     await tasksStore.update(task.id, task);
     res.json({ success: true, message: 'Stopping task' });
   }
@@ -106,17 +106,17 @@ class TasksController extends CrudControllerBase {
     const tasks = await tasksStore.getByProjectId(projectId);
     const executingTasks = taskRunnerService.executingTasks;
     const queuedTasks = taskRunnerService.taskQueue;
-    
+
     tasks.forEach(t => {
       t.isExecuting = executingTasks.includes(t.id);
       t.isQueued = queuedTasks.includes(t.id);
-      
+
       // Incluir posição na fila se a tarefa estiver em fila
       if (t.isQueued) {
         t.queuePosition = queuedTasks.indexOf(t.id) + 1; // Posição na fila (1-based)
       }
     });
-    
+
     res.json(tasks);
   }
 }
