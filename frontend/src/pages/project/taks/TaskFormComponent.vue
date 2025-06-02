@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col h-full space-y-2">
+  <div class="h-full flex space-x-2">
+    <!-- Formulário de tarefa -->
+    <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col space-y-2" :style="{ width: `${leftWidth}%` }">
     <div class="flex justify-between items-center">
       <h2 class="text-lg font-bold">{{ isEditing ? `Editar Tarefa (${ task.id })` : 'Nova Tarefa' }}</h2>
       <button @click="goBack" class="text-gray-400 hover:text-gray-200">
@@ -24,7 +26,7 @@
           <label class="form-label">Referências</label>
           <button type="button" @click="openReferencesDialog" class="btn btn-secondary mt-1 mr-1">
             <FontAwesomeIcon :icon="faPlus" class="mr-2"/>
-            Adicionar Referência
+            Referência
           </button>
         </div>
 
@@ -70,6 +72,21 @@
       </div>
     </form>
     <ReferencesDialog ref="referencesDialog" :project="project" :task-references="task.references" @update:references="updateReferences"/>
+    </div>
+
+    <!-- Divisor redimensionável -->
+    <div class="cursor-col-resize w-2 h-full hover:bg-blue-300 active:bg-blue-500 transition-colors duration-200" @mousedown="startResize"></div>
+
+    <!-- Chat -->
+    <div class="flex-1">
+      <ChatComponent v-if="task.id" :project="project" :task="task"/>
+      <div v-else class="bg-gray-900 rounded-lg shadow-md p-6 h-full flex flex-col">
+        <h2 class="text-2xl font-bold mb-4">Chat</h2>
+        <div class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
+          Salve a tarefa primeiro para habilitar o chat
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -85,6 +102,7 @@ import { faCog, faCopy, faPlay, faPlus, faSave, faTimes } from '@fortawesome/fre
 import { conversationsApi } from '@/api/conversations.api.js';
 import { socketIOService } from "@/services/socket.io.js";
 import { runningTasksService } from "@/services/running-tasks.service.js";
+import ChatComponent from '@/pages/project/chat/ChatComponent.vue';
 
 const props = defineProps({
   project: {
@@ -94,8 +112,11 @@ const props = defineProps({
 });
 
 const assistants = ref([]);
+const containerRef = ref(null);
 const conversationTitle = ref(null);
 const isEditing = ref(false);
+const isResizing = ref(false);
+const leftWidth = ref(60);
 const loading = ref(false);
 const referencesDialog = ref(null);
 const route = useRoute();
@@ -124,6 +145,51 @@ const isRunning = computed(() => {
   if (!task.id) return false;
   return runningTasksService.isRunning(task.id);
 });
+
+const loadSavedLayout = () => {
+  try {
+    const savedWidth = localStorage.getItem('aidev.taskForm.leftWidth');
+    if (savedWidth !== null) {
+      leftWidth.value = parseFloat(savedWidth);
+    }
+  } catch (e) {
+    console.error('Erro ao carregar layout salvo:', e);
+  }
+};
+
+const saveLayout = () => {
+  try {
+    localStorage.setItem('aidev.taskForm.leftWidth', leftWidth.value.toString());
+  } catch (e) {
+    console.error('Erro ao salvar layout:', e);
+  }
+};
+
+const startResize = (e) => {
+  isResizing.value = true;
+
+  containerRef.value = e.target.closest('.h-full.flex.space-x-2');
+  document.addEventListener('mousemove', onResize);
+  document.addEventListener('mouseup', stopResize);
+
+  e.preventDefault();
+};
+
+const onResize = (e) => {
+  if (!isResizing.value || !containerRef.value) return;
+
+  const containerRect = containerRef.value.getBoundingClientRect();
+  const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+
+  leftWidth.value = Math.max(30, Math.min(80, newWidth));
+};
+
+const stopResize = () => {
+  isResizing.value = false;
+  document.removeEventListener('mousemove', onResize);
+  document.removeEventListener('mouseup', stopResize);
+  saveLayout();
+};
 
 const goBack = () => {
   emits('task-closed');
@@ -327,6 +393,7 @@ const taskUpdated = (updatedTask) => {
 };
 
 onMounted(async () => {
+  loadSavedLayout();
   window.addEventListener('keydown', handleKeyPress);
   socketIOService.socket.on('task-updated', taskUpdated);
 
@@ -338,5 +405,7 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyPress);
   socketIOService.socket.off('task-updated', taskUpdated);
+  document.removeEventListener('mousemove', onResize);
+  document.removeEventListener('mouseup', stopResize);
 });
 </script>

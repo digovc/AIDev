@@ -104,10 +104,17 @@ const searchReferences = debounce(async () => {
   }
 
   isSearching.value = true;
+
   try {
     const response = await referencesApi.search(props.project.id, searchQuery.value);
-    // Filtra referências que ainda não foram adicionadas
-    searchResults.value = (response.data || []).filter(
+    let results = response.data || [];
+
+    if (!results.length) {
+      const responseRetry = await referencesApi.search(props.project.id, searchQuery.value);
+      results = responseRetry.data || [];
+    }
+
+    searchResults.value = (results || []).filter(
         result => !references.value.some(ref => ref.path === result.path)
     );
     selectedIndex.value = searchResults.value.length > 0 ? 0 : -1;
