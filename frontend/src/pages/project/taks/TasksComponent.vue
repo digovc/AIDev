@@ -48,7 +48,6 @@ const getTasksByStatus = (status) => {
 const handleArchive = async (taskId) => {
   try {
     await tasksApi.archiveTasks(props.project.id, [taskId]);
-    // Remove a tarefa arquivada da lista
     tasks.value = tasks.value.filter(t => t.id !== taskId);
   } catch (error) {
     alert('Erro ao arquivar tarefa: ' + error.message);
@@ -80,7 +79,6 @@ const handlePlay = async (taskId) => {
 
   try {
     await tasksApi.runTask(task.id);
-    emit('taskSelected', task);
   } catch (error) {
     task.status = 'backlog';
     alert('Erro ao iniciar tarefa: ' + error.message);
@@ -88,7 +86,6 @@ const handlePlay = async (taskId) => {
 };
 
 const handlePlayNow = (taskId) => {
-  // Primeiro, coloca todas as tarefas em andamento de volta para o backlog
   tasks.value.forEach(t => {
     if (t.status === 'running') {
       t.status = 'backlog';
@@ -106,9 +103,7 @@ const handlePlayNow = (taskId) => {
 const handleStop = async (taskId) => {
   const task = tasks.value.find(t => t.id === taskId);
 
-  if (!task) {
-    return;
-  }
+  if (!task) return;
 
   task.status = 'backlog';
   await tasksApi.stopTask(task.id);
@@ -167,32 +162,14 @@ const taskUpdated = (task) => {
   }
 };
 
-const taskExecuting = (taskId) => {
-  const task = tasks.value.find(t => t.id === taskId);
-  if (task) {
-    task.isExecuting = true;
-  }
-};
-
-const taskNotExecuting = (taskId) => {
-  const task = tasks.value.find(t => t.id === taskId);
-  if (task) {
-    task.isExecuting = false
-  }
-};
-
 onMounted(async () => {
   await loadTasks()
   socketIOService.socket.on('task-created', taskCreated);
   socketIOService.socket.on('task-updated', taskUpdated);
-  socketIOService.socket.on('task-executing', taskExecuting);
-  socketIOService.socket.on('task-not-executing', taskNotExecuting);
 });
 
 onUnmounted(() => {
   socketIOService.socket.off('task-created', taskCreated);
   socketIOService.socket.off('task-updated', taskUpdated);
-  socketIOService.socket.off('task-executing', taskExecuting);
-  socketIOService.socket.off('task-not-executing', taskNotExecuting);
 });
 </script>

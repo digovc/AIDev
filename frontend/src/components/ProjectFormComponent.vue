@@ -82,7 +82,6 @@ const resetForm = () => {
   project.name = '';
   project.description = '';
   project.path = '';
-  project.conversations = [];
   project.tasks = [];
 };
 
@@ -90,7 +89,7 @@ const saveProject = async () => {
   try {
     loading.value = true;
     let response;
-    
+
     if (isEditing.value) {
       response = await projectsApi.updateProject(project.id, project);
       emit('project-updated', response.data);
@@ -98,7 +97,7 @@ const saveProject = async () => {
       response = await projectsApi.createProject(project);
       emit('project-created', response.data);
     }
-    
+
     close();
   } catch (error) {
     console.error('Erro ao salvar projeto:', error);

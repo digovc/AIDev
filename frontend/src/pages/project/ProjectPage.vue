@@ -11,11 +11,9 @@
     <div v-else class="flex h-full">
 
       <div class="space-y-2 flex flex-col" :style="{ width: `${leftWidth}%` }">
-
         <ProjectInfoComponent :project="project" @project-updated="handleProjectUpdated"/>
         <div class="relative grow overflow-y-auto">
-
-          <RouterView v-if="project" :project="project" class="h-full absolute inset-0" @taskSelected="handleTaskSelected"></RouterView>
+          <RouterView v-if="project" :project="project" class="h-full absolute inset-0" @taskSelected="handleTaskSelected" @taskClosed="handleTaskClosed" @taskDuplicated="handleTaskSelected" @taskStarted="handleTaskSelected"></RouterView>
         </div>
       </div>
 
@@ -24,8 +22,10 @@
 
       <!-- Coluna da direita (chat) -->
       <div class="flex-1">
-
-        <ChatComponent ref="chatComponent" :project="project" class="h-full"/>
+        <ChatComponent v-if="taskSelected" :project="project" :task="taskSelected"/>
+        <div v-else class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
+          Nenhuma tarefa selecionada
+        </div>
       </div>
     </div>
   </div>
@@ -39,17 +39,14 @@ import ProjectInfoComponent from './ProjectInfoComponent.vue';
 import ChatComponent from './chat/ChatComponent.vue';
 import { socketIOService } from "@/services/socket.io.js";
 
-const route = useRoute();
-const project = ref(null);
-const loading = ref(true);
-const error = ref(null);
-const chatComponent = ref(null);
-
-
-const leftWidth = ref(66); // Padrão: 66% para a esquerda (aprox. 2/3)
-const isResizing = ref(false);
 const containerRef = ref(null);
-
+const error = ref(null);
+const isResizing = ref(false);
+const leftWidth = ref(66);
+const loading = ref(true);
+const project = ref(null);
+const route = useRoute();
+const taskSelected = ref(null);
 
 const loadSavedLayout = () => {
   try {
@@ -62,7 +59,6 @@ const loadSavedLayout = () => {
   }
 };
 
-
 const saveLayout = () => {
   try {
     localStorage.setItem('aidev.layout.leftWidth', leftWidth.value.toString());
@@ -70,7 +66,6 @@ const saveLayout = () => {
     console.error('Erro ao salvar layout:', e);
   }
 };
-
 
 const startResize = (e) => {
   isResizing.value = true;
@@ -82,17 +77,15 @@ const startResize = (e) => {
   e.preventDefault();
 };
 
-
 const onResize = (e) => {
   if (!isResizing.value || !containerRef.value) return;
 
   const containerRect = containerRef.value.getBoundingClientRect();
   const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
 
-  
+
   leftWidth.value = Math.max(30, Math.min(80, newWidth));
 };
-
 
 const stopResize = () => {
   isResizing.value = false;
@@ -102,9 +95,11 @@ const stopResize = () => {
 };
 
 const handleTaskSelected = (task) => {
-  if (task && task.conversationId && chatComponent.value) {
-    chatComponent.value.selectConversationById(task.conversationId);
-  }
+  taskSelected.value = task;
+};
+
+const handleTaskClosed = () => {
+  taskSelected.value = null;
 };
 
 const handleProjectUpdated = (updatedProject) => {
@@ -141,17 +136,14 @@ const loadProject = async () => {
 };
 
 const conversationCreated = (conversation) => {
-  if (project.value && conversation.projectId === project.value.id) {
-    project.value.conversations.push({ id: conversation.id, title: conversation.title });
+  if (taskSelected && taskSelected.id === conversation.taskId && taskSelected.conversationId !== conversation.id) {
+    taskSelected.conversationId = conversation.id;
   }
 };
 
 onMounted(async () => {
-
   loadSavedLayout();
-
   await loadProject();
-
 
   if (project.value && project.value.name) {
     document.title = `${ project.value.name } - AIDev`;
@@ -163,10 +155,8 @@ onMounted(async () => {
 onUnmounted(() => {
   socketIOService.socket.off('conversation-created', conversationCreated);
 
-
   document.removeEventListener('mousemove', onResize);
   document.removeEventListener('mouseup', stopResize);
-
 
   document.title = 'AIDev';
 });

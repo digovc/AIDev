@@ -47,30 +47,26 @@
         </select>
       </div>
 
-      <div class="flex justify-between items-center space-x-3">
-        <div class="flex items-center">
-          <div v-if="hasConversation" class="flex items-center text-sm text-gray-400 mr-4">
-            <FontAwesomeIcon :icon="faComments" class="mr-2"/>
-            <span>{{ conversationTitle || 'Conversa vinculada' }}</span>
-          </div>
-        </div>
-        <div class="flex justify-end space-x-3">
-          <button type="button" @click="saveAndRunTask" class="btn btn-primary" :disabled="loading">
-            <FontAwesomeIcon :icon="faPlay" class="mr-2"/>
-            {{ loading ? 'Processando...' : 'Executar' }}
-          </button>
-          <button type="submit" class="btn btn-primary" :disabled="loading">
-            <FontAwesomeIcon :icon="faSave" class="mr-2"/>
-            {{ loading ? 'Salvando...' : 'Salvar' }}
-          </button>
-          <button v-if="isEditing" type="button" @click="duplicateTask" class="btn btn-secondary" :disabled="loading">
-            <FontAwesomeIcon :icon="faCopy" class="mr-2"/>
-            Duplicar
-          </button>
-          <button type="button" @click="goBack" class="btn btn-secondary">
-            Cancelar
-          </button>
-        </div>
+      <div class="flex justify-end space-x-3">
+        <button type="button" @click="saveAndRunTask" class="btn btn-primary" :disabled="loading" v-if="!isRunning">
+          <FontAwesomeIcon :icon="faPlay" class="mr-2"/>
+          {{ loading ? 'Processando...' : 'Executar' }}
+        </button>
+        <button type="button" @click="stopTask" class="btn btn-danger" :disabled="loading" v-else>
+          <FontAwesomeIcon :icon="faCog" class="h-6 w-6 animate-spin" v-if="isRunning"/>
+          {{ loading ? 'Processando...' : 'Parar' }}
+        </button>
+        <button type="submit" class="btn btn-primary" :disabled="loading">
+          <FontAwesomeIcon :icon="faSave" class="mr-2"/>
+          {{ loading ? 'Salvando...' : 'Salvar' }}
+        </button>
+        <button v-if="isEditing" type="button" @click="duplicateTask" class="btn btn-secondary" :disabled="loading">
+          <FontAwesomeIcon :icon="faCopy" class="mr-2"/>
+          Duplicar
+        </button>
+        <button type="button" @click="goBack" class="btn btn-secondary">
+          Voltar
+        </button>
       </div>
     </form>
     <ReferencesDialog ref="referencesDialog" :project="project" :task-references="task.references" @update:references="updateReferences"/>
@@ -85,8 +81,10 @@ import ReferencesDialog from '@/pages/project/taks/ReferencesDialog.vue';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { assistantsApi } from '@/api/assistants.api.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faComments, faCopy, faPlay, faPlus, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faCopy, faPlay, faPlus, faSave, faStop, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { conversationsApi } from '@/api/conversations.api.js';
+import { socketIOService } from "@/services/socket.io.js";
+import { runningTasksService } from "@/services/running-tasks.service.js";
 
 const props = defineProps({
   project: {
@@ -95,14 +93,14 @@ const props = defineProps({
   }
 });
 
-const router = useRouter();
-const route = useRoute();
-const loading = ref(false);
-const isEditing = ref(false);
-const referencesDialog = ref(null);
-const titleInput = ref(null);
 const assistants = ref([]);
 const conversationTitle = ref(null);
+const isEditing = ref(false);
+const loading = ref(false);
+const referencesDialog = ref(null);
+const route = useRoute();
+const router = useRouter();
+const titleInput = ref(null);
 
 const task = reactive({
   id: null,
@@ -113,12 +111,22 @@ const task = reactive({
   assistantId: null
 });
 
-const hasConversation = computed(() => {
-  console.log('hasConversation', task.conversationId);
-  return task.conversationId !== null && task.conversationId !== undefined;
+watch(() => route.params.taskId, async (newTaskId) => {
+  if (newTaskId) {
+    await loadTask();
+  }
+});
+
+const emits = defineEmits(['task-closed', 'task-duplicated', 'task-started']);
+
+const isRunning = computed(() => {
+  if (!task) return false;
+  if (!task.id) return false;
+  return runningTasksService.isRunning(task.id);
 });
 
 const goBack = () => {
+  emits('task-closed');
   router.push(`/projects/${ props.project.id }`);
 };
 
@@ -143,7 +151,7 @@ const saveTask = async () => {
       task.id = result.data.id; // Atualiza o ID da tarefa após a criação
     }
 
-    // Navegar de volta para a lista de tarefas
+    emits('task-closed');
     await router.push(`/projects/${ props.project.id }`);
   } catch (error) {
     console.error(`Erro ao ${ isEditing.value ? 'atualizar' : 'salvar' } tarefa:`, error);
@@ -178,17 +186,19 @@ const saveAndRunTask = async () => {
       taskId = result.data.id;
     }
 
-    // Executar a tarefa após salvar
     await tasksApi.runTask(taskId);
-
-    // Navegar de volta para a lista de tarefas
-    await router.push(`/projects/${ props.project.id }`);
+    emits('task-started', task);
   } catch (error) {
     console.error(`Erro ao salvar e executar tarefa:`, error);
     alert(`Ocorreu um erro ao salvar e executar a tarefa. Por favor, tente novamente.`);
   } finally {
     loading.value = false;
   }
+};
+
+const stopTask = async () => {
+  task.status = 'backlog';
+  await tasksApi.stopTask(task.id);
 };
 
 const loadTask = async () => {
@@ -250,9 +260,11 @@ const duplicateTask = async () => {
 
     // Criar nova tarefa
     const result = await tasksApi.createTask(duplicatedTaskData);
+    const duplicatedTask = result.data;
 
     // Navegar para a página de edição da nova tarefa
-    await router.push(`/projects/${ props.project.id }/tasks/${ result.data.id }`);
+    emits('task-duplicated', duplicatedTask);
+    await router.push(`/projects/${ props.project.id }/tasks/${ duplicatedTask.id }`);
 
     setTimeout(() => titleInput.value.focus(), 100);
   } catch (error) {
@@ -283,13 +295,6 @@ const handleKeyPress = (event) => {
   }
 };
 
-// Observar mudanças na rota para recarregar a tarefa quando o parâmetro taskId mudar
-watch(() => route.params.taskId, async (newTaskId) => {
-  if (newTaskId) {
-    await loadTask();
-  }
-});
-
 const loadAssistants = async () => {
   try {
     const response = await assistantsApi.listAssistants();
@@ -308,8 +313,16 @@ const loadAssistants = async () => {
   }
 };
 
+const taskUpdated = (updatedTask) => {
+  if (updatedTask.id === task.id) {
+    Object.assign(task, updatedTask);
+  }
+};
+
 onMounted(async () => {
   window.addEventListener('keydown', handleKeyPress);
+  socketIOService.socket.on('task-updated', taskUpdated);
+
   await loadTask();
   await loadAssistants();
   await titleInput.value.focus();
@@ -317,5 +330,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyPress);
+  socketIOService.socket.off('task-updated', taskUpdated);
 });
 </script>

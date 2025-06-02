@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-export class SocketIOService {
+class SocketIOService {
   constructor() {
     this.socket = io(import.meta.env.VITE_API_URL, {
       transports: ['websocket'],

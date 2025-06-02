@@ -10,6 +10,9 @@
       </span>
     </div>
     <div v-for="(block, index) in message.blocks" :key="index" class="text-gray-300 overflow-y-auto">
+      <div v-if="block.type === 'reasoning'">
+        <ChatMessageReasoningComponent :content="block.content"/>
+      </div>
       <div v-if="block.type === 'text'">
         <ChatMessageTextComponent :content="block.content"/>
       </div>
@@ -30,6 +33,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import ChatMessageTextComponent from "@/pages/project/chat/ChatMessageTextComponent.vue";
 import ChatMessageToolComponent from "@/pages/project/chat/ChatMessageToolComponent.vue";
 import ChatMessageToolResultComponent from "@/pages/project/chat/ChatMessageToolResultComponent.vue";
+import ChatMessageReasoningComponent from "@/pages/project/chat/ChatMessageReasoningComponent.vue";
 
 const props = defineProps({
   message: {
