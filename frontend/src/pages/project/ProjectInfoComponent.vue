@@ -1,10 +1,10 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4">
+  <div class="bg-gray-800 rounded-lg shadow-md py-1 px-4">
     <div class="flex justify-between items-center">
-      <div>
-        <h1 class="text-3xl font-bold mb-1">{{ project?.name }}</h1>
+      <div class="flex items-center space-x-4">
+        <h1 class="text-lg font-bold">{{ project?.name }}</h1>
         <div class="text-gray-300 text-xs">
-          Path: {{ project?.path }}
+          {{ project?.path }}
         </div>
       </div>
       <div class="flex items-center space-x-4">

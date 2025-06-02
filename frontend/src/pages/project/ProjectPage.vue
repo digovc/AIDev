@@ -8,26 +8,28 @@
       {{ error }}
     </div>
 
-    <div v-else class="flex h-full">
-
-      <div class="space-y-2 flex flex-col" :style="{ width: `${leftWidth}%` }">
-        <ProjectInfoComponent :project="project" @project-updated="handleProjectUpdated"/>
-        <div class="relative grow overflow-y-auto">
-          <RouterView v-if="project" :project="project" class="h-full absolute inset-0" @taskSelected="handleTaskSelected" @taskClosed="handleTaskClosed" @taskDuplicated="handleTaskSelected" @taskStarted="handleTaskSelected"></RouterView>
+    <div v-else class="flex flex-col h-full space-y-2">
+      <ProjectInfoComponent :project="project" @project-updated="handleProjectUpdated"/>
+      <div class="flex h-full">
+        <div class="space-y-2 flex flex-col" :style="{ width: `${leftWidth}%` }">
+          <div class="relative grow overflow-y-auto">
+            <RouterView v-if="project" :project="project" class="h-full absolute inset-0" @taskSelected="handleTaskSelected" @taskClosed="handleTaskClosed" @taskDuplicated="handleTaskSelected" @taskStarted="handleTaskSelected"></RouterView>
+          </div>
         </div>
-      </div>
 
-      <!-- Divisor redimensionável -->
-      <div class="cursor-col-resize w-2 h-full hover:bg-blue-300 active:bg-blue-500 transition-colors duration-200" @mousedown="startResize"></div>
+        <!-- Divisor redimensionável -->
+        <div class="cursor-col-resize w-2 h-full hover:bg-blue-300 active:bg-blue-500 transition-colors duration-200" @mousedown="startResize"></div>
 
-      <!-- Coluna da direita (chat) -->
-      <div class="flex-1">
-        <ChatComponent v-if="taskSelected" :project="project" :task="taskSelected"/>
-        <div v-else class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
-          Nenhuma tarefa selecionada
+        <!-- Coluna da direita (chat) -->
+        <div class="flex-1">
+          <ChatComponent v-if="taskSelected" :project="project" :task="taskSelected"/>
+          <div v-else class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
+            Nenhuma tarefa selecionada
+          </div>
         </div>
       </div>
     </div>
+
   </div>
 </template>
 
