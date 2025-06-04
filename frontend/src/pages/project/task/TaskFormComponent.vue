@@ -80,8 +80,8 @@
     <!-- Chat -->
     <div class="flex-1">
       <ChatComponent v-if="task.id" :project="project" :task="task"/>
-      <div v-else class="bg-gray-900 rounded-lg shadow-md p-6 h-full flex flex-col">
-        <h2 class="text-2xl font-bold mb-4">Chat</h2>
+      <div v-else class="bg-gray-900 rounded-lg shadow-md p-4 h-full flex flex-col">
+        <h2 class="text-lg font-bold mb-4">Chat</h2>
         <div class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
           Salve a tarefa primeiro para habilitar o chat
         </div>
@@ -94,7 +94,7 @@
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { tasksApi } from '@/api/tasks.api.js';
-import ReferencesDialog from '@/pages/project/taks/ReferencesDialog.vue';
+import ReferencesDialog from '@/pages/project/task/ReferencesDialog.vue';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { assistantsApi } from '@/api/assistants.api.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
