@@ -6,13 +6,13 @@ class ListFilesTool {
   getDefinition() {
     return {
       name: "list_files",
-      description: "Lista os diretórios e arquivos do projeto",
+      description: "Lists the directories and files of the project",
       input_schema: {
         type: "object",
         required: ["folder"],
         properties: {
           folder: {
-            description: "Diretório que deseja listar",
+            description: "The directory you want to list",
             type: "string"
           }
         }

@@ -6,14 +6,14 @@ class ReadFileTool {
   getDefinition() {
     return {
       name: "read_file",
-      description: "Lê o conteúdo de um arquivo no projeto. Não leia arquivos que já estão disponíveis como referência.",
+      description: "Reads the content of a file in the project",
       input_schema: {
         type: "object",
         required: ["file"],
         properties: {
           file: {
             type: "string",
-            description: "Diretório do arquivo a ser lido"
+            description: "Directory of the file to be read"
           }
         }
       }

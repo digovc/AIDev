@@ -4,29 +4,29 @@ class WriteTaskTool {
   getDefinition() {
     return {
       name: "write_task",
-      description: "Adiciona ou atualiza uma tarefa do projeto",
+      description: "Adds or updates a project task",
       input_schema: {
         type: "object",
         required: ["title", "description"],
         properties: {
           id: {
-            description: "ID da tarefa (obrigatório para atualização)",
+            description: "Task ID (required for update)",
             type: "string"
           },
           title: {
-            description: "Título da tarefa (obrigatório para criação)",
+            description: "Task title (required for creation)",
             type: "string"
           },
           description: {
-            description: "Descrição detalhada da tarefa",
+            description: "Detailed description of the task",
             type: "string"
           },
           appendDescription: {
-            description: "Adiciona texto à descrição atual da tarefa",
+            description: "Appends text to the current task description",
             type: "string"
           },
           status: {
-            description: "Status da tarefa",
+            description: "Task status",
             type: "string",
             enum: [
               "backlog",

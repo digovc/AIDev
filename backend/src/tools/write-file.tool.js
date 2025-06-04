@@ -6,29 +6,29 @@ class WriteFileTool {
   getDefinition() {
     return {
       name: "write_file",
-      description: "Cria ou atualiza um arquivo no projeto.",
+      description: "Creates or updates a file in the project",
       input_schema: {
         type: "object",
         required: ["file", "blocks"],
         properties: {
           file: {
             type: "string",
-            description: "Caminho relativo do arquivo a ser criado ou atualizado."
+            description: "Path of the file to be created or updated"
           },
           blocks: {
             type: "array",
-            description: "Lista de blocos de operação de escrita.",
+            description: "List of write operation blocks",
             items: {
               type: "object",
               required: ["new_text"],
               properties: {
                 original_text: {
                   type: "string",
-                  description: "Texto exato a ser substituído no arquivo."
+                  description: "Exact text to be replaced in the file"
                 },
                 new_text: {
                   type: "string",
-                  description: "Texto a ser inserido no arquivo."
+                  description: "Text to be inserted in the file"
                 }
               }
             }

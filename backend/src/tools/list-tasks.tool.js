@@ -4,12 +4,12 @@ class ListTasksTool {
   getDefinition() {
     return {
       name: "list_tasks",
-      description: "Lista as tarefas do projeto",
+      description: "Lists the tasks of the project",
       input_schema: {
         type: "object",
         properties: {
           status: {
-            description: "Filtro por status da tarefa",
+            description: "Filter by task status",
             type: "string",
             enum: [
               "backlog",
