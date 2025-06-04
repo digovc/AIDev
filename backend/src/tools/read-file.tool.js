@@ -26,20 +26,19 @@ class ReadFileTool {
     const filePath = path.resolve(projectPath, input.file);
 
     try {
-      // Ler o conteúdo do arquivo
       const content = await fs.readFile(filePath, 'utf8');
 
       return {
         success: true,
         content: content,
-        message: `Arquivo ${ input.file } lido com sucesso.`
+        message: `File ${ input.file } read successfully.`
       };
     } catch (error) {
       if (error.code === 'ENOENT') {
-        throw new Error(`Arquivo ${ input.file } não encontrado.`);
+        throw new Error(`File ${ input.file } not found.`);
       }
 
-      throw `Erro ao ler o arquivo ${ input.file }: ${ error.message }`;
+      throw `Error reading file ${ input.file }: ${ error.message }`;
     }
   }
 }
