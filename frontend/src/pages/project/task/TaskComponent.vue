@@ -36,8 +36,8 @@ const router = useRouter();
 const task = ref(null);
 
 const tabs = ref([
-  { title: 'Detalhes' },
-  { title: 'Histórico' },
+  { title: 'Detalhes', route: 'task-details', params: { taskId: task.value?.id } },
+  { title: 'Histórico', route: 'task-chat' },
 ]);
 
 watch(() => route.params.taskId, async (newTaskId) => {
