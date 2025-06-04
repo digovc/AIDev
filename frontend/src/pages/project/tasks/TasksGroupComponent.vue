@@ -4,7 +4,7 @@
       <h3 class="text-gl font-semibold text-white flex items-center">
         {{ title }} <span class="ml-2 text-gray-400 text-sm">({{ tasks.length }})</span>
       </h3>
-      <i :class="expanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'" class="text-gray-400 hover:text-gray-200"></i>
+      <FontAwesomeIcon :icon="expanded ? faChevronUp : faChevronDown" class="text-gray-400 hover:text-gray-200"/>
     </div>
 
     <div v-if="expanded" class="mt-3">
@@ -28,7 +28,7 @@
 import { ref } from 'vue';
 import TaskComponent from './TaskComponent.vue';
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faArchive } from "@fortawesome/free-solid-svg-icons";
+import { faArchive, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 const expanded = ref(true);
 
