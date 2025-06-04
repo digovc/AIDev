@@ -17,15 +17,12 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import TabsComponent from '@/components/TabsComponent.vue';
 import { tasksApi } from '@/api/tasks.api.js';
-
-const route = useRoute();
-const router = useRouter();
 
 const props = defineProps({
   project: {
@@ -34,23 +31,24 @@ const props = defineProps({
   }
 });
 
+const route = useRoute();
+const router = useRouter();
+const task = ref(null);
+
 const tabs = ref([
   { title: 'Detalhes' },
   { title: 'Histórico' },
 ]);
 
-const task = reactive({
-  id: null,
-  title: '',
-  description: '',
-  status: 'backlog',
-  references: [],
-  assistantId: null
+watch(() => route.params.taskId, async (newTaskId) => {
+  if (task.value?.id !== newTaskId) {
+    await loadTask();
+  }
 });
 
 const taskTitle = computed(() => {
-  if (task.id) return `Tarefa ${ task.id }`;
-  return 'Nova Tarefa';
+  if (task.value?.id) return `Tarefa ${ task.value.id }`;
+  return 'Nova tarefa';
 });
 
 const loadTask = async () => {
@@ -61,13 +59,8 @@ const loadTask = async () => {
 
   try {
     const response = await tasksApi.getTaskById(taskId);
-    const taskData = response.data;
-
-    for (const key in taskData) {
-      task[key] = taskData[key];
-    }
-
-    task.references = task.references || [];
+    task.value = response.data;
+    task.value.references = task.value.references || [];
   } catch (error) {
     console.error('Erro ao carregar tarefa:', error);
     alert('Não foi possível carregar os dados da tarefa.');
@@ -77,35 +70,6 @@ const loadTask = async () => {
 
 const goBack = () => {
   router.push(`/projects/${ props.project.id }`);
-};
-
-const saveTask = async () => {
-  try {
-    const taskData = {
-      ...task,
-      projectId: props.project.id
-    };
-
-    if (task.id) {
-      await tasksApi.updateTask(task.id, taskData);
-    } else {
-      const result = await tasksApi.createTask(taskData);
-      task.id = result.data.id;
-    }
-
-    goBack();
-  } catch (error) {
-    console.error('Erro ao salvar tarefa:', error);
-    alert('Ocorreu um erro ao salvar a tarefa. Por favor, tente novamente.');
-  }
-};
-
-const saveAndRunTask = async () => {
-  // Implement save and run logic
-};
-
-const duplicateTask = async () => {
-  // Implement duplicate logic
 };
 
 onMounted(async () => {

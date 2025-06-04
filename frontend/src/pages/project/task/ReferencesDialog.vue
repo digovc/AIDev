@@ -40,10 +40,10 @@
 </template>
 
 <script setup>
-import { nextTick, ref, watch } from 'vue';
-import { referencesApi } from '@/api/references.api';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { debounce } from 'lodash'
+import { nextTick, ref, watch } from 'vue';
+import { referencesApi } from '@/api/references.api';
 
 const props = defineProps({
   project: {
@@ -62,35 +62,13 @@ const isSearching = ref(false);
 const references = ref([...props.taskReferences]);
 const searchQuery = ref('');
 const searchResults = ref([]);
-const selectedIndex = ref(-1);
 const searchResultsRef = ref(null);
+const selectedIndex = ref(-1);
 
 watch(searchQuery, () => {
   selectedIndex.value = -1;
   searchReferences();
 });
-
-const open = () => {
-  references.value = [...props.taskReferences];
-  dialogRef.value.showModal();
-
-};
-
-const close = () => {
-  dialogRef.value.close();
-  resetForm();
-};
-
-const resetForm = () => {
-  searchQuery.value = '';
-  searchResults.value = [];
-  selectedIndex.value = -1;
-
-};
-
-const removeReference = (index) => {
-  references.value.splice(index, 1);
-};
 
 const searchReferences = debounce(async () => {
   if (!searchQuery.value.trim()) {
@@ -121,6 +99,28 @@ const searchReferences = debounce(async () => {
   }
 }, 500);
 
+const open = () => {
+  references.value = [...props.taskReferences];
+  dialogRef.value.showModal();
+
+};
+
+const close = () => {
+  dialogRef.value.close();
+  resetForm();
+};
+
+const resetForm = () => {
+  searchQuery.value = '';
+  searchResults.value = [];
+  selectedIndex.value = -1;
+
+};
+
+const removeReference = (index) => {
+  references.value.splice(index, 1);
+};
+
 const scrollToSelectedItem = () => {
   if (searchResultsRef.value && selectedIndex.value !== -1) {
     const selectedElement = searchResultsRef.value.querySelector(`:nth-child(${ selectedIndex.value + 1 })`);
@@ -135,6 +135,7 @@ const handleKeyDown = (e) => {
     e.preventDefault();
     e.stopPropagation();
     close();
+    return;
   }
 
   if (searchResults.value.length === 0) return;

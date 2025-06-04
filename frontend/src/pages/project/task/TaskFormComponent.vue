@@ -25,7 +25,7 @@
           Nenhuma referência adicionada
         </div>
 
-        <div v-else class="space-y-2 pt-3 grow overflow-y-auto">
+        <div v-else class="space-y-2 pt-4 grow overflow-y-auto">
           <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)"/>
         </div>
       </div>
@@ -132,7 +132,6 @@ const saveTask = async () => {
       projectId: props.project.id
     };
 
-    // Salva o assistente selecionado como default no localStorage
     if (task.assistantId) {
       localStorage.setItem('defaultAssistantId', task.assistantId);
     }
@@ -141,17 +140,15 @@ const saveTask = async () => {
       await tasksApi.updateTask(task.id, taskData);
     } else {
       const result = await tasksApi.createTask(taskData);
-      task.id = result.data.id; // Atualiza o ID da tarefa após a criação
+      task.id = result.data.id;
     }
 
-    emits('task-closed');
-    await router.push(`/projects/${ props.project.id }`);
+    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }`);
   } catch (error) {
     console.error(`Erro ao ${ isEditing.value ? 'atualizar' : 'salvar' } tarefa:`, error);
     alert(`Ocorreu um erro ao ${ isEditing.value ? 'atualizar' : 'salvar' } a tarefa. Por favor, tente novamente.`);
   } finally {
     loading.value = false;
-    window.removeEventListener('keydown', handleKeyPress);
   }
 };
 
