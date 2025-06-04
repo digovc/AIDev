@@ -1,11 +1,5 @@
 <template>
-  <div class="tab-content">
+  <div class="h-full">
     <slot></slot>
   </div>
 </template>
-
-<style scoped>
-.tab-content {
-  height: 100%;
-}
-</style>

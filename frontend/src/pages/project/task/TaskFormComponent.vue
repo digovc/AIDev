@@ -1,7 +1,5 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col space-y-2">
-    <h2 class="text-lg font-bold">{{ isEditing ? `Tarefa ${ task.id }` : 'Nova Tarefa' }}</h2>
-
+  <div class="bg-gray-900 rounded-lg shadow-md px-1 flex flex-col space-y-2">
     <form @submit.prevent="saveTask" class="flex flex-col grow space-y-2">
       <div class="mb-4">
         <label for="title" class="form-label">Título</label>
