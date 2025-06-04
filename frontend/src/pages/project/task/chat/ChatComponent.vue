@@ -1,16 +1,13 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4 h-full flex flex-col">
-    <h2 class="text-lg font-bold mb-4">Chat</h2>
-    <div class="flex flex-col h-full">
-      <div class="flex-grow mb-4 relative">
-        <ChatConversationComponent :conversation="conversation" v-if="conversation"/>
-        <div v-else class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
-          Nenhuma mensagem trocada
-        </div>
+  <div v-if="task" class="flex flex-col h-full">
+    <div class="flex-grow mb-4 relative">
+      <ChatConversationComponent :conversation="conversation" v-if="conversation"/>
+      <div v-else class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
+        Nenhuma mensagem trocada
       </div>
-      <div>
-        <ChatInputComponent :onSendMessage="sendMessage" v-if="conversation"/>
-      </div>
+    </div>
+    <div>
+      <ChatInputComponent :onSendMessage="sendMessage" v-if="conversation"/>
     </div>
   </div>
 </template>
@@ -29,8 +26,7 @@ const props = defineProps({
     required: true
   },
   task: {
-    type: Object,
-    required: true
+    type: Object
   }
 });
 
@@ -38,8 +34,6 @@ const route = useRoute();
 const conversation = ref(null);
 
 watch(() => props.task, async () => {
-  console.log('Task changed:', props.task);
-
   if (!props.task) {
     conversation.value = null;
     return;

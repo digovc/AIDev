@@ -1,11 +1,11 @@
-const promptParserService = require('./prompt-parser.service');
-const tasksStore = require('../stores/tasks.store');
+const CancelationToken = require("./cancelation.token");
 const agentService = require('./agent.service');
 const conversationsStore = require('../stores/conversations.store');
 const messagesStore = require('../stores/messages.store');
 const projectsStore = require('../stores/projects.store');
+const promptParserService = require('./prompt-parser.service');
 const socketIOService = require("./socket-io.service");
-const CancelationToken = require("./cancelation.token");
+const tasksStore = require('../stores/tasks.store');
 
 class TaskRunnerService {
   executingTasks = [];

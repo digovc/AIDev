@@ -94,7 +94,7 @@ class TasksController extends CrudControllerBase {
       return res.status(404).json({ success: false, message: 'Task not found' });
     }
 
-    taskRunnerService.stopTask(taskId);
+    taskRunnerService.stopTask(taskId).catch(console.error);
 
     task.status = 'backlog';
     await tasksStore.update(task.id, task);

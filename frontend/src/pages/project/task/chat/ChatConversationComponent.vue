@@ -10,7 +10,7 @@
     </div>
 
     <!-- Botão para retomar o scroll automático -->
-    <button v-if="!autoScrollEnabled" @click="resumeAutoScroll" class="fixed bottom-30 animate-pulse right-18 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition text-xs">
+    <button v-if="!autoScrollEnabled" @click="resumeAutoScroll" class="fixed bottom-30 right-26 animate-pulse bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition text-xs">
       ↓ Ir para o final
     </button>
   </div>

@@ -27,14 +27,14 @@ import ProjectHeaderComponent from "@/pages/project/ProjectHeaderComponent.vue";
 import { onMounted, onUnmounted, ref } from 'vue';
 import { projectsApi } from '@/api/projects.api';
 import { socketIOService } from "@/services/socket.io.js";
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const error = ref(null);
 const loading = ref(true);
 const project = ref(null);
 const route = useRoute();
+const router = useRouter();
 const taskSelected = ref(null);
-
 
 const handleTaskSelected = (task) => {
   taskSelected.value = task;
@@ -56,6 +56,7 @@ const handleProjectUpdated = (updatedProject) => {
 
 const loadProject = async () => {
   if (!route.params.id) {
+    await router.push('home');
     return;
   }
 
@@ -64,11 +65,9 @@ const loadProject = async () => {
     const response = await projectsApi.getProjectById(route.params.id);
     project.value = response.data;
 
-
     if (project.value && project.value.name) {
       document.title = `${ project.value.name } - AIDev`;
     }
-
   } catch (e) {
     console.error('Erro ao carregar dados do projeto:', e);
     error.value = 'Não foi possível carregar o projeto. Tente novamente mais tarde.';
@@ -95,7 +94,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   socketIOService.socket.off('conversation-created', conversationCreated);
-
   document.title = 'AIDev';
 });
 </script>
