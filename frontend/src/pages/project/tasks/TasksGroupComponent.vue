@@ -19,16 +19,17 @@
       <div v-if="tasks.length === 0" class="text-sm text-gray-400 italic">
         Nenhuma tarefa {{ emptyMessage }}
       </div>
-      <TaskComponent v-for="task in tasks" :key="task.id" :task="task" @play="$emit('play', $event)" @play-now="$emit('play-now', $event)" @stop="$emit('stop', $event)" @edit="$emit('edit', $event)" @archive="$emit('archive', $event)" @done="$emit('done', $event)"/>
+      <TaskItemComponent v-for="task in tasks" :key="task.id" :task="task" @play="$emit('play', $event)" @play-now="$emit('play-now',
+       $event)" @stop="$emit('stop', $event)" @edit="$emit('edit', $event)" @archive="$emit('archive', $event)" @done="$emit('done', $event)"/>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import TaskComponent from './TaskComponent.vue';
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faArchive, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import TaskItemComponent from "@/pages/project/tasks/TaskItemComponent.vue";
 
 const expanded = ref(true);
 

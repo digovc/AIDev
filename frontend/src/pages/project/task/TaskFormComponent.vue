@@ -1,92 +1,75 @@
 <template>
-  <div class="h-full flex space-x-2">
-    <!-- Formulário de tarefa -->
-    <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col space-y-2" :style="{ width: `${leftWidth}%` }">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold">{{ isEditing ? `Editar Tarefa (${ task.id })` : 'Nova Tarefa' }}</h2>
-        <button @click="goBack" class="text-gray-400 hover:text-gray-200">
-          <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
+  <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col space-y-2">
+    <div class="flex justify-between items-center">
+      <h2 class="text-lg font-bold">{{ isEditing ? `Tarefa (${ task.id })` : 'Nova Tarefa' }}</h2>
+      <button @click="goBack" class="text-gray-400 hover:text-gray-200">
+        <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
+      </button>
+    </div>
+
+    <form @submit.prevent="saveTask" class="flex flex-col grow space-y-2">
+      <div class="mb-4">
+        <label for="title" class="form-label">Título</label>
+        <input type="text" id="title" v-model="task.title" class="form-input" required ref="titleInput"/>
+      </div>
+
+      <div class="mb-4">
+        <label for="description" class="form-label">Descrição</label>
+        <textarea id="description" v-model="task.description" rows="15" class="form-input"></textarea>
+      </div>
+
+      <!-- Adicione esta nova seção para listar as referências -->
+      <div class="grow flex flex-col">
+        <div class="flex justify-between items-center">
+          <label class="form-label">Referências</label>
+          <button type="button" @click="openReferencesDialog" class="btn btn-secondary mt-1 mr-1">
+            <FontAwesomeIcon :icon="faPlus" class="mr-2"/>
+            Referência
+          </button>
+        </div>
+
+        <div v-if="task.references.length === 0" class="text-gray-500 italic p-2">
+          Nenhuma referência adicionada
+        </div>
+
+        <div v-else class="space-y-2 pt-3 grow h-1 overflow-y-auto">
+          <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)"/>
+        </div>
+      </div>
+
+      <div>
+        <label for="assistant" class="form-label">Assistente</label>
+        <select id="assistant" v-model="task.assistantId" class="form-input">
+          <option :value="null">Selecione um assistente</option>
+          <option v-for="assistant in assistants" :key="assistant.id" :value="assistant.id">
+            {{ assistant.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="flex justify-end space-x-3">
+        <button type="button" @click="saveAndRunTask" class="btn btn-primary" :disabled="loading" v-if="!isRunning">
+          <FontAwesomeIcon :icon="faPlay" class="mr-2"/>
+          {{ loading ? 'Processando...' : 'Executar' }}
+        </button>
+        <button type="button" @click="stopTask" class="btn btn-danger" :disabled="loading" v-else>
+          <FontAwesomeIcon :icon="faCog" class="h-6 w-6 animate-spin" v-if="isRunning"/>
+          {{ loading ? 'Processando...' : 'Parar' }}
+        </button>
+        <button type="submit" class="btn btn-primary" :disabled="loading">
+          <FontAwesomeIcon :icon="faSave" class="mr-2"/>
+          {{ loading ? 'Salvando...' : 'Salvar' }}
+        </button>
+        <button v-if="isEditing" type="button" @click="duplicateTask" class="btn btn-secondary" :disabled="loading">
+          <FontAwesomeIcon :icon="faCopy" class="mr-2"/>
+          Duplicar
+        </button>
+        <button type="button" @click="goBack" class="btn btn-secondary">
+          Voltar
         </button>
       </div>
-
-      <form @submit.prevent="saveTask" class="flex flex-col grow space-y-2">
-        <div class="mb-4">
-          <label for="title" class="form-label">Título</label>
-          <input type="text" id="title" v-model="task.title" class="form-input" required ref="titleInput"/>
-        </div>
-
-        <div class="mb-4">
-          <label for="description" class="form-label">Descrição</label>
-          <textarea id="description" v-model="task.description" rows="15" class="form-input"></textarea>
-        </div>
-
-        <!-- Adicione esta nova seção para listar as referências -->
-        <div class="grow flex flex-col">
-          <div class="flex justify-between items-center">
-            <label class="form-label">Referências</label>
-            <button type="button" @click="openReferencesDialog" class="btn btn-secondary mt-1 mr-1">
-              <FontAwesomeIcon :icon="faPlus" class="mr-2"/>
-              Referência
-            </button>
-          </div>
-
-          <div v-if="task.references.length === 0" class="text-gray-500 italic p-2">
-            Nenhuma referência adicionada
-          </div>
-
-          <div v-else class="space-y-2 pt-3 grow h-1 overflow-y-auto">
-            <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)"/>
-          </div>
-        </div>
-
-        <div>
-          <label for="assistant" class="form-label">Assistente</label>
-          <select id="assistant" v-model="task.assistantId" class="form-input">
-            <option :value="null">Selecione um assistente</option>
-            <option v-for="assistant in assistants" :key="assistant.id" :value="assistant.id">
-              {{ assistant.name }}
-            </option>
-          </select>
-        </div>
-
-        <div class="flex justify-end space-x-3">
-          <button type="button" @click="saveAndRunTask" class="btn btn-primary" :disabled="loading" v-if="!isRunning">
-            <FontAwesomeIcon :icon="faPlay" class="mr-2"/>
-            {{ loading ? 'Processando...' : 'Executar' }}
-          </button>
-          <button type="button" @click="stopTask" class="btn btn-danger" :disabled="loading" v-else>
-            <FontAwesomeIcon :icon="faCog" class="h-6 w-6 animate-spin" v-if="isRunning"/>
-            {{ loading ? 'Processando...' : 'Parar' }}
-          </button>
-          <button type="submit" class="btn btn-primary" :disabled="loading">
-            <FontAwesomeIcon :icon="faSave" class="mr-2"/>
-            {{ loading ? 'Salvando...' : 'Salvar' }}
-          </button>
-          <button v-if="isEditing" type="button" @click="duplicateTask" class="btn btn-secondary" :disabled="loading">
-            <FontAwesomeIcon :icon="faCopy" class="mr-2"/>
-            Duplicar
-          </button>
-          <button type="button" @click="goBack" class="btn btn-secondary">
-            Voltar
-          </button>
-        </div>
-      </form>
-      <ReferencesDialog ref="referencesDialog" :project="project" :task-references="task.references" @update:references="updateReferences"/>
-    </div>
-
-    <!-- Divisor redimensionável -->
-    <div class="cursor-col-resize w-px h-full hover:bg-blue-300 active:bg-blue-500 transition-colors duration-200" @mousedown="startResize"></div>
-
-    <!-- Chat -->
-    <div class="flex-1">
-      <ChatComponent v-if="task.id" :project="project" :task="task"/>
-      <div v-else class="bg-gray-900 rounded-lg shadow-md p-4 h-full flex flex-col">
-        <h2 class="text-lg font-bold mb-4">Chat</h2>
-        <div class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
-          Salve a tarefa primeiro para habilitar o chat
-        </div>
-      </div>
-    </div>
+    </form>
+    <ReferencesDialog ref="referencesDialog" :project="project" :task-references="task.references" @update:references="updateReferences"/>
   </div>
 </template>
 
@@ -102,7 +85,6 @@ import { faCog, faCopy, faPlay, faPlus, faSave, faTimes } from '@fortawesome/fre
 import { conversationsApi } from '@/api/conversations.api.js';
 import { socketIOService } from "@/services/socket.io.js";
 import { runningTasksService } from "@/services/running-tasks.service.js";
-import ChatComponent from '@/pages/project/chat/ChatComponent.vue';
 
 const props = defineProps({
   project: {
@@ -112,11 +94,8 @@ const props = defineProps({
 });
 
 const assistants = ref([]);
-const containerRef = ref(null);
 const conversationTitle = ref(null);
 const isEditing = ref(false);
-const isResizing = ref(false);
-const leftWidth = ref(60);
 const loading = ref(false);
 const referencesDialog = ref(null);
 const route = useRoute();
@@ -145,51 +124,6 @@ const isRunning = computed(() => {
   if (!task.id) return false;
   return runningTasksService.isRunning(task.id);
 });
-
-const loadSavedLayout = () => {
-  try {
-    const savedWidth = localStorage.getItem('aidev.taskForm.leftWidth');
-    if (savedWidth !== null) {
-      leftWidth.value = parseFloat(savedWidth);
-    }
-  } catch (e) {
-    console.error('Erro ao carregar layout salvo:', e);
-  }
-};
-
-const saveLayout = () => {
-  try {
-    localStorage.setItem('aidev.taskForm.leftWidth', leftWidth.value.toString());
-  } catch (e) {
-    console.error('Erro ao salvar layout:', e);
-  }
-};
-
-const startResize = (e) => {
-  isResizing.value = true;
-
-  containerRef.value = e.target.closest('.h-full.flex.space-x-2');
-  document.addEventListener('mousemove', onResize);
-  document.addEventListener('mouseup', stopResize);
-
-  e.preventDefault();
-};
-
-const onResize = (e) => {
-  if (!isResizing.value || !containerRef.value) return;
-
-  const containerRect = containerRef.value.getBoundingClientRect();
-  const newWidth = (((e.clientX - containerRect.left) / containerRect.width) * 100);
-
-  leftWidth.value = Math.max(30, Math.min(80, newWidth)) - 0.5;
-};
-
-const stopResize = () => {
-  isResizing.value = false;
-  document.removeEventListener('mousemove', onResize);
-  document.removeEventListener('mouseup', stopResize);
-  saveLayout();
-};
 
 const goBack = () => {
   emits('task-closed');
@@ -391,7 +325,6 @@ const taskUpdated = (updatedTask) => {
 };
 
 onMounted(async () => {
-  loadSavedLayout();
   window.addEventListener('keydown', handleKeyPress);
   socketIOService.socket.on('task-updated', taskUpdated);
 
@@ -403,7 +336,5 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyPress);
   socketIOService.socket.off('task-updated', taskUpdated);
-  document.removeEventListener('mousemove', onResize);
-  document.removeEventListener('mouseup', stopResize);
 });
 </script>
