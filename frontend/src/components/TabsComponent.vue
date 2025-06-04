@@ -1,13 +1,7 @@
 <template>
   <div class="tabs-container">
     <div class="tabs-header">
-      <div 
-        v-for="(tab, index) in tabs" 
-        :key="index"
-        class="tab-header"
-        :class="{ 'active': activeTab === index }"
-        @click="activeTab = index"
-      >
+      <div v-for="(tab, index) in tabs" :key="index" class="tab-header" :class="{ 'active': activeTab === index }" @click="activeTab = index">
         {{ tab.title }}
       </div>
     </div>

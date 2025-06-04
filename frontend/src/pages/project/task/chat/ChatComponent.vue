@@ -19,7 +19,6 @@
 import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ChatConversationComponent from './ChatConversationComponent.vue';
-
 import ChatInputComponent from './ChatInputComponent.vue';
 import { conversationsApi } from '@/api/conversations.api.js';
 import { messagesApi } from "@/api/messages.api.js";

@@ -59,9 +59,7 @@ const handleScroll = () => {
   if (!messagesContainer.value) return;
 
   const { scrollTop, scrollHeight, clientHeight } = messagesContainer.value;
-  const isAtBottom = scrollHeight - (scrollTop + clientHeight) < 50; // Margem de 50px
-
-  autoScrollEnabled.value = isAtBottom;
+  autoScrollEnabled.value = scrollHeight - (scrollTop + clientHeight) < 50;
 };
 
 const resumeAutoScroll = () => {

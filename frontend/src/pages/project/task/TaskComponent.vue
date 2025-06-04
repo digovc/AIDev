@@ -14,6 +14,12 @@
         </TabComponent>
       </template>
 
+      <template #tab-1>
+        <TabComponent>
+          <ChatComponent :project="project" :task="task"/>
+        </TabComponent>
+      </template>
+
       <!-- Add more tabs as needed -->
     </TabsComponent>
   </div>
@@ -28,6 +34,7 @@ import TabsComponent from '@/components/TabsComponent.vue';
 import TabComponent from '@/components/TabComponent.vue';
 import TaskFormComponent from './TaskFormComponent.vue';
 import { tasksApi } from '@/api/tasks.api.js';
+import ChatComponent from "@/pages/project/task/chat/ChatComponent.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -49,7 +56,7 @@ const task = reactive({
 });
 
 const taskTitle = computed(() => {
-  if (task.id) return `Tarefa (${ task.id })`;
+  if (task.id) return `Tarefa ${ task.id }`;
   return 'Nova Tarefa';
 });
 
