@@ -43,12 +43,12 @@ const router = createRouter({
         {
           path: 'tasks/new',
           name: 'task-new',
-          component: () => import('./pages/project/task/TaskFormComponent.vue'),
+          component: () => import('./pages/project/task/TaskComponent.vue'),
         },
         {
           path: 'tasks/:taskId',
           name: 'task-edit',
-          component: () => import('./pages/project/task/TaskFormComponent.vue'),
+          component: () => import('./pages/project/task/TaskComponent.vue'),
         }
       ]
     },
