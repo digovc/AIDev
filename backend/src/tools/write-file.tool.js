@@ -6,10 +6,7 @@ class WriteFileTool {
   getDefinition() {
     return {
       name: "write_file",
-      description: [
-        "Cria ou atualiza um arquivo no projeto.",
-        "Permite substituir trechos de texto EXATOS (não é utilizado regex) ou inserir novo conteúdo."
-      ].join(" "),
+      description: "Cria ou atualiza um arquivo no projeto.",
       input_schema: {
         type: "object",
         required: ["file", "blocks"],
@@ -20,28 +17,18 @@ class WriteFileTool {
           },
           blocks: {
             type: "array",
-            description: [
-              "Lista de blocos de operação de escrita.",
-              "Cada bloco pode substituir um trecho existente ou inserir novo conteúdo."
-            ].join(" "),
+            description: "Lista de blocos de operação de escrita.",
             items: {
               type: "object",
-              required: ["replace"],
+              required: ["new_text"],
               properties: {
-                search: {
+                original_text: {
                   type: "string",
-                  description: [
-                    "Texto literal a ser substituído no arquivo.",
-                    "A busca é EXATA e não admite sintaxe de regex.",
-                    "Se não encontrar esse texto no conteúdo atual, será lançado um erro."
-                  ].join(" ")
+                  description: "Texto exato a ser substituído no arquivo."
                 },
-                replace: {
+                new_text: {
                   type: "string",
-                  description: [
-                    "Texto literal que irá substituir o bloco identificado em `search`.",
-                    "Se `search` não for fornecido, o valor aqui será inserido como conteúdo completo."
-                  ].join(" ")
+                  description: "Texto a ser inserido no arquivo."
                 }
               }
             }
