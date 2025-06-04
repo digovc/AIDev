@@ -1,20 +1,18 @@
 <template>
-  <div class="bg-gray-800 rounded-lg shadow-md py-1 px-4">
+  <div class="bg-gray-900 rounded-lg shadow-md py-1 px-4">
     <div class="flex justify-between items-center">
       <div class="flex items-center space-x-4">
         <h1 class="text-lg font-bold">{{ project?.name }}</h1>
         <div class="text-gray-300 text-xs">
           {{ project?.path }}
         </div>
-      </div>
-      <div class="flex items-center space-x-4">
-        <button @click="editProject" class="text-gray-400 hover:text-gray-200">
+        <button @click="editProject" class="text-gray-400 hover:text-gray-200 text-sm">
           <FontAwesomeIcon :icon="faEdit"/>
         </button>
-        <button @click="backToHome" class="text-gray-400 hover:text-gray-200">
-          <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
-        </button>
       </div>
+      <button @click="backToHome" class="text-gray-400 hover:text-gray-200">
+        <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
+      </button>
     </div>
     <ProjectFormComponent ref="projectFormRef" @project-updated="onProjectUpdated"/>
   </div>

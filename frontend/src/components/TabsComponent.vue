@@ -5,9 +5,6 @@
         {{ tab.title }}
       </div>
     </div>
-    <div class="flex-1 overflow-y-auto py-[15px]">
-      <slot :name="`tab-${activeTab}`"></slot>
-    </div>
   </div>
 </template>
 

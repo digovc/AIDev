@@ -41,14 +41,21 @@ const router = createRouter({
           component: () => import('./pages/project/tasks/TasksComponent.vue'),
         },
         {
-          path: 'tasks/new',
-          name: 'task-new',
-          component: () => import('./pages/project/task/TaskComponent.vue'),
-        },
-        {
           path: 'tasks/:taskId',
           name: 'task-edit',
           component: () => import('./pages/project/task/TaskComponent.vue'),
+          children: [
+            {
+              path: '',
+              name: 'task-details',
+              component: () => import('./pages/project/task/TaskFormComponent.vue'),
+            },
+            {
+              path: 'chat',
+              name: 'task-chat',
+              component: () => import('./pages/project/task/chat/ChatComponent.vue'),
+            },
+          ]
         }
       ]
     },

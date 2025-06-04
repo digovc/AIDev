@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col h-full">
+  <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-lg font-bold">{{ taskTitle }}</h2>
       <button @click="goBack" class="text-gray-400 hover:text-gray-200">
@@ -7,19 +7,12 @@
       </button>
     </div>
 
-    <TabsComponent :tabs="tabs">
-      <template #tab-0>
-        <TabComponent>
-          <TaskFormComponent :project="project" :task="task" @save="saveTask" @save-and-run="saveAndRunTask" @duplicate="duplicateTask"/>
-        </TabComponent>
-      </template>
-
-      <template #tab-1>
-        <TabComponent>
-          <ChatComponent :project="project" :task="task"/>
-        </TabComponent>
-      </template>
-    </TabsComponent>
+    <div>
+      <TabsComponent :tabs="tabs"/>
+    </div>
+    <div class="flex-1 overflow-y-auto pt-4 px-2">
+      <RouterView :project="project" :task="task"/>
+    </div>
   </div>
 </template>
 
@@ -29,10 +22,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import TabsComponent from '@/components/TabsComponent.vue';
-import TabComponent from '@/components/TabComponent.vue';
-import TaskFormComponent from './TaskFormComponent.vue';
 import { tasksApi } from '@/api/tasks.api.js';
-import ChatComponent from "@/pages/project/task/chat/ChatComponent.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -65,7 +55,9 @@ const taskTitle = computed(() => {
 
 const loadTask = async () => {
   const taskId = route.params.taskId;
+
   if (!taskId) return;
+  if (taskId === 'new') return;
 
   try {
     const response = await tasksApi.getTaskById(taskId);

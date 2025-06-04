@@ -195,9 +195,8 @@ const stopTask = async () => {
 const loadTask = async () => {
   const taskId = route.params.taskId;
 
-  if (!taskId) {
-    return;
-  }
+  if (!taskId) return;
+  if (taskId === 'new') return;
 
   isEditing.value = true;
 

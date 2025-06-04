@@ -8,11 +8,14 @@
       {{ error }}
     </div>
 
-    <div v-else class="flex flex-col h-full space-y-2">
-      <ProjectInfoComponent :project="project" @project-updated="handleProjectUpdated"/>
-      <!-- Lista de tarefas ocupa toda a largura -->
-      <div class="h-full">
-        <RouterView v-if="project" :project="project" class="h-full" @taskSelected="handleTaskSelected" @taskClosed="handleTaskClosed" @taskDuplicated="handleTaskSelected" @taskStarted="handleTaskSelected"></RouterView>
+    <div v-else class="flex flex-col grow space-y-2">
+      <div>
+        <ProjectHeaderComponent :project="project" @project-updated="handleProjectUpdated"/>
+      </div>
+      <div class="flex-1 relative">
+        <div class="absolute inset-0 overflow-y-auto">
+          <RouterView v-if="project" :project="project" class="h-full" @taskSelected="handleTaskSelected" @taskClosed="handleTaskClosed" @taskDuplicated="handleTaskSelected" @taskStarted="handleTaskSelected"></RouterView>
+        </div>
       </div>
     </div>
 
@@ -20,18 +23,17 @@
 </template>
 
 <script setup>
+import ProjectHeaderComponent from "@/pages/project/ProjectHeaderComponent.vue";
 import { onMounted, onUnmounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
 import { projectsApi } from '@/api/projects.api';
-import ProjectInfoComponent from './ProjectInfoComponent.vue';
 import { socketIOService } from "@/services/socket.io.js";
+import { useRoute } from 'vue-router';
 
 const error = ref(null);
 const loading = ref(true);
 const project = ref(null);
 const route = useRoute();
 const taskSelected = ref(null);
-
 
 
 const handleTaskSelected = (task) => {

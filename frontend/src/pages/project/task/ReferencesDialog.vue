@@ -59,7 +59,6 @@ const props = defineProps({
 const dialogRef = ref(null);
 const emit = defineEmits(['update:references']);
 const isSearching = ref(false);
-const loading = ref(false);
 const references = ref([...props.taskReferences]);
 const searchQuery = ref('');
 const searchResults = ref([]);
@@ -80,7 +79,6 @@ const open = () => {
 const close = () => {
   dialogRef.value.close();
   resetForm();
-
 };
 
 const resetForm = () => {
@@ -92,10 +90,7 @@ const resetForm = () => {
 
 const removeReference = (index) => {
   references.value.splice(index, 1);
-
 };
-
-// Método removido, pois a atualização de referências agora acontece em tempo real
 
 const searchReferences = debounce(async () => {
   if (!searchQuery.value.trim()) {
