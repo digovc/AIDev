@@ -25,12 +25,12 @@
           Nenhuma referência adicionada
         </div>
 
-        <div v-else class="space-y-2 pt-3 grow h-1 overflow-y-auto">
+        <div v-else class="space-y-2 pt-3 grow overflow-y-auto">
           <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)"/>
         </div>
       </div>
 
-      <div>
+      <div class="pt-4">
         <label for="assistant" class="form-label">Assistente</label>
         <select id="assistant" v-model="task.assistantId" class="form-input">
           <option :value="null">Selecione um assistente</option>

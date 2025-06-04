@@ -7,7 +7,7 @@
       </button>
     </div>
 
-    <TabsComponent>
+    <TabsComponent :tabs="tabs">
       <template #tab-0>
         <TabComponent>
           <TaskFormComponent :project="project" :task="task" @save="saveTask" @save-and-run="saveAndRunTask" @duplicate="duplicateTask"/>
@@ -19,14 +19,12 @@
           <ChatComponent :project="project" :task="task"/>
         </TabComponent>
       </template>
-
-      <!-- Add more tabs as needed -->
     </TabsComponent>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -45,6 +43,11 @@ const props = defineProps({
     required: true
   }
 });
+
+const tabs = ref([
+  { title: 'Detalhes' },
+  { title: 'Histórico' },
+]);
 
 const task = reactive({
   id: null,

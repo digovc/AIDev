@@ -14,10 +14,13 @@
 <script setup>
 import { ref } from 'vue';
 
+const props = defineProps({
+  tabs: {
+    type: Array,
+    required: true,
+    default: () => []
+  }
+});
+
 const activeTab = ref(0);
-const tabs = ref([
-  { title: 'Detalhes' },
-  { title: 'Histórico' },
-  // Add more tabs as needed
-]);
 </script>
