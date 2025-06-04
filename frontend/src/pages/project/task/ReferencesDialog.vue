@@ -27,7 +27,7 @@
 
       <!-- Lista de referências adicionadas -->
       <div class="grow">
-        <div v-if="references.length === 0" class="text-gray-400 text-center py-4 h-full flex items-center justify-center">
+        <div v-if="references.length === 0" class="text-sm text-gray-400 text-center py-4 h-full flex items-center justify-center">
           Nenhuma referência adicionada
         </div>
 
@@ -137,8 +137,9 @@ const scrollToSelectedItem = () => {
 
 const handleKeyDown = (e) => {
   if (e.key === 'Escape') {
+    e.preventDefault();
+    e.stopPropagation();
     close();
-    return;
   }
 
   if (searchResults.value.length === 0) return;

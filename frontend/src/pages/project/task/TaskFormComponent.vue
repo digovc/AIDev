@@ -28,7 +28,7 @@
           </button>
         </div>
 
-        <div v-if="task.references.length === 0" class="text-gray-500 italic p-2">
+        <div v-if="task.references.length === 0" class="text-gray-500 italic text-sm">
           Nenhuma referência adicionada
         </div>
 
@@ -290,12 +290,16 @@ const handleKeyPress = (event) => {
 
   if (isRunPressed && !loading.value) {
     event.preventDefault();
+    event.stopPropagation();
     saveAndRunTask();
+    return;
   }
 
   const isScapePressed = event.key === 'Escape';
+
   if (isScapePressed) {
     event.preventDefault();
+    event.stopPropagation();
     goBack();
   }
 };
