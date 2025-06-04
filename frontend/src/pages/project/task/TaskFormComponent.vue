@@ -242,18 +242,16 @@ const saveAndRunTask = async () => {
       projectId: props.project.id
     };
 
-    let taskId;
-
     if (isEditing.value) {
       await tasksApi.updateTask(task.id, taskData);
-      taskId = task.id;
     } else {
       const result = await tasksApi.createTask(taskData);
-      taskId = result.data.id;
+      task.id = result.data.id;
     }
 
-    await tasksApi.runTask(taskId);
+    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }`);
     emits('task-started', task);
+    await tasksApi.runTask(task.id);
   } catch (error) {
     console.error(`Erro ao salvar e executar tarefa:`, error);
     alert(`Ocorreu um erro ao salvar e executar a tarefa. Por favor, tente novamente.`);

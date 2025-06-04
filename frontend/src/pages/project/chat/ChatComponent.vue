@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4 pt-2 h-full flex flex-col">
+  <div class="bg-gray-900 rounded-lg shadow-md p-4 pt-0 h-full flex flex-col">
     <h2 class="text-lg font-bold mb-4">Chat</h2>
     <div class="flex flex-col h-full">
       <div class="flex-grow mb-4 relative">
