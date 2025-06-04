@@ -41,14 +41,6 @@
       </div>
 
       <div class="flex justify-end space-x-3">
-        <button type="button" @click="saveAndRunTask" class="btn btn-primary" :disabled="loading" v-if="!isRunning">
-          <FontAwesomeIcon :icon="faPlay" class="mr-2"/>
-          {{ loading ? 'Processando...' : 'Executar' }}
-        </button>
-        <button type="button" @click="stopTask" class="btn btn-danger" :disabled="loading" v-else>
-          <FontAwesomeIcon :icon="faCog" class="h-6 w-6 animate-spin" v-if="isRunning"/>
-          {{ loading ? 'Processando...' : 'Parar' }}
-        </button>
         <button type="submit" class="btn btn-primary" :disabled="loading">
           <FontAwesomeIcon :icon="faSave" class="mr-2"/>
           {{ loading ? 'Salvando...' : 'Salvar' }}
@@ -67,17 +59,16 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { tasksApi } from '@/api/tasks.api.js';
 import ReferencesDialog from '@/pages/project/task/ReferencesDialog.vue';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { assistantsApi } from '@/api/assistants.api.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faCog, faCopy, faPlay, faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faCopy, faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
 import { conversationsApi } from '@/api/conversations.api.js';
 import { socketIOService } from "@/services/socket.io.js";
-import { runningTasksService } from "@/services/running-tasks.service.js";
 
 const props = defineProps({
   project: {
@@ -111,12 +102,6 @@ watch(() => route.params.taskId, async (newTaskId) => {
 });
 
 const emits = defineEmits(['task-closed', 'task-duplicated', 'task-started']);
-
-const isRunning = computed(() => {
-  if (!task) return false;
-  if (!task.id) return false;
-  return runningTasksService.isRunning(task.id);
-});
 
 const goBack = () => {
   emits('task-closed');
@@ -152,42 +137,6 @@ const saveTask = async () => {
   }
 };
 
-const saveAndRunTask = async () => {
-  try {
-    loading.value = true;
-
-    // Salva o assistente selecionado como default no localStorage
-    if (task.assistantId) {
-      localStorage.setItem('defaultAssistantId', task.assistantId);
-    }
-
-    const taskData = {
-      ...task,
-      projectId: props.project.id
-    };
-
-    if (isEditing.value) {
-      await tasksApi.updateTask(task.id, taskData);
-    } else {
-      const result = await tasksApi.createTask(taskData);
-      task.id = result.data.id;
-    }
-
-    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }`);
-    emits('task-started', task);
-    await tasksApi.runTask(task.id);
-  } catch (error) {
-    console.error(`Erro ao salvar e executar tarefa:`, error);
-    alert(`Ocorreu um erro ao salvar e executar a tarefa. Por favor, tente novamente.`);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const stopTask = async () => {
-  task.status = 'backlog';
-  await tasksApi.stopTask(task.id);
-};
 
 const loadTask = async () => {
   const taskId = route.params.taskId;
@@ -275,15 +224,6 @@ const removeReference = (index) => {
 };
 
 const handleKeyPress = (event) => {
-  const isRunPressed = event.ctrlKey && event.shiftKey && event.key === 'E';
-
-  if (isRunPressed && !loading.value) {
-    event.preventDefault();
-    event.stopPropagation();
-    saveAndRunTask();
-    return;
-  }
-
   const isScapePressed = event.key === 'Escape';
 
   if (isScapePressed) {

@@ -1,10 +1,22 @@
 <template>
   <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-bold">{{ taskTitle }}</h2>
-      <button @click="goBack" class="text-gray-400 hover:text-gray-200">
-        <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
-      </button>
+      <div class="flex items-center space-x-4">
+        <h2 class="text-lg font-bold">{{ taskTitle }}</h2>
+        <FontAwesomeIcon :icon="faCog" class="text-gray-200 animate-spin" v-if="isRunning"/>
+      </div>
+
+      <div class="flex space-x-4 text-gray-400 text-lg">
+        <button v-if="!isRunning && task?.id" @click="saveAndRunTask" :disabled="loading">
+          <FontAwesomeIcon :icon="faPlay" class="text-green-500 hover:text-green-300"/>
+        </button>
+        <button v-if="isRunning && task?.id" @click="stopTask" :disabled="loading">
+          <FontAwesomeIcon :icon="faStop" class="text-red-500 hover:text-red-300"/>
+        </button>
+        <button @click="goBack" class="hover:text-gray-200">
+          <FontAwesomeIcon :icon="faTimes"/>
+        </button>
+      </div>
     </div>
 
     <div>
@@ -20,9 +32,10 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faPlay, faStop, faTimes } from '@fortawesome/free-solid-svg-icons';
 import TabsComponent from '@/components/TabsComponent.vue';
 import { tasksApi } from '@/api/tasks.api.js';
+import { runningTasksService } from "@/services/running-tasks.service.js";
 
 const props = defineProps({
   project: {
@@ -31,6 +44,7 @@ const props = defineProps({
   }
 });
 
+const loading = ref(false);
 const route = useRoute();
 const router = useRouter();
 const task = ref(null);
@@ -65,6 +79,35 @@ const loadTask = async () => {
     console.error('Erro ao carregar tarefa:', error);
     alert('Não foi possível carregar os dados da tarefa.');
     goBack();
+  }
+};
+
+const isRunning = computed(() => {
+  if (!task.value?.id) return false;
+  return runningTasksService.isRunning(task.value.id);
+});
+
+const saveAndRunTask = async () => {
+  try {
+    loading.value = true;
+    await tasksApi.runTask(task.value.id);
+  } catch (error) {
+    console.error('Erro ao executar tarefa:', error);
+    alert('Ocorreu um erro ao executar a tarefa. Por favor, tente novamente.');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const stopTask = async () => {
+  try {
+    loading.value = true;
+    await tasksApi.stopTask(task.value.id);
+  } catch (error) {
+    console.error('Erro ao parar tarefa:', error);
+    alert('Ocorreu um erro ao parar a tarefa. Por favor, tente novamente.');
+  } finally {
+    loading.value = false;
   }
 };
 
