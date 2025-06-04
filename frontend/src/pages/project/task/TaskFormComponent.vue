@@ -1,11 +1,6 @@
 <template>
   <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col space-y-2">
-    <div class="flex justify-between items-center">
-      <h2 class="text-lg font-bold">{{ isEditing ? `Tarefa (${ task.id })` : 'Nova Tarefa' }}</h2>
-      <button @click="goBack" class="text-gray-400 hover:text-gray-200">
-        <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
-      </button>
-    </div>
+    <h2 class="text-lg font-bold">{{ isEditing ? `Tarefa (${ task.id })` : 'Nova Tarefa' }}</h2>
 
     <form @submit.prevent="saveTask" class="flex flex-col grow space-y-2">
       <div class="mb-4">
@@ -81,7 +76,7 @@ import ReferencesDialog from '@/pages/project/task/ReferencesDialog.vue';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { assistantsApi } from '@/api/assistants.api.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faCog, faCopy, faPlay, faPlus, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faCopy, faPlay, faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
 import { conversationsApi } from '@/api/conversations.api.js';
 import { socketIOService } from "@/services/socket.io.js";
 import { runningTasksService } from "@/services/running-tasks.service.js";

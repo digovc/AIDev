@@ -6,27 +6,21 @@
         <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
       </button>
     </div>
-    
+
     <TabsComponent>
       <template #tab-0>
         <TabComponent>
-          <TaskFormComponent 
-            :project="project" 
-            :task="task" 
-            @save="saveTask" 
-            @save-and-run="saveAndRunTask" 
-            @duplicate="duplicateTask" 
-          />
+          <TaskFormComponent :project="project" :task="task" @save="saveTask" @save-and-run="saveAndRunTask" @duplicate="duplicateTask"/>
         </TabComponent>
       </template>
-      
+
       <!-- Add more tabs as needed -->
     </TabsComponent>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -55,7 +49,7 @@ const task = reactive({
 });
 
 const taskTitle = computed(() => {
-  if (task.id) return `Tarefa (${task.id})`;
+  if (task.id) return `Tarefa (${ task.id })`;
   return 'Nova Tarefa';
 });
 
@@ -66,11 +60,11 @@ const loadTask = async () => {
   try {
     const response = await tasksApi.getTaskById(taskId);
     const taskData = response.data;
-    
+
     for (const key in taskData) {
       task[key] = taskData[key];
     }
-    
+
     task.references = task.references || [];
   } catch (error) {
     console.error('Erro ao carregar tarefa:', error);
@@ -80,7 +74,7 @@ const loadTask = async () => {
 };
 
 const goBack = () => {
-  router.push(`/projects/${props.project.id}`);
+  router.push(`/projects/${ props.project.id }`);
 };
 
 const saveTask = async () => {
@@ -96,7 +90,7 @@ const saveTask = async () => {
       const result = await tasksApi.createTask(taskData);
       task.id = result.data.id;
     }
-    
+
     goBack();
   } catch (error) {
     console.error('Erro ao salvar tarefa:', error);
