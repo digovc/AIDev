@@ -20,7 +20,6 @@
 
 <script setup>
 import { onUnmounted, ref } from "vue";
-import { fileApi } from "@/api/file.api.js";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";

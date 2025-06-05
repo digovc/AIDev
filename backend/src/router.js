@@ -1,6 +1,7 @@
 const express = require('express');
 const assistantsController = require("./controllers/assistants.controller");
 const conversationsController = require("./controllers/conversations.controller");
+const fileController = require("./controllers/file.controller");
 const gitController = require("./controllers/git.controller");
 const messagesController = require("./controllers/messages.controller");
 const projectsController = require('./controllers/projects.controller');
@@ -20,6 +21,7 @@ class Router {
     // Register all controller endpoints
     assistantsController.registerEndpoints(this.expressRouter);
     conversationsController.registerEndpoints(this.expressRouter);
+    fileController.registerEndpoints(this.expressRouter);
     gitController.registerEndpoints(this.expressRouter);
     messagesController.registerEndpoints(this.expressRouter);
     projectsController.registerEndpoints(this.expressRouter);
