@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-full">
     <div class="flex border-b border-gray-600">
-      <div v-for="(tab, index) in tabs" :key="index" class="px-5 py-2.5 cursor-pointer text-gray-400 border-b-2 border-transparent transition-all duration-300" :class="{ 'text-white border-blue-500': activeTab === tab }" @click="openTab(tab)">
+      <div v-for="(tab, index) in tabs" :key="index" class="px-5 py-2.5 cursor-pointer text-gray-400 border-b-2 border-transparent transition-all duration-300" :class="{ 'text-white border-blue-500': isActive(tab) }" @click="openTab(tab)">
         {{ tab.title }}
       </div>
     </div>
@@ -26,6 +26,10 @@ const router = useRouter();
 const openTab = (tab) => {
   activeTab.value = tab;
   router.push({ name: tab.route, params: tab.params });
+};
+
+const isActive = (tab) => {
+  return activeTab.value?.route === tab.route;
 };
 
 onMounted(() => {

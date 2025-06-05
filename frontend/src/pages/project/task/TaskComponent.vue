@@ -50,11 +50,22 @@ const route = useRoute();
 const router = useRouter();
 const task = ref(null);
 
-const tabs = ref([
-  { title: 'Detalhes', route: 'task-details', params: { taskId: task.value?.id } },
-  { title: 'Histórico', route: 'task-chat' },
-  { title: 'Alterações', route: 'task-diff' },
-]);
+const tabs = computed(() => {
+  const params = route.params;
+
+  const baseTabs = [
+    { title: 'Detalhes', route: 'task-details', params },
+  ];
+
+  if (task.value?.id) {
+    baseTabs.push(
+        { title: 'Histórico', route: 'task-chat', params },
+        { title: 'Alterações', route: 'task-diff', params },
+    );
+  }
+
+  return baseTabs;
+});
 
 watch(() => route.params.taskId, async (newTaskId) => {
   if (task.value?.id !== newTaskId) {
