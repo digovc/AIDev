@@ -1,7 +1,7 @@
 <template>
   <div class="h-full">
     <DiffFilesComponent v-if="!selectedFile" :files="files" @select="handleFileSelect"/>
-    <DiffViewComponent v-else :file="selectedFile" :task="task" @close="selectedFile = null"/>
+    <DiffViewComponent v-else :file="selectedFile" :task="task" @close="selectedFile = null" @line-click="console.log($event)"/>
   </div>
 </template>
 

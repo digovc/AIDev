@@ -31,13 +31,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faArchive, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import TaskItemComponent from "@/pages/project/tasks/TaskItemComponent.vue";
 
-const expanded = ref(true);
-
-const toggleExpanded = () => {
-  expanded.value = !expanded.value;
-};
-
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     required: true
@@ -55,6 +49,12 @@ defineProps({
     default: true
   }
 });
+
+const expanded = ref(props.title !== 'Concluído');
+
+const toggleExpanded = () => {
+  expanded.value = !expanded.value;
+};
 
 defineEmits(['play', 'play-now', 'stop', 'edit', 'archive', 'done', 'archive-all']);
 </script>
