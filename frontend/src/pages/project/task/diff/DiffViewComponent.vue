@@ -141,9 +141,6 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  disposables.forEach(d => d.dispose());
-  disposables.length = 0;
-
   if (monacoDiffEditor) {
     monacoDiffEditor.dispose();
     monacoDiffEditor = null;
