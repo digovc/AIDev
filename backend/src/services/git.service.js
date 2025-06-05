@@ -10,27 +10,7 @@ const execAsync = promisify(exec);
 class GitService {
   async getFilesChanged(taskId) {
     try {
-      const task = await tasksStore.getById(taskId);
-
-      if (!task) {
-        throw new Error('Task not found');
-      }
-
-      const projectId = task.projectId;
-
-      // Fetch the project by ID
-      const project = await projectsStore.getById(projectId);
-
-      if (!project) {
-        throw new Error('Project not found');
-      }
-
-      // Get the project path
-      const projectPath = project.path;
-
-      if (!projectPath) {
-        throw new Error('Project path not defined');
-      }
+      const projectPath = await this._getProjectPath(taskId);
 
       // Execute git status --porcelain command
       const { stdout, stderr } = await execAsync('git status --porcelain', { cwd: projectPath });
@@ -55,14 +35,7 @@ class GitService {
 
   async getContentVersions(taskId, filePath) {
     try {
-      const task = await tasksStore.getById(taskId);
-      if (!task) throw new Error('Task not found');
-
-      const project = await projectsStore.getById(task.projectId);
-      if (!project) throw new Error('Project not found');
-      if (!project.path) throw new Error('Project path not defined');
-
-      const projectPath = project.path;
+      const projectPath = await this._getProjectPath(taskId);
 
       // Get current file content
       const previousContent = await execAsync(`git show HEAD:${ filePath }`, { cwd: projectPath })
@@ -80,24 +53,7 @@ class GitService {
 
   async getRemoteBranches(taskId) {
     try {
-      const task = await tasksStore.getById(taskId);
-
-      if (!task) {
-        throw new Error('Task not found');
-      }
-
-      const projectId = task.projectId;
-      const project = await projectsStore.getById(projectId);
-
-      if (!project) {
-        throw new Error('Project not found');
-      }
-
-      const projectPath = project.path;
-
-      if (!projectPath) {
-        throw new Error('Project path not defined');
-      }
+      const projectPath = await this._getProjectPath(taskId);
 
       // Fetch remote branches
       const { stdout, stderr } = await execAsync('git branch -r', { cwd: projectPath });
@@ -118,24 +74,7 @@ class GitService {
 
   async checkout(taskId, branch) {
     try {
-      const task = await tasksStore.getById(taskId);
-
-      if (!task) {
-        throw new Error('Task not found');
-      }
-
-      const projectId = task.projectId;
-      const project = await projectsStore.getById(projectId);
-
-      if (!project) {
-        throw new Error('Project not found');
-      }
-
-      const projectPath = project.path;
-
-      if (!projectPath) {
-        throw new Error('Project path not defined');
-      }
+      const projectPath = await this._getProjectPath(taskId);
 
       // if some changes exist, throw an error
       const { stdout, stderr } = await execAsync('git status --porcelain', { cwd: projectPath });
@@ -166,24 +105,7 @@ class GitService {
 
   async pushChanges(taskId) {
     try {
-      const task = await tasksStore.getById(taskId);
-
-      if (!task) {
-        throw new Error('Task not found');
-      }
-
-      const projectId = task.projectId;
-      const project = await projectsStore.getById(projectId);
-
-      if (!project) {
-        throw new Error('Project not found');
-      }
-
-      const projectPath = project.path;
-
-      if (!projectPath) {
-        throw new Error('Project path not defined');
-      }
+      const { task, projectPath } = await this._getProjectPath(taskId);
 
       // Switch to a branch formatted as 'aidev-<task-id>'
       const branchName = `aidev-${ taskId }`;
@@ -203,6 +125,24 @@ class GitService {
     } catch (error) {
       throw new Error(`Error in GitService.pushChanges: ${ error.message }`);
     }
+  }
+
+  async _getProjectPath(taskId) {
+    const task = await tasksStore.getById(taskId);
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
+    const project = await projectsStore.getById(task.projectId);
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    const projectPath = project.path;
+    if (!projectPath) {
+      throw new Error('Project path not defined');
+    }
+    return { task, projectPath };
   }
 }
 
