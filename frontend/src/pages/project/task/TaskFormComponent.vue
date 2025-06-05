@@ -6,19 +6,17 @@
         <input type="text" id="title" v-model="task.title" class="form-input" required ref="titleInput"/>
       </div>
 
-      <div class="mb-4">
-        <label for="description" class="form-label">Descrição</label>
-        <textarea id="description" v-model="task.description" rows="15" class="form-input"></textarea>
-      </div>
-
       <!-- Adicione esta nova seção para listar as referências -->
       <div class="grow flex flex-col">
         <div class="flex justify-between items-center">
           <label class="form-label">Referências</label>
-          <button type="button" @click="openReferencesDialog" class="btn btn-secondary mt-1 mr-1">
-            <FontAwesomeIcon :icon="faPlus" class="mr-2"/>
-            Referência
-          </button>
+          <FontAwesomeIcon 
+  :icon="faPlus" 
+  @click="openReferencesDialog" 
+  class="text-gray-400 hover:text-gray-200 cursor-pointer pr-2"
+  tabindex="0"
+  @keydown.enter="openReferencesDialog"
+/>
         </div>
 
         <div v-if="task.references.length === 0" class="text-gray-500 italic text-sm">
@@ -28,6 +26,11 @@
         <div v-else class="space-y-2 pt-4 grow overflow-y-auto">
           <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)"/>
         </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="description" class="form-label">Descrição</label>
+        <textarea id="description" v-model="task.description" rows="15" class="form-input"></textarea>
       </div>
 
       <div class="pt-4">
