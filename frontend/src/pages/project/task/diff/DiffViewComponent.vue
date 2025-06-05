@@ -132,8 +132,19 @@ const loadVersions = async () => {
   }
 };
 
+const handleKeyPress = (event) => {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    event.stopPropagation();
+    event.defaultPrevented = true;
+    emit('close');
+    return false;
+  }
+};
+
 onMounted(async () => {
   await loadVersions();
+  window.addEventListener('keydown', handleKeyPress);
 
   if (versions.value) {
     initEditor();
@@ -141,6 +152,8 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyPress);
+
   if (monacoDiffEditor) {
     monacoDiffEditor.dispose();
     monacoDiffEditor = null;

@@ -124,6 +124,8 @@ const taskUpdated = (updatedTask) => {
 };
 
 const handleKeyPress = (event) => {
+  if (event.defaultPrevented) return;
+
   const isScapePressed = event.key === 'Escape';
 
   if (isScapePressed) {

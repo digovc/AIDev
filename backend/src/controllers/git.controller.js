@@ -10,6 +10,10 @@ class GitController {
       this.getContentVersions(req, res).catch((e) => this.errorHandler(e, res));
     });
 
+    router.get('/git/branches/:taskId', (req, res) => {
+      this.getRemoteBranches(req, res).catch((e) => this.errorHandler(e, res));
+    });
+
     router.post('/git/push/:taskId', (req, res) => {
       this.pushChanges(req, res).catch((e) => this.errorHandler(e, res));
     });
@@ -31,6 +35,16 @@ class GitController {
     const filePath = Buffer.from(b64Path, 'base64').toString('utf8');
     const versions = await gitService.getContentVersions(taskId, filePath);
     res.json(versions);
+  }
+
+  async getRemoteBranches(req, res) {
+    const taskId = req.params.taskId;
+    try {
+      const branches = await gitService.getRemoteBranches(taskId);
+      res.json(branches);
+    } catch (error) {
+      this.errorHandler(error, res);
+    }
   }
 
   async pushChanges(req, res) {

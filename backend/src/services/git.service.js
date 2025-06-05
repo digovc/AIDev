@@ -79,6 +79,44 @@ class GitService {
   }
 
 
+  async getRemoteBranches(taskId) {
+    try {
+      const task = await tasksStore.getById(taskId);
+
+      if (!task) {
+        throw new Error('Task not found');
+      }
+
+      const projectId = task.projectId;
+      const project = await projectsStore.getById(projectId);
+
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      const projectPath = project.path;
+
+      if (!projectPath) {
+        throw new Error('Project path not defined');
+      }
+
+      // Fetch remote branches
+      const { stdout, stderr } = await execAsync('git branch -r', { cwd: projectPath });
+
+      if (stderr) {
+        throw new Error(`Failed to get remote branches: ${ stderr }`);
+      }
+
+      // Parse the output to get branch names
+      return stdout
+        .split('\n')
+        .filter(line => line.trim() !== '')
+        .map(line => line.trim().replace('origin/', ''));
+    } catch (error) {
+      throw new Error(`Error in GitService.getRemoteBranches: ${ error.message }`);
+    }
+  }
+
   async pushChanges(taskId) {
     try {
       const task = await tasksStore.getById(taskId);
