@@ -48,7 +48,7 @@ watch(() => props.task, async () => {
 
   const response = await conversationsApi.getById(props.task.conversationId);
   conversation.value = response.data;
-}, { immediate: true, deep: true });
+}, { deep: true, immediate: true });
 
 const sendMessage = async (text) => {
   const projectId = route.params.id;

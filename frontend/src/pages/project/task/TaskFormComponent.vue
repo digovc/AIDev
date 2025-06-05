@@ -40,7 +40,7 @@
         </select>
       </div>
 
-      <div class="flex justify-end space-x-3">
+      <div class="flex justify-end space-x-3 pt-2">
         <button type="submit" class="btn btn-primary" :disabled="loading">
           <FontAwesomeIcon :icon="faSave" class="mr-2"/>
           {{ loading ? 'Salvando...' : 'Salvar' }}

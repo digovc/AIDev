@@ -29,13 +29,14 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faCog, faPlay, faStop, faTimes } from '@fortawesome/free-solid-svg-icons';
 import TabsComponent from '@/components/TabsComponent.vue';
 import { tasksApi } from '@/api/tasks.api.js';
 import { runningTasksService } from "@/services/running-tasks.service.js";
+import { socketIOService } from "@/services/socket.io.js";
 
 const props = defineProps({
   project: {
@@ -65,6 +66,11 @@ const taskTitle = computed(() => {
   return 'Nova tarefa';
 });
 
+const isRunning = computed(() => {
+  if (!task.value?.id) return false;
+  return runningTasksService.isRunning(task.value.id);
+});
+
 const loadTask = async () => {
   const taskId = route.params.taskId;
 
@@ -81,11 +87,6 @@ const loadTask = async () => {
     goBack();
   }
 };
-
-const isRunning = computed(() => {
-  if (!task.value?.id) return false;
-  return runningTasksService.isRunning(task.value.id);
-});
 
 const saveAndRunTask = async () => {
   try {
@@ -115,7 +116,17 @@ const goBack = () => {
   router.push(`/projects/${ props.project.id }`);
 };
 
+const taskUpdated = (updatedTask) => {
+  if (updatedTask.id !== task.value.id) return;
+  task.value = updatedTask;
+};
+
 onMounted(async () => {
   await loadTask();
+  socketIOService.socket.on('task-updated', taskUpdated);
+});
+
+onUnmounted(() => {
+  socketIOService.socket.off('task-updated', taskUpdated);
 });
 </script>
