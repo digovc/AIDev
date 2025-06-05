@@ -86,6 +86,21 @@ const initEditor = () => {
   );
 
   monacoEditor.setModel(model);
+
+  monacoEditor.onMouseDown(e => handleEditorMouseDown(e, monacoEditor));
+};
+
+const handleEditorMouseDown = (event, editorInstance) => {
+  const target = event.target;
+  if (target.type !== monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) return;
+  if (!target.position) return;
+
+  const lineNumber = target.position.lineNumber;
+  const model = editorInstance.getModel();
+  const lineContent = model ? model.getLineContent(lineNumber) : '';
+
+  const textToCopy = `Ref: ${props.file.path}\nLine ${lineNumber}: ${lineContent}`;
+  navigator.clipboard.writeText(textToCopy);
 };
 
 const copyPathToClipboard = () => {

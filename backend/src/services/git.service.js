@@ -10,7 +10,7 @@ const execAsync = promisify(exec);
 class GitService {
   async getFilesChanged(taskId) {
     try {
-      const projectPath = await this._getProjectPath(taskId);
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // Execute git status --porcelain command
       const { stdout, stderr } = await execAsync('git status --porcelain', { cwd: projectPath });
@@ -35,7 +35,7 @@ class GitService {
 
   async getContentVersions(taskId, filePath) {
     try {
-      const projectPath = await this._getProjectPath(taskId);
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // Get current file content
       const previousContent = await execAsync(`git show HEAD:${ filePath }`, { cwd: projectPath })
@@ -53,7 +53,7 @@ class GitService {
 
   async getRemoteBranches(taskId) {
     try {
-      const projectPath = await this._getProjectPath(taskId);
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // Fetch remote branches
       const { stdout, stderr } = await execAsync('git branch -r', { cwd: projectPath });
@@ -74,7 +74,7 @@ class GitService {
 
   async checkout(taskId, branch) {
     try {
-      const projectPath = await this._getProjectPath(taskId);
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // if some changes exist, throw an error
       const { stdout, stderr } = await execAsync('git status --porcelain', { cwd: projectPath });
@@ -105,7 +105,7 @@ class GitService {
 
   async pushChanges(taskId) {
     try {
-      const { task, projectPath } = await this._getProjectPath(taskId);
+      const { task, projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // Switch to a branch formatted as 'task-<task-id>'
       const branchName = `task-${ taskId }`;
@@ -127,7 +127,7 @@ class GitService {
     }
   }
 
-  async _getProjectPath(taskId) {
+  async _getTaskAndProjectPath(taskId) {
     const task = await tasksStore.getById(taskId);
     if (!task) {
       throw new Error('Task not found');

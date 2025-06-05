@@ -42,7 +42,7 @@
           <FontAwesomeIcon :icon="faPlay"/>
           <span class="hidden md:inline md:pl-2">Executar</span>
         </button>
-        <button type="submit" class="btn btn-primary" :disabled="loading">
+        <button type="submit" class="btn btn-primary" :disabled="loading" @click="saveTask">
           <FontAwesomeIcon :icon="faSave"/>
           <span class="hidden md:inline md:pl-2">{{ loading ? 'Salvando...' : 'Salvar' }}</span>
         </button>
