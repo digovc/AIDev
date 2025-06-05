@@ -94,7 +94,7 @@ class GitService {
         throw new Error(`Failed to get remote branches: ${ stderr }`);
       }
 
-      // Switch to a branch formatted as 'aidev-<task-id>'
+      // Switch to a branch formatted as 'task-<task-id>'
       await execAsync(`git checkout -b ${ branch }`, { cwd: projectPath });
 
       return { success: true };
@@ -107,8 +107,8 @@ class GitService {
     try {
       const { task, projectPath } = await this._getProjectPath(taskId);
 
-      // Switch to a branch formatted as 'aidev-<task-id>'
-      const branchName = `aidev-${ taskId }`;
+      // Switch to a branch formatted as 'task-<task-id>'
+      const branchName = `task-${ taskId }`;
       await execAsync(`git checkout -b ${ branchName }`, { cwd: projectPath });
 
       // Add all changes (modified, added, or deleted files)
