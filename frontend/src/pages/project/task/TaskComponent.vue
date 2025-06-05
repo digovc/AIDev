@@ -6,7 +6,7 @@
         <FontAwesomeIcon :icon="faCog" class="text-gray-200 animate-spin" v-if="isRunning"/>
       </div>
 
-      <div class="flex space-x-4 text-gray-400 text-lg">
+      <div class="flex gap-4 text-gray-400 text-lg">
         <button v-if="!isRunning && task?.id" @click="saveAndRunTask" :disabled="loading">
           <FontAwesomeIcon :icon="faPlay" class="text-green-500 hover:text-green-300"/>
         </button>

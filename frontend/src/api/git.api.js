@@ -7,7 +7,12 @@ export class GitApi extends ApiBase {
   }
 
   async getFilesChanged(taskId) {
-    return this.client.get(`${ this.baseUrl }/files/${ taskId }`);
+    return this.client.get(`${this.baseUrl}/files/${taskId}`);
+  }
+
+  async getContentVersions(taskId, filePath) {
+    const b64Path = btoa(filePath);
+    return this.client.get(`${this.baseUrl}/versions/${taskId}/${b64Path}`);
   }
 }
 

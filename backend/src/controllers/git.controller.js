@@ -5,6 +5,10 @@ class GitController {
     router.get('/git/files/:taskId', (req, res) => {
       this.getFilesChanged(req, res).catch((e) => this.errorHandler(e, res));
     });
+
+    router.get('/git/versions/:taskId/:b64Path', (req, res) => {
+      this.getContentVersions(req, res).catch((e) => this.errorHandler(e, res));
+    });
   }
 
   errorHandler(err, res) {
@@ -16,6 +20,13 @@ class GitController {
     const taskId = req.params.taskId;
     const files = await gitService.getFilesChanged(taskId);
     res.json(files);
+  }
+
+  async getContentVersions(req, res) {
+    const { taskId, b64Path } = req.params;
+    const filePath = Buffer.from(b64Path, 'base64').toString('utf8');
+    const versions = await gitService.getContentVersions(taskId, filePath);
+    res.json(versions);
   }
 }
 

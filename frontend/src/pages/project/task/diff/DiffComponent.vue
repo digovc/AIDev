@@ -1,7 +1,7 @@
 <template>
   <div class="h-full">
-    <DiffViewComponent v-if="selectedFile" :file="selectedFile"/>
-    <DiffFilesComponent v-else :files="files" @select="handleFileSelect"/>
+    <DiffFilesComponent v-if="!selectedFile" :files="files" @select="handleFileSelect"/>
+    <DiffViewComponent v-else :file="selectedFile" :task="task" @close="selectedFile = null"/>
   </div>
 </template>
 
@@ -12,16 +12,15 @@ import DiffViewComponent from './DiffViewComponent.vue';
 import { gitApi } from "@/api/git.api.js";
 
 const props = defineProps({
-  task: {
-    type: Object,
-    required: true
-  }
+  task: { type: Object }
 });
 
 const files = ref([]);
 const selectedFile = ref(null);
 
 watch(() => props.task, async (newTask) => {
+  if (!newTask) return;
+
   try {
     const response = await gitApi.getFilesChanged(props.task.id);
     files.value = response.data;
@@ -31,6 +30,6 @@ watch(() => props.task, async (newTask) => {
 }, { immediate: true });
 
 const handleFileSelect = (file) => {
-  selectedFile.value = file;
+  selectedFile.value = file
 };
 </script>
