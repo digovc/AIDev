@@ -2,6 +2,8 @@ const { exec } = require('child_process');
 const { promisify } = require('util');
 const projectsStore = require('../stores/projects.store');
 const tasksStore = require('../stores/tasks.store');
+const path = require("node:path");
+const fs = require("node:fs").promises;
 
 const execAsync = promisify(exec);
 
@@ -63,14 +65,12 @@ class GitService {
       const projectPath = project.path;
 
       // Get current file content
-      const currentContent = await execAsync(`git show HEAD:${filePath}`, { cwd: projectPath })
+      const previousContent = await execAsync(`git show HEAD:${filePath}`, { cwd: projectPath })
         .then(({ stdout }) => stdout)
         .catch(() => ''); // Handle file not found or other errors
 
-      // Get previous file content (HEAD~1)
-      const previousContent = await execAsync(`git show HEAD~1:${filePath}`, { cwd: projectPath })
-        .then(({ stdout }) => stdout)
-        .catch(() => ''); // Handle file not found or other errors
+      const filePathWithProject = path.join(projectPath, filePath);
+      const currentContent = await fs.readFile(filePathWithProject, 'utf8');
 
       return { previous: previousContent, current: currentContent };
     } catch (error) {

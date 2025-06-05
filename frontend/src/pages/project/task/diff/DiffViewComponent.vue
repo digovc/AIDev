@@ -10,9 +10,8 @@
     </div>
     <div class="flex-1 overflow-y-auto relative">
       <div class="absolute inset-0">
-        <div id="editor" class="h-full"/>
+        <div ref="editor" class="h-full"/>
       </div>
-
     </div>
   </div>
 </template>
@@ -21,16 +20,10 @@
 import { onMounted, ref } from "vue";
 import { gitApi } from "@/api/git.api.js";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
-import 'monaco-editor/esm/vs/basic-languages/html/html.contribution';
-import 'monaco-editor/esm/vs/basic-languages/css/css.contribution';
-import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution';
-import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution';
-import 'monaco-editor/esm/vs/basic-languages/markdown/markdown.contribution';
-import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { languageDetector } from "@/services/language.detector.js";
+import "@/services/monaco.worker.js";
 
 const props = defineProps({
   task: {
@@ -44,21 +37,23 @@ const props = defineProps({
 });
 
 const versions = ref();
+const editor = ref();
 
 const initEditor = () => {
   const language = languageDetector.getLanguage(props.file.path);
+
   const originalModel = monaco.editor.createModel(
       versions.value.previous,
-      language,
+      language
   );
 
   const modifiedModel = monaco.editor.createModel(
       versions.value.current,
-      language,
+      language
   );
 
   const diffEditor = monaco.editor.createDiffEditor(
-      document.getElementById("editor"),
+      editor.value,
       {
         enableSplitViewResizing: false,
         readOnly: true,

@@ -1,14 +1,16 @@
 <template>
-  <div class="flex">
-    <input v-model="messageText" type="text" placeholder="Digite sua mensagem..." class="flex-grow p-2 rounded-l bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500" @keyup.enter="sendMessage"/>
-    <button class="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700" @click="sendMessage" :disabled="!messageText.trim()">
-      Enviar
+  <div class="relative">
+    <textarea v-model="messageText" placeholder="Digite sua mensagem..." class="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500"/>
+    <button class="absolute bottom-4 right-2 bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-blue-700" @click="sendMessage" :disabled="!messageText.trim()">
+      <FontAwesomeIcon :icon="faPaperPlane" class="text-white"/>
     </button>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 
 const props = defineProps({
   onSendMessage: Function

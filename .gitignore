@@ -144,3 +144,4 @@ test/
 backend/static
 backend/.aidev*
 frontend/dist
+.DS_Store
