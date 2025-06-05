@@ -4,7 +4,8 @@
       <div class="text-sm">
         {{ file.path }}
       </div>
-      <div class="flex justify-between items-center px-2 text-gray-400">
+      <div class="flex justify-between items-center px-2 text-gray-400 gap-4">
+        <FontAwesomeIcon :icon="faRightLeft" @click="toggleSplitView" class="text-gray-400 hover:text-gray-300 cursor-pointer"/>
         <FontAwesomeIcon :icon="faTimes" @click="$emit('close')" class="text-gray-400 hover:text-gray-300 cursor-pointer"/>
       </div>
     </div>
@@ -20,7 +21,7 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import { gitApi } from "@/api/git.api.js";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faRightLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { languageDetector } from "@/services/language.detector.js";
 import "@/services/monaco.worker.js";
@@ -36,11 +37,19 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['close', 'line-click']);
+const emit = defineEmits(['close']);
 
 const versions = ref();
 const editorContainer = ref();
 let monacoDiffEditor = null;
+const isSplitView = ref(false);
+
+const toggleSplitView = () => {
+  isSplitView.value = !isSplitView.value;
+  monacoDiffEditor.updateOptions({
+    renderSideBySide: isSplitView.value
+  });
+};
 
 // Mantenha referências aos modelos para fácil acesso se necessário,
 // embora possamos obtê-los dos editores também.
@@ -85,7 +94,7 @@ const initEditor = () => {
       {
         enableSplitViewResizing: false,
         readOnly: true,
-        renderSideBySide: false,
+        renderSideBySide: isSplitView.value,
         roundedSelection: false,
         scrollBeyondLastLine: false,
         theme: "vs-dark",
@@ -113,13 +122,9 @@ const handleEditorMouseDown = (event, editorInstance, editorType) => {
   const lineNumber = target.position.lineNumber;
   const model = editorInstance.getModel();
   const lineContent = model ? model.getLineContent(lineNumber) : '';
-  console.log(`Clique na linha ${ lineNumber } do editor ${ editorType }. Conteúdo: "${ lineContent }"`);
-
-  emit('line-click', {
-    file: props.file,
-    lineNumber: lineNumber,
-    lineContent: lineContent
-  });
+  
+  const textToCopy = `Ref: ${props.file.path}\nLine ${lineNumber}: ${lineContent}`;
+  navigator.clipboard.writeText(textToCopy);
 };
 
 const loadVersions = async () => {

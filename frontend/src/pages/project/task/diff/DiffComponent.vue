@@ -5,7 +5,7 @@
     </div>
     <div class="grow">
       <DiffFilesComponent v-if="!selectedFile" :files="files" @select="handleFileSelect"/>
-      <DiffViewComponent v-else :file="selectedFile" :task="task" @close="selectedFile = null" @line-click="console.log($event)"/>
+      <DiffViewComponent v-else :file="selectedFile" :task="task" @close="selectedFile = null"/>
     </div>
   </div>
 </template>
