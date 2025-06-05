@@ -1,7 +1,7 @@
 <template>
   <div class="h-full bg-gray-900 flex flex-col gap-2">
     <div class="flex justify-between items-center px-2 text-gray-300">
-      <div class="text-sm">
+      <div class="text-sm cursor-pointer hover:text-gray-100" @click="copyPathToClipboard">
         {{ file.path }}
       </div>
       <div class="flex justify-between items-center px-2 text-gray-400 gap-4">
@@ -112,6 +112,10 @@ const initEditor = () => {
 
   originalEditor.onMouseDown(e => handleEditorMouseDown(e, originalEditor, 'original'));
   modifiedEditor.onMouseDown(e => handleEditorMouseDown(e, modifiedEditor, 'modified'));
+};
+
+const copyPathToClipboard = () => {
+  navigator.clipboard.writeText(props.file.path);
 };
 
 const handleEditorMouseDown = (event, editorInstance, editorType) => {

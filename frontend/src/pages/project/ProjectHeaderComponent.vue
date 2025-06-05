@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md py-1 px-4">
+  <div class="bg-gray-900 rounded-lg shadow-md py-1 px-2">
     <div class="flex justify-between items-center">
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2">
         <h1 class="text-lg font-bold">{{ project?.name }}</h1>
         <div class="text-gray-300 text-xs">
           {{ project?.path }}

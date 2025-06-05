@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full bg-gray-800 p-4 overflow-y-auto">
+  <div class="h-full bg-gray-800 p-2 overflow-y-auto">
     <template v-if="files.length > 0">
       <DiffFileComponent v-for="file in files" :key="file.path" :file="file" @click="handleFileClick(file)"/>
     </template>

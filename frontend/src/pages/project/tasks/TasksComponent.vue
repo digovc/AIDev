@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col">
+  <div class="bg-gray-900 rounded-lg shadow-md p-2 flex flex-col">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-lg font-bold">Tarefas</h2>
       <button @click="showTaskForm" class="text-gray-400 hover:text-gray-200">
