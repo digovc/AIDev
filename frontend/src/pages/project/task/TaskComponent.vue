@@ -7,7 +7,7 @@
       </div>
 
       <div class="flex gap-4 text-gray-400 text-lg">
-        <button v-if="!isRunning && task?.id" @click="saveAndRunTask" :disabled="loading">
+        <button v-if="!isRunning && task?.id" @click="runTask" :disabled="loading">
           <FontAwesomeIcon :icon="faPlay" class="text-green-500 hover:text-green-300"/>
         </button>
         <button v-if="isRunning && task?.id" @click="stopTask" :disabled="loading">
@@ -89,8 +89,9 @@ const loadTask = async () => {
   }
 };
 
-const saveAndRunTask = async () => {
+const runTask = async () => {
   try {
+    if (!task.value?.id) return;
     loading.value = true;
     await tasksApi.runTask(task.value.id);
   } catch (error) {
@@ -122,12 +123,34 @@ const taskUpdated = (updatedTask) => {
   task.value = updatedTask;
 };
 
+const handleKeyPress = (event) => {
+  const isScapePressed = event.key === 'Escape';
+
+  if (isScapePressed) {
+    event.preventDefault();
+    event.stopPropagation();
+    goBack();
+    return false;
+  }
+
+  if (event.key === 'E' && event.ctrlKey && event.shiftKey) {
+    event.preventDefault();
+    event.stopPropagation();
+    runTask();
+    return false;
+  }
+
+  return true;
+};
+
 onMounted(async () => {
   await loadTask();
   socketIOService.socket.on('task-updated', taskUpdated);
+  window.addEventListener('keydown', handleKeyPress);
 });
 
 onUnmounted(() => {
   socketIOService.socket.off('task-updated', taskUpdated);
+  window.removeEventListener('keydown', handleKeyPress);
 });
 </script>

@@ -10,8 +10,7 @@
     </div>
 
     <!-- Botão para retomar o scroll automático -->
-    <button v-if="!autoScrollEnabled" @click="resumeAutoScroll"
-            class="absolute bottom-3 right-3 animate-pulse bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition text-xs">
+    <button v-if="!autoScrollEnabled" @click="resumeAutoScroll" class="absolute bottom-3 right-3 animate-pulse bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition text-xs">
       ↓ Ir para o final
     </button>
   </div>
@@ -90,7 +89,28 @@ const blockCreated = (block) => {
 };
 
 const blockDelta = (block) => {
-  const message = messages.value.find(m => m.id === block.messageId);
+  if (block.conversationId !== props.conversation.id) return;
+
+  let message = messages.value.find(m => m.id === block.messageId);
+
+  if (!message) {
+    message = {
+      id: block.messageId,
+      text: { body: '', label: '' },
+      sentAt: new Date(),
+      from: 'system',
+      blocks: [
+        {
+          id: block.id,
+          type: 'text',
+          content: block.delta,
+        }
+      ],
+    }
+
+    messages.value.push(message);
+    scrollToBottom();
+  }
 
   if (message && message.blocks && message.blocks.length > 0) {
     const localBlock = message.blocks.find(b => b.id === block.id);

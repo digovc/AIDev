@@ -124,6 +124,7 @@ class AgentService {
   async createBlock(assistantMessage, event) {
     const block = {
       id: `${ new Date().getTime() }`,
+      conversationId: assistantMessage.conversationId,
       messageId: assistantMessage.id,
       type: event.blockType,
       tool: event.tool,
@@ -141,6 +142,7 @@ class AgentService {
 
     socketIOService.io.emit('block-delta', {
       id: lastBlock.id,
+      conversationId: assistantMessage.conversationId,
       messageId: lastBlock.messageId,
       delta: content ?? ''
     });

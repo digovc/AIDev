@@ -10,13 +10,7 @@
       <div class="grow flex flex-col">
         <div class="flex justify-between items-center">
           <label class="form-label">Referências</label>
-          <FontAwesomeIcon 
-  :icon="faPlus" 
-  @click="openReferencesDialog" 
-  class="text-gray-400 hover:text-gray-200 cursor-pointer pr-2"
-  tabindex="0"
-  @keydown.enter="openReferencesDialog"
-/>
+          <FontAwesomeIcon :icon="faPlus" @click="openReferencesDialog" class="text-gray-400 hover:text-gray-200 cursor-pointer pr-2" tabindex="0" @keydown.enter="openReferencesDialog" @keydown.space="openReferencesDialog"/>
         </div>
 
         <div v-if="task.references.length === 0" class="text-gray-500 italic text-sm">
@@ -248,16 +242,6 @@ const removeReference = (index) => {
   task.references.splice(index, 1);
 };
 
-const handleKeyPress = (event) => {
-  const isScapePressed = event.key === 'Escape';
-
-  if (isScapePressed) {
-    event.preventDefault();
-    event.stopPropagation();
-    goBack();
-  }
-};
-
 const loadAssistants = async () => {
   try {
     const response = await assistantsApi.listAssistants();
@@ -282,9 +266,20 @@ const taskUpdated = (updatedTask) => {
   }
 };
 
+const handleKeyPress = (event) => {
+  if (event.key === 'E' && event.ctrlKey && event.shiftKey) {
+    event.preventDefault();
+    event.stopPropagation();
+    saveAndRunTask();
+    return false;
+  }
+
+  return true;
+};
+
 onMounted(async () => {
-  window.addEventListener('keydown', handleKeyPress);
   socketIOService.socket.on('task-updated', taskUpdated);
+  window.addEventListener('keydown', handleKeyPress);
 
   await loadTask();
   await loadAssistants();
@@ -292,7 +287,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyPress);
   socketIOService.socket.off('task-updated', taskUpdated);
+  window.removeEventListener('keydown', handleKeyPress);
 });
 </script>
