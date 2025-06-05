@@ -1,7 +1,7 @@
 <template>
   <div class="h-full flex flex-col gap-2">
     <div class="flex justify-end items-center pb-2 pr-2">
-      <FontAwesomeIcon :icon="faUpload" class="text-gray-400 hover:text-gray-200" @click="pushChanges"/>
+      <FontAwesomeIcon :icon="faUpload" class="text-gray-400 hover:text-gray-200" @click="pushChanges" :disabled="isPushing"/>
     </div>
     <div class="grow">
       <DiffFilesComponent v-if="!selectedFile" :files="files" @select="handleFileSelect"/>
@@ -24,6 +24,7 @@ const props = defineProps({
 
 const files = ref([]);
 const selectedFile = ref(null);
+const isPushing = ref(false);
 
 watch(() => props.task, async (newTask) => {
   if (!newTask) return;
@@ -41,11 +42,18 @@ const handleFileSelect = (file) => {
 };
 
 const pushChanges = async () => {
+  const confirmed = confirm('Tem certeza que deseja enviar as alterações?');
+  if (!confirmed) return;
+
+  isPushing.value = true;
   try {
     await gitApi.pushChanges(props.task.id);
+    alert('Alterações enviadas com sucesso!');
   } catch (error) {
     console.error('Failed to push changes:', error);
     alert('Ocorreu um erro ao enviar as alterações. Por favor, tente novamente.');
+  } finally {
+    isPushing.value = false;
   }
 };
 </script>
