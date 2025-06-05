@@ -52,7 +52,7 @@ class TasksController extends CrudControllerBase {
     const archivedTasks = await tasksStore.archiveTasks(projectId, taskIds);
 
     for (const taskId of taskIds) {
-      taskRunnerService.stopTask(taskId);
+      taskRunnerService.stopTask(taskId).catch(console.error);
     }
 
     res.json({ success: true, archivedTasks });

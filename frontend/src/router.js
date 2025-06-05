@@ -55,6 +55,11 @@ const router = createRouter({
               name: 'task-chat',
               component: () => import('./pages/project/task/chat/ChatComponent.vue'),
             },
+            {
+              path: 'diff',
+              name: 'task-diff',
+              component: () => import('./pages/project/task/diff/DiffComponent.vue'),
+            },
           ]
         }
       ]

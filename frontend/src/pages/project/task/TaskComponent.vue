@@ -53,6 +53,7 @@ const task = ref(null);
 const tabs = ref([
   { title: 'Detalhes', route: 'task-details', params: { taskId: task.value?.id } },
   { title: 'Histórico', route: 'task-chat' },
+  { title: 'Alterações', route: 'task-diff' },
 ]);
 
 watch(() => route.params.taskId, async (newTaskId) => {
