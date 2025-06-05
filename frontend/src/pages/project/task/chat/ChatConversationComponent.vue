@@ -69,7 +69,6 @@ const resumeAutoScroll = () => {
 
 const messageSaved = (message) => {
   if (message.conversationId !== props.conversation.id) return;
-
   if (!messages.value) messages.value = [];
 
   if (!messages.value.find(m => m.id === message.id)) {
@@ -91,26 +90,7 @@ const blockCreated = (block) => {
 const blockDelta = (block) => {
   if (block.conversationId !== props.conversation.id) return;
 
-  let message = messages.value.find(m => m.id === block.messageId);
-
-  if (!message) {
-    message = {
-      id: block.messageId,
-      text: { body: '', label: '' },
-      sentAt: new Date(),
-      from: 'system',
-      blocks: [
-        {
-          id: block.id,
-          type: 'text',
-          content: block.delta,
-        }
-      ],
-    }
-
-    messages.value.push(message);
-    scrollToBottom();
-  }
+  const message = messages.value.find(m => m.id === block.messageId);
 
   if (message && message.blocks && message.blocks.length > 0) {
     const localBlock = message.blocks.find(b => b.id === block.id);
