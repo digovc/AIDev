@@ -1,6 +1,6 @@
 <template>
   <div class="bg-gray-900 rounded-lg flex flex-col space-y-2">
-    <form @submit.prevent="saveTask" class="flex flex-col grow space-y-2">
+    <form class="flex flex-col grow space-y-2">
       <div class="mb-4">
         <label for="title" class="form-label">Título</label>
         <input type="text" id="title" v-model="task.title" class="form-input" required ref="titleInput"/>
@@ -57,7 +57,7 @@
       </div>
     </form>
     <ReferencesDialog ref="referencesDialog" :project="project" :task-references="task.references" @update:references="updateReferences"/>
-    <FileViewDialog ref="fileViewDialog" :file="selectedFile" />
+    <FileViewDialog ref="fileViewDialog" :file="selectedFile"/>
   </div>
 </template>
 

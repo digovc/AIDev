@@ -16,7 +16,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faTimes, faEye } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 defineProps({
   reference: {

@@ -7,8 +7,7 @@ class FilesService {
   async getFileContent(taskId, filePath) {
     const task = await tasksStore.getById(taskId);
     const project = await projectsStore.getById(task.projectId);
-    const projectPath = path.dirname(project.path);
-    const absolutePath = path.join(projectPath, filePath);
+    const absolutePath = path.join(project.path, filePath);
 
     try {
       const content = await fs.readFile(absolutePath, 'utf8');

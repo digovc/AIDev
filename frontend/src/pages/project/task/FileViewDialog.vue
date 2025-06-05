@@ -19,12 +19,14 @@
 </template>
 
 <script setup>
-import { onUnmounted, ref } from "vue";
+import { nextTick, onUnmounted, ref } from "vue";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { languageDetector } from "@/services/language.detector.js";
 import "@/services/monaco.worker.js";
+import { filesApi } from "@/api/files.api.js";
+import { useRoute } from "vue-router";
 
 const props = defineProps({
   file: {
@@ -36,13 +38,16 @@ const props = defineProps({
 const dialogRef = ref(null);
 const content = ref('');
 const editorContainer = ref();
+const route = useRoute();
+
 let monacoEditor = null;
 let model = null;
 
 const open = async () => {
+  await nextTick();
   await loadFile();
-  initEditor();
   dialogRef.value.showModal();
+  initEditor();
 };
 
 const close = () => {
@@ -92,7 +97,8 @@ const loadFile = async () => {
     return;
   }
   try {
-    const response = await fileApi.get(props.file.path);
+    const taskId = route.params.taskId;
+    const response = await filesApi.getFileContent(taskId, props.file.path);
     content.value = response.data.content;
   } catch (error) {
     console.error('Failed to fetch file content:', error);

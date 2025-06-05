@@ -97,7 +97,7 @@ const searchReferences = debounce(async () => {
   } finally {
     isSearching.value = false;
   }
-}, 500);
+}, 1000);
 
 const open = () => {
   references.value = [...props.taskReferences];
