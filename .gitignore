@@ -142,5 +142,6 @@ docs/_book
 test/
 
 backend/static
-backend/.aidev
+backend/.aidev*
 frontend/dist
+.DS_Store

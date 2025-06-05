@@ -38,17 +38,29 @@ const router = createRouter({
         {
           path: '',
           name: 'tasks',
-          component: () => import('./pages/project/taks/TasksComponent.vue'),
-        },
-        {
-          path: 'tasks/new',
-          name: 'task-new',
-          component: () => import('./pages/project/taks/TaskFormComponent.vue'),
+          component: () => import('./pages/project/tasks/TasksComponent.vue'),
         },
         {
           path: 'tasks/:taskId',
           name: 'task-edit',
-          component: () => import('./pages/project/taks/TaskFormComponent.vue'),
+          component: () => import('./pages/project/task/TaskComponent.vue'),
+          children: [
+            {
+              path: '',
+              name: 'task-details',
+              component: () => import('./pages/project/task/TaskFormComponent.vue'),
+            },
+            {
+              path: 'chat',
+              name: 'task-chat',
+              component: () => import('./pages/project/task/chat/ChatComponent.vue'),
+            },
+            {
+              path: 'diff',
+              name: 'task-diff',
+              component: () => import('./pages/project/task/diff/DiffComponent.vue'),
+            },
+          ]
         }
       ]
     },

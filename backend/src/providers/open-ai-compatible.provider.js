@@ -56,6 +56,12 @@ class OpenAICompatibleProvider {
     if (!choice.delta) return;
     const delta = choice.delta;
 
+    if (currentBlock.isOpen && currentBlock.type === 'reasoning' && delta.content) {
+      currentBlock.isOpen = false;
+      currentBlock.type = undefined;
+      currentBlock.toolUseId = undefined;
+    }
+
     if (currentBlock.isOpen && currentBlock.type === 'text' && delta.tool_calls?.length) {
       currentBlock.isOpen = false;
       currentBlock.type = undefined;
@@ -72,9 +78,11 @@ class OpenAICompatibleProvider {
       currentBlock.isOpen = true;
 
       if (!delta.tool_calls || !delta.tool_calls.length) {
-        currentBlock.type = 'text';
+        const type = delta.content != null ? 'text' : 'reasoning';
+        currentBlock.type = type;
         currentBlock.toolUseId = undefined;
-        return streamCallback({ type: 'block_start', blockType: 'text', content: delta.content ?? '' });
+        const content = delta.content ?? delta.reasoning_content ?? '';
+        return streamCallback({ type: 'block_start', blockType: type, content: content });
       }
 
       if (delta.tool_calls && delta.tool_calls.length) {
@@ -91,6 +99,10 @@ class OpenAICompatibleProvider {
           content: toolCall.function.arguments,
         });
       }
+    }
+
+    if (currentBlock.isOpen && currentBlock.type === 'reasoning' && delta.reasoning_content) {
+      return streamCallback({ type: 'block_delta', delta: delta.reasoning_content });
     }
 
     if (currentBlock.isOpen && currentBlock.type === 'text' && delta.content) {
@@ -121,13 +133,8 @@ class OpenAICompatibleProvider {
     const formattedMessages = [];
 
     for (const message of messages) {
-      if (!message.blocks?.length) {
-        continue;
-      }
-
-      if (message.sender === 'log') {
-        continue;
-      }
+      if (!message.blocks?.length) continue;
+      if (message.sender === 'log') continue;
 
       if (message.sender === 'system') {
         formattedMessages.push({
@@ -147,9 +154,7 @@ class OpenAICompatibleProvider {
       for (const block of message.blocks) {
         switch (block.type) {
           case 'text':
-            if (!block.content || !block.content.trim()) {
-              continue;
-            }
+            if (!block.content || !block.content.trim()) continue;
             textBlocks.push(block.content);
             break;
           case 'tool_use':
@@ -180,9 +185,8 @@ class OpenAICompatibleProvider {
         formattedMessage.content = textBlocks.join('\n');
       }
 
-      if (formattedMessage.empty) {
-        continue;
-      }
+      if (formattedMessage.empty) continue;
+      if (!formattedMessage.content && !formattedMessage.tool_calls) continue;
 
       formattedMessages.push(formattedMessage);
     }

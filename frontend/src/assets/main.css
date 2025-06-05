@@ -25,3 +25,7 @@ textarea.form-input {
 .btn-secondary {
     @apply border-gray-300 text-gray-700 bg-white hover:bg-gray-50;
 }
+
+.btn-danger {
+    @apply border-transparent text-white bg-red-500 hover:bg-red-600;
+}

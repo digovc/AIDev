@@ -10,7 +10,7 @@
     </div>
 
     <!-- Botão para retomar o scroll automático -->
-    <button v-if="!autoScrollEnabled" @click="resumeAutoScroll" class="fixed bottom-38 right-18 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition">
+    <button v-if="!autoScrollEnabled" @click="resumeAutoScroll" class="absolute bottom-3 right-3 animate-pulse bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition text-xs">
       ↓ Ir para o final
     </button>
   </div>
@@ -59,9 +59,7 @@ const handleScroll = () => {
   if (!messagesContainer.value) return;
 
   const { scrollTop, scrollHeight, clientHeight } = messagesContainer.value;
-  const isAtBottom = scrollHeight - (scrollTop + clientHeight) < 50; // Margem de 50px
-
-  autoScrollEnabled.value = isAtBottom;
+  autoScrollEnabled.value = scrollHeight - (scrollTop + clientHeight) < 50;
 };
 
 const resumeAutoScroll = () => {
@@ -71,7 +69,6 @@ const resumeAutoScroll = () => {
 
 const messageSaved = (message) => {
   if (message.conversationId !== props.conversation.id) return;
-
   if (!messages.value) messages.value = [];
 
   if (!messages.value.find(m => m.id === message.id)) {

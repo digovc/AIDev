@@ -5,7 +5,7 @@
       <span class="font-semibold text-yellow-500">{{ toolName }}</span>
     </div>
     <div v-if="block.content" class="tool-input bg-[#0d1117] p-2 rounded">
-      <pre class="whitespace-pre-wrap break-words text-sm">{{ formatInput(block.content) }}</pre>
+      <pre class="whitespace-pre-wrap break-words text-gray-400 text-xs">{{ formatInput(block.content) }}</pre>
     </div>
   </div>
 </template>

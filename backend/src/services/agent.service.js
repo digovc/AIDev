@@ -133,6 +133,7 @@ class AgentService {
 
     assistantMessage.blocks.push(block);
     socketIOService.io.emit('block-created', block);
+    await messagesStore.update(assistantMessage.id, assistantMessage);
   }
 
   async appendBlockContent(assistantMessage, content) {

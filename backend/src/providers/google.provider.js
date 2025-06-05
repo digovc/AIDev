@@ -7,7 +7,7 @@ class GoogleProvider {
     this.delay = 1000;
   }
 
-  async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
+  async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
     }
@@ -21,10 +21,10 @@ class GoogleProvider {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: assistent.model || 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: assistant.model || 'gemini-2.0-flash' });
 
     streamCallback({ type: 'message_start', inputTokens: 0 });
-    let isTooManyRequests = false;
+    let isRetryRequired = false;
 
     try {
       const toolsFormatted = this.formatTools(tools);
@@ -47,27 +47,28 @@ class GoogleProvider {
       this.retryCount = 0;
       this.delay = 1000;
     } catch (error) {
-      if (error.status === 429 && this.retryCount < 3) {
-        isTooManyRequests = true;
+      if (this.retryCount < 15) {
+        isRetryRequired = true;
       } else {
         throw error;
       }
     } finally {
-      if (!isTooManyRequests) {
+      if (!isRetryRequired) {
         streamCallback({ type: 'message_stop' });
       }
     }
 
-    if (isTooManyRequests) {
-      await this.retry(assistent, messages, cancelationToken, tools, streamCallback);
+    if (isRetryRequired) {
+      await this.retry(assistant, messages, cancelationToken, tools, streamCallback);
     }
   }
 
-  async retry(assistent, messages, cancelationToken, tools, streamCallback) {
+  async retry(assistant, messages, cancelationToken, tools, streamCallback) {
+    console.log('Retrying Google request...');
     this.retryCount++;
     await new Promise(resolve => setTimeout(resolve, this.delay));
     this.delay *= 2; // Exponential backoff
-    await this.chatCompletion(assistent, messages, cancelationToken, tools, streamCallback);
+    await this.chatCompletion(assistant, messages, cancelationToken, tools, streamCallback);
   }
 
   translateStreamEvent(chunk, currentBlock, streamCallback) {

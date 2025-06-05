@@ -5,20 +5,20 @@ const projecsStore = require('../stores/projects.store');
 class ListFilesTool {
   getDefinition() {
     return {
-      "name": "list_files",
-      "description": "Lista os diretórios e arquivos do projeto",
-      "input_schema": {
-        "type": "object",
-        "required": ["folder"],
-        "properties": {
-          "folder": {
-            "description": "Diretório que deseja listar",
-            "type": "string"
+      name: "list_files",
+      description: "Lists the directories and files of the project",
+      input_schema: {
+        type: "object",
+        required: ["folder"],
+        properties: {
+          folder: {
+            description: "The directory you want to list",
+            type: "string"
           }
         }
       }
     }
-  }
+  };
 
   async executeTool(conversation, input) {
     const project = await projecsStore.getById(conversation.projectId);

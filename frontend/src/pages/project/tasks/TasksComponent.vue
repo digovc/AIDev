@@ -1,7 +1,7 @@
 <template>
   <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-bold">Tarefas</h2>
+      <h2 class="text-lg font-bold">Tarefas</h2>
       <button @click="showTaskForm" class="text-gray-400 hover:text-gray-200">
         <FontAwesomeIcon :icon="faPlus" class="text-2xl"/>
       </button>
@@ -37,6 +37,7 @@ const router = useRouter();
 
 const emit = defineEmits(['taskSelected']);
 const tasks = ref([]);
+
 const showTaskForm = () => {
   router.push(`/projects/${ props.project.id }/tasks/new`);
 };
@@ -48,7 +49,6 @@ const getTasksByStatus = (status) => {
 const handleArchive = async (taskId) => {
   try {
     await tasksApi.archiveTasks(props.project.id, [taskId]);
-    // Remove a tarefa arquivada da lista
     tasks.value = tasks.value.filter(t => t.id !== taskId);
   } catch (error) {
     alert('Erro ao arquivar tarefa: ' + error.message);
@@ -80,7 +80,6 @@ const handlePlay = async (taskId) => {
 
   try {
     await tasksApi.runTask(task.id);
-    emit('taskSelected', task);
   } catch (error) {
     task.status = 'backlog';
     alert('Erro ao iniciar tarefa: ' + error.message);
@@ -88,7 +87,6 @@ const handlePlay = async (taskId) => {
 };
 
 const handlePlayNow = (taskId) => {
-  // Primeiro, coloca todas as tarefas em andamento de volta para o backlog
   tasks.value.forEach(t => {
     if (t.status === 'running') {
       t.status = 'backlog';
@@ -106,9 +104,7 @@ const handlePlayNow = (taskId) => {
 const handleStop = async (taskId) => {
   const task = tasks.value.find(t => t.id === taskId);
 
-  if (!task) {
-    return;
-  }
+  if (!task) return;
 
   task.status = 'backlog';
   await tasksApi.stopTask(task.id);
@@ -128,6 +124,15 @@ const handleEdit = (task) => {
   router.push(`/projects/${ props.project.id }/tasks/${ task.id }`);
   emit('taskSelected', task);
 };
+
+const handleKeyPress = (event) => {
+  const isPressed = event.ctrlKey && event.shiftKey && event.key === 'N';
+  if (isPressed) {
+    event.preventDefault();
+    showTaskForm();
+  }
+};
+
 
 const markTaskAsDone = async (task) => {
   task.status = 'done';
@@ -167,32 +172,16 @@ const taskUpdated = (task) => {
   }
 };
 
-const taskExecuting = (taskId) => {
-  const task = tasks.value.find(t => t.id === taskId);
-  if (task) {
-    task.isExecuting = true;
-  }
-};
-
-const taskNotExecuting = (taskId) => {
-  const task = tasks.value.find(t => t.id === taskId);
-  if (task) {
-    task.isExecuting = false
-  }
-};
-
 onMounted(async () => {
   await loadTasks()
+  window.addEventListener('keydown', handleKeyPress);
   socketIOService.socket.on('task-created', taskCreated);
   socketIOService.socket.on('task-updated', taskUpdated);
-  socketIOService.socket.on('task-executing', taskExecuting);
-  socketIOService.socket.on('task-not-executing', taskNotExecuting);
 });
 
 onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyPress);
   socketIOService.socket.off('task-created', taskCreated);
   socketIOService.socket.off('task-updated', taskUpdated);
-  socketIOService.socket.off('task-executing', taskExecuting);
-  socketIOService.socket.off('task-not-executing', taskNotExecuting);
 });
 </script>

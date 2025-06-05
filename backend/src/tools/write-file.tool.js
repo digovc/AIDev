@@ -5,42 +5,37 @@ const projectsStore = require('../stores/projects.store');
 class WriteFileTool {
   getDefinition() {
     return {
-      "name": "write_file",
-      "description": "Cria ou atualiza um arquivo no projeto",
-      "input_schema": {
-        "type": "object",
-        "required": [
-          "file",
-          "blocks"
-        ],
-        "properties": {
-          "file": {
-            "type": "string",
-            "description": "Diretório do arquivo a ser criado ou atualizado"
+      name: "write_file",
+      description: "Creates or updates a file in the project",
+      input_schema: {
+        type: "object",
+        required: ["file", "blocks"],
+        properties: {
+          file: {
+            type: "string",
+            description: "Path of the file to be created or updated"
           },
-          "blocks": {
-            "type": "array",
-            "description": "Array de blocos de a serem escritos ou substituídos no arquivo",
-            "items": {
-              "type": "object",
-              "required": [
-                "replace"
-              ],
-              "properties": {
-                "search": {
-                  "type": "string",
-                  "description": "Bloco de texto a ser substituído"
+          blocks: {
+            type: "array",
+            description: "List of write operation blocks",
+            items: {
+              type: "object",
+              required: ["new_snippet"],
+              properties: {
+                original_snippet: {
+                  type: "string",
+                  description: "The exact text snippet to find and replace"
                 },
-                "replace": {
-                  "type": "string",
-                  "description": "Bloco de texto a ser inserido ou substituído"
+                new_snippet: {
+                  type: "string",
+                  description: "The new text to replace the original snippet with"
                 }
               }
             }
           }
         }
       }
-    }
+    };
   }
 
   async executeTool(conversation, input) {
@@ -48,42 +43,35 @@ class WriteFileTool {
     const projectPath = project.path;
     const filePath = path.resolve(projectPath, input.file);
 
-    // Verificar se o arquivo existe
     let content = '';
+
     try {
       content = await fs.readFile(filePath, 'utf8');
     } catch (error) {
-      // Se o arquivo não existir, começamos com conteúdo vazio
       if (error.code !== 'ENOENT') {
-        throw new Error(`Erro ao escrever arquivo ${ input.file }: ${ error.message }`);
+        throw `Error writing file ${ input.file }: ${ error.message }`;
       }
     }
 
-    // Processar cada bloco
     for (const block of input.blocks) {
-      if (block.search) {
-        // Substituir conteúdo existente
-        if (!content.includes(block.search)) {
-          throw new Error(`Bloco de texto não encontrado no arquivo ${ input.file }: ${ block.search }`);
+      if (block.original_snippet) {
+        if (!content.includes(block.original_snippet)) {
+          throw new Error(`Block of text not found in file ${ input.file }: ${ block.original_snippet }`);
         }
 
-        content = content.replace(block.search, block.replace);
+        content = content.replace(block.original_snippet, block.new_snippet);
       } else {
-        // Adicionar novo conteúdo
-        content = block.replace;
+        content = block.new_snippet;
       }
     }
 
-    // Garantir que o diretório exista
     const directory = path.dirname(filePath);
     await fs.mkdir(directory, { recursive: true });
-
-    // Escrever o arquivo
     await fs.writeFile(filePath, content, 'utf8');
 
     return {
       success: true,
-      message: `Arquivo ${ input.file } atualizado com sucesso.`
+      message: `File ${ input.file } updated successfully.`
     };
   }
 }

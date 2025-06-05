@@ -27,7 +27,7 @@
 
       <!-- Lista de referências adicionadas -->
       <div class="grow">
-        <div v-if="references.length === 0" class="text-gray-400 text-center py-4 h-full flex items-center justify-center">
+        <div v-if="references.length === 0" class="text-sm text-gray-400 text-center py-4 h-full flex items-center justify-center">
           Nenhuma referência adicionada
         </div>
 
@@ -40,10 +40,10 @@
 </template>
 
 <script setup>
-import { nextTick, ref, watch } from 'vue';
-import { referencesApi } from '@/api/references.api';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { debounce } from 'lodash'
+import { nextTick, ref, watch } from 'vue';
+import { referencesApi } from '@/api/references.api';
 
 const props = defineProps({
   project: {
@@ -59,17 +59,45 @@ const props = defineProps({
 const dialogRef = ref(null);
 const emit = defineEmits(['update:references']);
 const isSearching = ref(false);
-const loading = ref(false);
 const references = ref([...props.taskReferences]);
 const searchQuery = ref('');
 const searchResults = ref([]);
-const selectedIndex = ref(-1);
 const searchResultsRef = ref(null);
+const selectedIndex = ref(-1);
 
 watch(searchQuery, () => {
   selectedIndex.value = -1;
   searchReferences();
 });
+
+const searchReferences = debounce(async () => {
+  if (!searchQuery.value.trim()) {
+    searchResults.value = [];
+    return;
+  }
+
+  isSearching.value = true;
+
+  try {
+    const response = await referencesApi.search(props.project.id, searchQuery.value);
+    let results = response.data || [];
+
+    if (!results.length) {
+      const responseRetry = await referencesApi.search(props.project.id, searchQuery.value);
+      results = responseRetry.data || [];
+    }
+
+    searchResults.value = (results || []).filter(
+        result => !references.value.some(ref => ref.path === result.path)
+    );
+    selectedIndex.value = searchResults.value.length > 0 ? 0 : -1;
+  } catch (error) {
+    console.error('Erro ao buscar referências:', error);
+    searchResults.value = [];
+  } finally {
+    isSearching.value = false;
+  }
+}, 500);
 
 const open = () => {
   references.value = [...props.taskReferences];
@@ -80,7 +108,6 @@ const open = () => {
 const close = () => {
   dialogRef.value.close();
   resetForm();
-
 };
 
 const resetForm = () => {
@@ -92,32 +119,7 @@ const resetForm = () => {
 
 const removeReference = (index) => {
   references.value.splice(index, 1);
-
 };
-
-// Método removido, pois a atualização de referências agora acontece em tempo real
-
-const searchReferences = debounce(async () => {
-  if (!searchQuery.value.trim()) {
-    searchResults.value = [];
-    return;
-  }
-
-  isSearching.value = true;
-  try {
-    const response = await referencesApi.search(props.project.id, searchQuery.value);
-    // Filtra referências que ainda não foram adicionadas
-    searchResults.value = (response.data || []).filter(
-        result => !references.value.some(ref => ref.path === result.path)
-    );
-    selectedIndex.value = searchResults.value.length > 0 ? 0 : -1;
-  } catch (error) {
-    console.error('Erro ao buscar referências:', error);
-    searchResults.value = [];
-  } finally {
-    isSearching.value = false;
-  }
-}, 500);
 
 const scrollToSelectedItem = () => {
   if (searchResultsRef.value && selectedIndex.value !== -1) {
@@ -130,6 +132,8 @@ const scrollToSelectedItem = () => {
 
 const handleKeyDown = (e) => {
   if (e.key === 'Escape') {
+    e.preventDefault();
+    e.stopPropagation();
     close();
     return;
   }

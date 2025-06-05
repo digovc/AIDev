@@ -2,7 +2,7 @@ const { Anthropic } = require('@anthropic-ai/sdk');
 const settingsStore = require('../stores/settings.store');
 
 class AnthropicProvider {
-  async chatCompletion(assistent, messages, cancelationToken, tools, streamCallback) {
+  async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
     if (cancelationToken.isCanceled()) {
       return;
     }
@@ -20,7 +20,7 @@ class AnthropicProvider {
     try {
       const stream = await anthropic.messages.create({
         messages: formattedMessages,
-        model: assistent.model,
+        model: assistant.model,
         max_tokens: 8192,
         stream: true,
         tools: tools,
