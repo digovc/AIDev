@@ -3,13 +3,13 @@ const path = require('path');
 const projectsStore = require('../stores/projects.store');
 const tasksStore = require('../stores/tasks.store');
 
-class FileService {
+class FilesService {
   async getFileContent(taskId, filePath) {
     const task = await tasksStore.getById(taskId);
     const project = await projectsStore.getById(task.projectId);
     const projectPath = path.dirname(project.path);
     const absolutePath = path.join(projectPath, filePath);
-    
+
     try {
       const content = await fs.readFile(absolutePath, 'utf8');
       return { content };
@@ -22,4 +22,4 @@ class FileService {
   }
 }
 
-module.exports = new FileService();
+module.exports = new FilesService();

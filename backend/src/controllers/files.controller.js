@@ -1,6 +1,6 @@
-const fileService = require('../services/file.service');
+const filesService = require('../services/files.service');
 
-class FileController {
+class FilesController {
   registerEndpoints(router) {
     router.get('/files/content/:taskId/:b64Path', (req, res) => {
       this.getFileContent(req, res).catch((e) => this._errorHandler(e, res));
@@ -10,7 +10,7 @@ class FileController {
   async getFileContent(req, res) {
     const { taskId, b64Path } = req.params;
     const filePath = Buffer.from(b64Path, 'base64').toString('utf8');
-    const content = await fileService.getFileContent(taskId, filePath);
+    const content = await filesService.getFileContent(taskId, filePath);
     res.json(content);
   }
 
@@ -20,4 +20,4 @@ class FileController {
   }
 }
 
-module.exports = new FileController();
+module.exports = new FilesController();
