@@ -16,11 +16,15 @@ export class GitApi extends ApiBase {
   }
 
   async getRemoteBranches(taskId) {
-    return this.client.get(`${ this.baseUrl }/branches/${ taskId }`);
+    return this.client.get(`${ this.baseUrl }/branches/${ taskId }`)
   }
 
   async pushChanges(taskId) {
     return this.client.post(`${ this.baseUrl }/push/${ taskId }`);
+  }
+
+  async checkout(branch) {
+    return this.client.post(`${ this.baseUrl }/checkout/${ branch }`);
   }
 }
 

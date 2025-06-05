@@ -78,7 +78,6 @@ class GitService {
     }
   }
 
-
   async getRemoteBranches(taskId) {
     try {
       const task = await tasksStore.getById(taskId);
@@ -114,6 +113,54 @@ class GitService {
         .map(line => line.trim().replace('origin/', ''));
     } catch (error) {
       throw new Error(`Error in GitService.getRemoteBranches: ${ error.message }`);
+    }
+  }
+
+  async checkout(taskId, branch) {
+    try {
+      const task = await tasksStore.getById(taskId);
+
+      if (!task) {
+        throw new Error('Task not found');
+      }
+
+      const projectId = task.projectId;
+      const project = await projectsStore.getById(projectId);
+
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      const projectPath = project.path;
+
+      if (!projectPath) {
+        throw new Error('Project path not defined');
+      }
+
+      // if some changes exist, throw an error
+      const { stdout, stderr } = await execAsync('git status --porcelain', { cwd: projectPath });
+
+      if (stderr) {
+        throw new Error(`Failed to get git status: ${ stderr }`);
+      }
+
+      if (stdout) {
+        throw new Error('Some changes exist in the project. Please commit or stash them before checking out a branch.');
+      }
+
+      // Fetch remote branches
+      await execAsync('git fetch origin', { cwd: projectPath });
+
+      if (stderr) {
+        throw new Error(`Failed to get remote branches: ${ stderr }`);
+      }
+
+      // Switch to a branch formatted as 'aidev-<task-id>'
+      await execAsync(`git checkout -b ${ branch }`, { cwd: projectPath });
+
+      return { success: true };
+    } catch (error) {
+      throw new Error(`Error in GitService.checkout: ${ error.message }`);
     }
   }
 

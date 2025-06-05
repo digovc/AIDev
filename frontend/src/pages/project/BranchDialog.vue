@@ -14,10 +14,12 @@
           Nenhuma branch encontrada
         </div>
 
-        <div v-else class="grid gap-3">
-          <div v-for="(branch, index) in branches" :key="index" class="p-1 cursor-pointer hover:bg-gray-700 text-sm">
-            <div>{{ branch }}</div>
-          </div>
+        <div v-else>
+          <select v-model="selectedBranch" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
+            <option v-for="(branch, index) in branches" :key="index" :value="branch">
+              {{ branch }}
+            </option>
+          </select>
         </div>
       </div>
 
@@ -30,17 +32,39 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { gitApi } from "@/api/git.api.js";
+import { useRoute } from "vue-router";
 
 const dialogRef = ref(null);
 const branches = ref([]);
+const selectedBranch = ref(null);
+const route = useRoute();
 
-const open = () => {
+const taskId = computed(() => route.params.taskId);
+
+const open = async () => {
+  const response = await gitApi.getRemoteBranches(taskId.value);
+
+  branches.value = response.data;
+
+  if (branches.value.length > 0) {
+    selectedBranch.value = branches.value[0];
+  }
+
   dialogRef.value.showModal();
 };
 
 const close = () => {
   dialogRef.value.close();
+};
+
+const checkoutBranch = async () => {
+  const isConfirmed = confirm(`Deseja realmente fazer checkout da branch ${ selectedBranch.value }?`);
+  if (isConfirmed) {
+    await gitApi.checkout(selectedBranch.value);
+    close();
+  }
 };
 
 defineExpose({
@@ -55,8 +79,8 @@ dialog::backdrop {
 
 dialog {
   border: none;
-  width: 75vw;
-  height: 75vh;
+  width: 25vw;
+  height: 25vh;
   position: fixed;
   top: 50%;
   left: 50%;

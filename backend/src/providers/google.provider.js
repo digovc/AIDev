@@ -24,7 +24,7 @@ class GoogleProvider {
     const model = genAI.getGenerativeModel({ model: assistant.model || 'gemini-2.0-flash' });
 
     streamCallback({ type: 'message_start', inputTokens: 0 });
-    let isTooManyRequests = false;
+    let isRetryRequired = false;
 
     try {
       const toolsFormatted = this.formatTools(tools);
@@ -47,18 +47,19 @@ class GoogleProvider {
       this.retryCount = 0;
       this.delay = 1000;
     } catch (error) {
-      if (error.status === 429 && this.retryCount < 3) {
-        isTooManyRequests = true;
+      const errors = [429, 500]
+      if (errors.includes(error.status) && this.retryCount < 5) {
+        isRetryRequired = true;
       } else {
         throw error;
       }
     } finally {
-      if (!isTooManyRequests) {
+      if (!isRetryRequired) {
         streamCallback({ type: 'message_stop' });
       }
     }
 
-    if (isTooManyRequests) {
+    if (isRetryRequired) {
       await this.retry(assistant, messages, cancelationToken, tools, streamCallback);
     }
   }
