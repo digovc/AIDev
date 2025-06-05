@@ -3,15 +3,20 @@
     <div class="text-xs text-gray-300">
       {{ reference.path }}
     </div>
-    <button @click.stop="$emit('remove')" class="invisible text-red-500 hover:text-red-700 group-hover:visible">
-      <FontAwesomeIcon :icon="faTimes"/>
-    </button>
+    <div class="flex gap-2">
+      <button @click.stop="$emit('view')" class="invisible text-blue-500 hover:text-blue-700 group-hover:visible">
+        <FontAwesomeIcon :icon="faEye"/>
+      </button>
+      <button @click.stop="$emit('remove')" class="invisible text-red-500 hover:text-red-700 group-hover:visible">
+        <FontAwesomeIcon :icon="faTimes"/>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faEye } from "@fortawesome/free-solid-svg-icons";
 
 defineProps({
   reference: {
@@ -20,5 +25,5 @@ defineProps({
   }
 });
 
-defineEmits(['remove']);
+defineEmits(['remove', 'view']);
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-900 rounded-lg px-1 flex flex-col space-y-2">
+  <div class="bg-gray-900 rounded-lg flex flex-col space-y-2">
     <form @submit.prevent="saveTask" class="flex flex-col grow space-y-2">
       <div class="mb-4">
         <label for="title" class="form-label">Título</label>
@@ -18,7 +18,7 @@
         </div>
 
         <div v-else class="space-y-2 pt-4 grow overflow-y-auto">
-          <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)"/>
+          <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)" @view="openFileViewDialog(ref)"/>
         </div>
       </div>
 
@@ -37,25 +37,27 @@
         </select>
       </div>
 
-      <div class="flex justify-end space-x-3 pt-2">
+      <div class="flex justify-end space-x-1 pt-2">
         <button v-if="!isTaskRunning" type="button" @click="saveAndRunTask" class="btn btn-primary" :disabled="loading">
-          <FontAwesomeIcon :icon="faPlay" class="mr-2"/>
-          Executar
+          <FontAwesomeIcon :icon="faPlay"/>
+          <span class="hidden md:inline md:pl-2">Executar</span>
         </button>
         <button type="submit" class="btn btn-primary" :disabled="loading">
-          <FontAwesomeIcon :icon="faSave" class="mr-2"/>
-          {{ loading ? 'Salvando...' : 'Salvar' }}
+          <FontAwesomeIcon :icon="faSave"/>
+          <span class="hidden md:inline md:pl-2">{{ loading ? 'Salvando...' : 'Salvar' }}</span>
         </button>
         <button v-if="isEditing" type="button" @click="duplicateTask" class="btn btn-secondary" :disabled="loading">
-          <FontAwesomeIcon :icon="faCopy" class="mr-2"/>
-          Duplicar
+          <FontAwesomeIcon :icon="faCopy"/>
+          <span class="hidden md:inline md:pl-2">Duplicar</span>
         </button>
         <button type="button" @click="goBack" class="btn btn-secondary">
-          Voltar
+          <FontAwesomeIcon :icon="faTimes"/>
+          <span class="hidden md:inline md:pl-2">Voltar</span>
         </button>
       </div>
     </form>
     <ReferencesDialog ref="referencesDialog" :project="project" :task-references="task.references" @update:references="updateReferences"/>
+    <FileViewDialog ref="fileViewDialog" :file="selectedFile" />
   </div>
 </template>
 
@@ -64,10 +66,11 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { tasksApi } from '@/api/tasks.api.js';
 import ReferencesDialog from '@/pages/project/task/ReferencesDialog.vue';
+import FileViewDialog from '@/pages/project/task/FileViewDialog.vue';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { assistantsApi } from '@/api/assistants.api.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faCopy, faPlay, faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faCopy, faPlay, faPlus, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { conversationsApi } from '@/api/conversations.api.js';
 import { socketIOService } from "@/services/socket.io.js";
 import { runningTasksService } from "@/services/running-tasks.service.js";
@@ -87,6 +90,9 @@ const referencesDialog = ref(null);
 const route = useRoute();
 const router = useRouter();
 const titleInput = ref(null);
+
+const fileViewDialog = ref(null);
+const selectedFile = ref({});
 
 const task = reactive({
   id: null,
@@ -232,6 +238,11 @@ const duplicateTask = async () => {
 
 const openReferencesDialog = () => {
   referencesDialog.value.open();
+};
+
+const openFileViewDialog = (file) => {
+  selectedFile.value = file;
+  fileViewDialog.value.open();
 };
 
 const updateReferences = (newReferences) => {
