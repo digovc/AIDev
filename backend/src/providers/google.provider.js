@@ -47,8 +47,7 @@ class GoogleProvider {
       this.retryCount = 0;
       this.delay = 1000;
     } catch (error) {
-      const errors = [429, 500]
-      if (errors.includes(error.status) && this.retryCount < 5) {
+      if (this.retryCount < 15) {
         isRetryRequired = true;
       } else {
         throw error;
@@ -65,6 +64,7 @@ class GoogleProvider {
   }
 
   async retry(assistant, messages, cancelationToken, tools, streamCallback) {
+    console.log('Retrying Google request...');
     this.retryCount++;
     await new Promise(resolve => setTimeout(resolve, this.delay));
     this.delay *= 2; // Exponential backoff
