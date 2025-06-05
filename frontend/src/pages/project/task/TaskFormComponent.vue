@@ -8,9 +8,9 @@
 
       <!-- Adicione esta nova seção para listar as referências -->
       <div class="grow flex flex-col">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center pr-2">
           <label class="form-label">Referências</label>
-          <FontAwesomeIcon :icon="faPlus" @click="openReferencesDialog" class="text-gray-400 hover:text-gray-200 cursor-pointer pr-2" tabindex="0" @keydown.enter="openReferencesDialog" @keydown.space="openReferencesDialog"/>
+          <FontAwesomeIcon :icon="faPlus" @click="openReferencesDialog" class="p-1 text-gray-400 hover:text-gray-200 cursor-pointer" tabindex="0" @keydown.enter="openReferencesDialog" @keydown.space="openReferencesDialog"/>
         </div>
 
         <div v-if="task.references.length === 0" class="text-gray-500 italic text-sm">

@@ -88,8 +88,6 @@ const blockCreated = (block) => {
 };
 
 const blockDelta = (block) => {
-  if (block.conversationId !== props.conversation.id) return;
-
   const message = messages.value.find(m => m.id === block.messageId);
 
   if (message && message.blocks && message.blocks.length > 0) {

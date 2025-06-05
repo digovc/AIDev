@@ -65,7 +65,7 @@ class GitService {
       const projectPath = project.path;
 
       // Get current file content
-      const previousContent = await execAsync(`git show HEAD:${filePath}`, { cwd: projectPath })
+      const previousContent = await execAsync(`git show HEAD:${ filePath }`, { cwd: projectPath })
         .then(({ stdout }) => stdout)
         .catch(() => ''); // Handle file not found or other errors
 
@@ -74,7 +74,49 @@ class GitService {
 
       return { previous: previousContent, current: currentContent };
     } catch (error) {
-      throw new Error(`Error in GitService: ${error.message}`);
+      throw new Error(`Error in GitService: ${ error.message }`);
+    }
+  }
+
+
+  async pushChanges(taskId) {
+    try {
+      const task = await tasksStore.getById(taskId);
+
+      if (!task) {
+        throw new Error('Task not found');
+      }
+
+      const projectId = task.projectId;
+      const project = await projectsStore.getById(projectId);
+
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      const projectPath = project.path;
+
+      if (!projectPath) {
+        throw new Error('Project path not defined');
+      }
+
+      // Switch to a branch formatted as 'aidev-<task-id>'
+      const branchName = `aidev-${ taskId }`;
+      await execAsync(`git checkout -b ${ branchName }`, { cwd: projectPath });
+
+      // Add all changes (modified, added, or deleted files)
+      await execAsync('git add -A', { cwd: projectPath });
+
+      // Create a commit with the task title as the message
+      const commitMessage = `${ task.title } - ${ new Date().toISOString() }`;
+      await execAsync(`git commit -m "${ commitMessage }"`, { cwd: projectPath });
+
+      // Push the changes to the remote repository
+      await execAsync(`git push origin ${ branchName }`, { cwd: projectPath });
+
+      return { success: true };
+    } catch (error) {
+      throw new Error(`Error in GitService.pushChanges: ${ error.message }`);
     }
   }
 }
