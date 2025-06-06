@@ -7,8 +7,11 @@
       <div class="text-xs font-mono pr-2" :class="statusClass">
         {{ statusText }}
       </div>
-      <div @click.stop="rollbackFile" class="text-gray-400 hover:text-white" title="'Rollback'">
+      <div v-if="file.status === 'M'" @click.stop="rollbackFile" class="text-gray-400 hover:text-white" title="'Rollback'">
         <FontAwesomeIcon :icon="faUndo"/>
+      </div>
+      <div v-if="file.status === 'A'" @click.stop="deleteFile" class="text-gray-400 hover:text-white" title="'Rollback'">
+        <FontAwesomeIcon :icon="faTrash"/>
       </div>
     </div>
   </div>
@@ -16,7 +19,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { faUndo } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faUndo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 const props = defineProps({
@@ -31,6 +34,14 @@ const emit = defineEmits(['rollback']);
 const rollbackFile = () => {
   if (confirm(`Tem certeza que deseja reverter as alterações no arquivo ${ props.file.path }?`)) {
     emit('rollback', props.file);
+    return false;
+  }
+};
+
+const deleteFile = () => {
+  if (confirm(`Tem certeza que deseja excluir o arquivo ${ props.file.path }?`)) {
+    emit('delete', props.file);
+    return false;
   }
 };
 
@@ -38,7 +49,7 @@ const statusClass = computed(() => {
   switch (props.file.status) {
     case 'M':
       return 'text-yellow-500';
-    case 'AM':
+    case 'A':
       return 'text-green-500';
     default:
       return 'text-gray-400';
@@ -48,8 +59,9 @@ const statusClass = computed(() => {
 const statusText = computed(() => {
   switch (props.file.status) {
     case 'M':
-      return 'Mod';
     case 'AM':
+      return 'Mod';
+    case 'A':
       return 'Add';
     default:
       return 'Não modificado';

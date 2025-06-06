@@ -28,6 +28,11 @@ export class GitApi extends ApiBase {
     return this.client.post(`${ this.baseUrl }/rollback/${ taskId }/${ b64Path }`);
   }
 
+  async deleteFile(taskId, filePath) {
+    const b64Path = btoa(filePath);
+    return this.client.delete(`${ this.baseUrl }/delete/${ taskId }/${ b64Path }`);
+  }
+
   async checkout(branch) {
     return this.client.post(`${ this.baseUrl }/checkout/${ branch }`);
   }

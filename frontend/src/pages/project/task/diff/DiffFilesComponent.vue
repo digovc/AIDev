@@ -3,7 +3,7 @@
     <template v-if="files.length > 0">
       <template v-for="file in files" :key="file.path">
         <template v-if="!file.isRolledBack">
-          <DiffFileComponent :file="file" @click="handleFileClick(file)" @rollback="handleRollback"/>
+          <DiffFileComponent :file="file" @click="handleFileClick(file)" @rollback="handleRollback" @delete="handleDelete"/>
         </template>
       </template>
     </template>
@@ -29,15 +29,19 @@ defineProps({
   }
 });
 
-const emit = defineEmits(['select', 'rollback']);
+const emit = defineEmits(['select']);
 
 const handleFileClick = (file) => {
   emit('select', file);
 };
 
 const handleRollback = async (file) => {
-  await gitApi.rollback(route.params.id, file.path);
-  emit('rollback');
+  await gitApi.rollback(route.params.taskId, file.path);
+  file.isRolledBack = true;
+};
+
+const handleDelete = async (file) => {
+  await gitApi.deleteFile(route.params.taskId, file.path);
   file.isRolledBack = true;
 };
 </script>

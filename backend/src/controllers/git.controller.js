@@ -22,6 +22,10 @@ class GitController {
       this.rollback(req, res).catch((e) => this._errorHandler(e, res));
     });
 
+    router.delete('/git/delete/:taskId/:b64Path', (req, res) => {
+      this.deleteFile(req, res).catch((e) => this._errorHandler(e, res));
+    });
+
     router.post('/git/push/:taskId', (req, res) => {
       this.pushChanges(req, res).catch((e) => this._errorHandler(e, res));
     });
@@ -42,44 +46,35 @@ class GitController {
 
   async getRemoteBranches(req, res) {
     const taskId = req.params.taskId;
-    try {
-      const branches = await gitService.getRemoteBranches(taskId);
-      res.json(branches);
-    } catch (error) {
-      this._errorHandler(error, res);
-    }
+    const branches = await gitService.getRemoteBranches(taskId);
+    res.json(branches);
   }
 
   async checkout(req, res) {
     const taskId = req.params.taskId;
     const branch = req.params.branch;
-    try {
-      await gitService.checkout(taskId, branch);
-      res.status(200).send({ success: true });
-    } catch (error) {
-      this._errorHandler(error, res);
-    }
+    await gitService.checkout(taskId, branch);
+    res.status(200).send({ success: true });
   }
 
   async pushChanges(req, res) {
     const taskId = req.params.taskId;
-    try {
-      await gitService.pushChanges(taskId);
-      res.status(200).send({ success: true });
-    } catch (error) {
-      this._errorHandler(error, res);
-    }
+    await gitService.pushChanges(taskId);
+    res.status(200).send({ success: true });
   }
 
   async rollback(req, res) {
     const { taskId, b64Path } = req.params;
     const filePath = Buffer.from(b64Path, 'base64').toString('utf8');
-    try {
-      await gitService.rollback(taskId, filePath);
-      res.status(200).send({ success: true });
-    } catch (error) {
-      this._errorHandler(error, res);
-    }
+    await gitService.rollback(taskId, filePath);
+    res.status(200).send({ success: true });
+  }
+
+  async deleteFile(req, res) {
+    const { taskId, b64Path } = req.params;
+    const filePath = Buffer.from(b64Path, 'base64').toString('utf8');
+    await gitService.deleteFile(taskId, filePath);
+    res.status(200).send({ success: true });
   }
 
   _errorHandler(err, res) {

@@ -12,6 +12,9 @@ class GitService {
     try {
       const { projectPath } = await this._getTaskAndProjectPath(taskId);
 
+      // Add all new files to the staging area
+      await execAsync('git add -A', { cwd: projectPath });
+
       // Execute git status --porcelain command
       const { stdout, stderr } = await execAsync('git status --porcelain', { cwd: projectPath });
 
@@ -141,6 +144,23 @@ class GitService {
       return { success: true };
     } catch (error) {
       throw new Error(`Error in GitService.rollback: ${ error.message }`);
+    }
+  }
+
+  async deleteFile(taskId, filePath) {
+    try {
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
+
+      // Delete the file from the repository
+      const { stderr } = await execAsync(`rm -f "${ filePath }"`, { cwd: projectPath });
+
+      if (stderr) {
+        throw new Error(`Failed to delete file: ${ stderr }`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      throw new Error(`Error in GitService.deleteFile: ${ error.message }`);
     }
   }
 
