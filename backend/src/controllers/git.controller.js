@@ -18,6 +18,10 @@ class GitController {
       this.checkout(req, res).catch((e) => this._errorHandler(e, res));
     });
 
+    router.post('/git/rollback/:taskId/:b64Path', (req, res) => {
+      this.rollback(req, res).catch((e) => this._errorHandler(e, res));
+    });
+
     router.post('/git/push/:taskId', (req, res) => {
       this.pushChanges(req, res).catch((e) => this._errorHandler(e, res));
     });
@@ -61,6 +65,17 @@ class GitController {
     const taskId = req.params.taskId;
     try {
       await gitService.pushChanges(taskId);
+      res.status(200).send({ success: true });
+    } catch (error) {
+      this._errorHandler(error, res);
+    }
+  }
+
+  async rollback(req, res) {
+    const { taskId, b64Path } = req.params;
+    const filePath = Buffer.from(b64Path, 'base64').toString('utf8');
+    try {
+      await gitService.rollback(taskId, filePath);
       res.status(200).send({ success: true });
     } catch (error) {
       this._errorHandler(error, res);

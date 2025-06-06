@@ -127,6 +127,23 @@ class GitService {
     }
   }
 
+  async rollback(taskId, filePath) {
+    try {
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
+
+      // Execute git checkout command to revert the file
+      const { stdout, stderr } = await execAsync(`git checkout HEAD -- "${ filePath }"`, { cwd: projectPath });
+
+      if (stderr) {
+        throw new Error(`Failed to rollback file: ${ stderr }`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      throw new Error(`Error in GitService.rollback: ${ error.message }`);
+    }
+  }
+
   async _getTaskAndProjectPath(taskId) {
     const task = await tasksStore.getById(taskId);
     if (!task) {
