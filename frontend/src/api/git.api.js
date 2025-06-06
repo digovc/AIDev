@@ -1,6 +1,6 @@
 import { ApiBase } from './api.base';
 
-export class GitApi extends ApiBase {
+class GitApi extends ApiBase {
   constructor() {
     super();
     this.baseUrl = '/git';

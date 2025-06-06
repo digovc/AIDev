@@ -5,7 +5,7 @@
     </div>
     <div class="grow">
       <DiffFilesComponent v-if="!selectedFile" :files="files" @select="handleFileSelect"/>
-      <DiffViewComponent v-else :file="selectedFile" :task="task" @close="selectedFile = null"/>
+      <DiffViewDialog v-else :file="selectedFile" :task="task" @close="selectedFile = null"/>
     </div>
   </div>
 </template>
@@ -13,7 +13,7 @@
 <script setup>
 import { nextTick, ref, watch } from 'vue';
 import DiffFilesComponent from './DiffFilesComponent.vue';
-import DiffViewComponent from './DiffViewComponent.vue';
+import DiffViewDialog from './DiffViewDialog.vue';
 import { gitApi } from "@/api/git.api.js";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
