@@ -6,9 +6,9 @@ export class FilesApi extends ApiBase {
     this.baseUrl = '/files';
   }
 
-  async getFileContent(taskId, filePath) {
+  async getFileContent(projectId, filePath) {
     const b64Path = btoa(filePath);
-    return this.client.get(`${ this.baseUrl }/content/${ taskId }/${ b64Path }`);
+    return this.client.get(`${ this.baseUrl }/content/${ projectId }/${ b64Path }`);
   }
 }
 

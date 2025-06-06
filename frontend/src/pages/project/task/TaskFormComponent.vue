@@ -141,7 +141,7 @@ const saveTask = async () => {
       task.id = result.data.id;
     }
 
-    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }`);
+    await router.push(`/projects/${ props.project.id }`);
   } catch (error) {
     console.error(`Erro ao ${ isEditing.value ? 'atualizar' : 'salvar' } tarefa:`, error);
     alert(`Ocorreu um erro ao ${ isEditing.value ? 'atualizar' : 'salvar' } a tarefa. Por favor, tente novamente.`);

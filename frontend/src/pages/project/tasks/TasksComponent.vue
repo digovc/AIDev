@@ -146,7 +146,7 @@ const markTaskAsDone = async (task) => {
 
 const loadTasks = async () => {
   const result = await tasksApi.getTasksByProjectId(props.project.id);
-  tasks.value = result.data;
+  tasks.value = (result.data || []).reverse();
 };
 
 const taskCreated = (task) => {

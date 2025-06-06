@@ -112,8 +112,8 @@ const loadFile = async () => {
     return;
   }
   try {
-    const taskId = route.params.taskId;
-    const response = await filesApi.getFileContent(taskId, props.file.path);
+    const projectId = route.params.id;
+    const response = await filesApi.getFileContent(projectId, props.file.path);
     content.value = response.data.content;
   } catch (error) {
     console.error('Failed to fetch file content:', error);
