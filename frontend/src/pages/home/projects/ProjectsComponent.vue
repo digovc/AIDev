@@ -1,7 +1,7 @@
 <template>
   <div class="p-4">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Meus Projetos</h1>
+      <h1 class="text-2xl font-bold">Projetos</h1>
       <button @click="showProjectForm" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
         Novo Projeto
       </button>

@@ -103,7 +103,7 @@ class AgentService {
         case 'block_start':
           return this.createBlock(assistantMessage, event);
         case 'block_delta':
-          return this.appendBlockContent(assistantMessage, event.delta);
+          return this.appendBlockContent(conversation, assistantMessage, event.delta);
       }
     } catch (e) {
       const message = `Erro ao processar stream: ${ e.message }`;
@@ -136,12 +136,13 @@ class AgentService {
     await messagesStore.update(assistantMessage.id, assistantMessage);
   }
 
-  async appendBlockContent(assistantMessage, content) {
+  async appendBlockContent(conversation, assistantMessage, content) {
     const lastBlock = assistantMessage.blocks[assistantMessage.blocks.length - 1];
     lastBlock.content += content ?? '';
 
     socketIOService.io.emit('block-delta', {
       id: lastBlock.id,
+      taskId: conversation.taskId,
       messageId: lastBlock.messageId,
       delta: content ?? ''
     });

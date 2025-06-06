@@ -80,16 +80,9 @@ const searchReferences = debounce(async () => {
 
   try {
     const response = await referencesApi.search(props.project.id, searchQuery.value);
-    let results = response.data || [];
+    const results = response.data ?? [];
 
-    if (!results.length) {
-      const responseRetry = await referencesApi.search(props.project.id, searchQuery.value);
-      results = responseRetry.data || [];
-    }
-
-    searchResults.value = (results || []).filter(
-        result => !references.value.some(ref => ref.path === result.path)
-    );
+    searchResults.value = results.filter(result => !references.value.some(ref => ref.path === result.path));
     selectedIndex.value = searchResults.value.length > 0 ? 0 : -1;
   } catch (error) {
     console.error('Erro ao buscar referências:', error);
