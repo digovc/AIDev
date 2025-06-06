@@ -17,7 +17,7 @@
         <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
       </button>
     </div>
-    <ProjectFormComponent ref="projectFormRef" @project-updated="onProjectUpdated"/>
+    <ProjectFormDialog ref="projectFormRef" @project-updated="onProjectUpdated"/>
     <BranchDialog ref="branchDialogRef" :project="project"/>
   </div>
 </template>
@@ -25,7 +25,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
-import ProjectFormComponent from '@/components/ProjectFormComponent.vue';
+import ProjectFormDialog from '@/components/ProjectFormDialog.vue';
 import BranchDialog from './BranchDialog.vue';
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCodeBranch, faEdit, faTimes } from "@fortawesome/free-solid-svg-icons";

@@ -32,6 +32,7 @@ defineProps({
 const emit = defineEmits(['select']);
 
 const handleFileClick = (file) => {
+  if (['D', 'R'].includes(file.status)) return;
   emit('select', file);
 };
 

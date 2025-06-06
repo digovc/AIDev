@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { projectsApi } from '@/api/projects.api';
 
 const props = defineProps({
@@ -62,20 +62,6 @@ const project = reactive({
 });
 
 const isEditing = computed(() => !!project.id);
-
-const open = (projectToEdit = null) => {
-  if (projectToEdit) {
-    Object.assign(project, projectToEdit);
-  } else {
-    resetForm();
-  }
-  dialogRef.value.showModal();
-};
-
-const close = () => {
-  dialogRef.value.close();
-  resetForm();
-};
 
 const resetForm = () => {
   project.id = '';
@@ -105,6 +91,20 @@ const saveProject = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const open = (projectToEdit = null) => {
+  if (projectToEdit) {
+    Object.assign(project, projectToEdit);
+  } else {
+    resetForm();
+  }
+  dialogRef.value.showModal();
+};
+
+const close = () => {
+  dialogRef.value.close();
+  resetForm();
 };
 
 defineExpose({

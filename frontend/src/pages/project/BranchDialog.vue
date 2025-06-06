@@ -43,6 +43,14 @@ const route = useRoute();
 
 const taskId = computed(() => route.params.taskId);
 
+const checkoutBranch = async () => {
+  const isConfirmed = confirm(`Deseja realmente fazer checkout da branch ${ selectedBranch.value }?`);
+  if (isConfirmed) {
+    await gitApi.checkout(selectedBranch.value);
+    close();
+  }
+};
+
 const open = async () => {
   const response = await gitApi.getRemoteBranches(taskId.value);
 
@@ -57,14 +65,6 @@ const open = async () => {
 
 const close = () => {
   dialogRef.value.close();
-};
-
-const checkoutBranch = async () => {
-  const isConfirmed = confirm(`Deseja realmente fazer checkout da branch ${ selectedBranch.value }?`);
-  if (isConfirmed) {
-    await gitApi.checkout(selectedBranch.value);
-    close();
-  }
 };
 
 defineExpose({

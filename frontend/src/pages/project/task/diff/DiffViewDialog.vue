@@ -1,24 +1,26 @@
 <template>
-  <div class="h-full bg-gray-900 flex flex-col gap-2">
-    <div class="flex justify-between items-center px-2 text-gray-300">
-      <div class="text-sm cursor-pointer hover:text-gray-100" @click="copyPathToClipboard">
-        {{ file.path }}
+  <dialog ref="dialogRef" class="p-0 rounded-lg shadow-lg bg-gray-900 text-white">
+    <div class="w-full h-full flex flex-col gap-2">
+      <div class="flex justify-between items-center p-2 text-gray-300">
+        <div class="text-sm cursor-pointer hover:text-gray-100" @click="copyPathToClipboard">
+          {{ file.path }}
+        </div>
+        <div class="flex justify-between items-center px-2 text-gray-400 gap-4">
+          <FontAwesomeIcon :icon="faRightLeft" @click="toggleSplitView" class="text-gray-400 hover:text-gray-300 cursor-pointer"/>
+          <FontAwesomeIcon :icon="faTimes" @click="close" class="text-gray-400 hover:text-gray-300 cursor-pointer"/>
+        </div>
       </div>
-      <div class="flex justify-between items-center px-2 text-gray-400 gap-4">
-        <FontAwesomeIcon :icon="faRightLeft" @click="toggleSplitView" class="text-gray-400 hover:text-gray-300 cursor-pointer"/>
-        <FontAwesomeIcon :icon="faTimes" @click="$emit('close')" class="text-gray-400 hover:text-gray-300 cursor-pointer"/>
+      <div class="flex-1 overflow-y-auto relative mx-2 mb-2">
+        <div class="absolute inset-0">
+          <div ref="editorContainer" class="h-full"/>
+        </div>
       </div>
     </div>
-    <div class="flex-1 overflow-y-auto relative">
-      <div class="absolute inset-0">
-        <div ref="editorContainer" class="h-full"/>
-      </div>
-    </div>
-  </div>
+  </dialog>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { nextTick, ref } from "vue";
 import { gitApi } from "@/api/git.api.js";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { faRightLeft, faTimes } from "@fortawesome/free-solid-svg-icons";
@@ -29,17 +31,14 @@ import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   task: {
-    type: Object,
-    required: true
+    type: Object
   },
   file: {
-    type: Object,
-    required: true
+    type: Object
   }
 });
 
-const emit = defineEmits(['close']);
-
+const dialogRef = ref(null);
 const versions = ref();
 const editorContainer = ref();
 let monacoDiffEditor = null;
@@ -63,30 +62,8 @@ const initEditor = () => {
 
   const language = languageDetector.getLanguage(props.file.path);
 
-  // Limpar modelos anteriores, se existirem
-  if (originalModelInstance) {
-    originalModelInstance.dispose();
-    originalModelInstance = null;
-  }
-
-  if (modifiedModelInstance) {
-    modifiedModelInstance.dispose();
-    modifiedModelInstance = null;
-  }
-
-  originalModelInstance = monaco.editor.createModel(
-      versions.value.previous,
-      language
-  );
-
-  modifiedModelInstance = monaco.editor.createModel(
-      versions.value.current,
-      language
-  );
-
-  if (monacoDiffEditor) {
-    monacoDiffEditor.dispose();
-  }
+  originalModelInstance = monaco.editor.createModel(versions.value.previous, language);
+  modifiedModelInstance = monaco.editor.createModel(versions.value.current, language);
 
   monacoDiffEditor = monaco.editor.createDiffEditor(
       editorContainer.value,
@@ -117,7 +94,7 @@ const copyPathToClipboard = () => {
   navigator.clipboard.writeText(props.file.path);
 };
 
-const handleEditorMouseDown = (event, editorInstance, editorType) => {
+const handleEditorMouseDown = (event, editorInstance) => {
   const target = event.target;
   if (target.type !== monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) return;
   if (!target.position) return;
@@ -142,34 +119,50 @@ const loadVersions = async () => {
 };
 
 const handleClose = () => {
-  emit('close');
+  close();
 };
 
-onMounted(async () => {
-  await loadVersions();
+const open = async () => {
   shortcutService.on('close', handleClose);
+  await nextTick();
+  await loadVersions();
+  initEditor();
 
-  if (versions.value) {
-    initEditor();
-  }
-});
+  dialogRef.value.showModal();
+};
 
-onUnmounted(() => {
+const close = () => {
   shortcutService.off('close', handleClose);
+  monacoDiffEditor?.dispose();
+  originalModelInstance?.dispose();
+  modifiedModelInstance?.dispose();
 
-  if (monacoDiffEditor) {
-    monacoDiffEditor.dispose();
-    monacoDiffEditor = null;
-  }
+  monacoDiffEditor = null;
+  originalModelInstance = null;
+  modifiedModelInstance = null;
 
-  if (originalModelInstance) {
-    originalModelInstance.dispose();
-    originalModelInstance = null;
-  }
 
-  if (modifiedModelInstance) {
-    modifiedModelInstance.dispose();
-    modifiedModelInstance = null;
-  }
+  dialogRef.value.close();
+};
+
+defineExpose({
+  open
 });
 </script>
+
+<style scoped>
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+dialog {
+  border: none;
+  width: 90vw;
+  height: 90vh;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+}
+</style>

@@ -4,8 +4,8 @@
       <FontAwesomeIcon :icon="faUpload" class="text-gray-400 hover:text-gray-200" @click="pushChanges" :disabled="isPushing"/>
     </div>
     <div class="grow">
-      <DiffFilesComponent v-if="!selectedFile" :files="files" @select="handleFileSelect"/>
-      <DiffViewDialog v-else :file="selectedFile" :task="task" @close="selectedFile = null"/>
+      <DiffFilesComponent :files="files" @select="handleFileSelect"/>
+      <DiffViewDialog v-if="selectedFile" ref="diffViewDialog" :file="selectedFile" :task="task"/>
     </div>
   </div>
 </template>
@@ -25,6 +25,7 @@ const props = defineProps({
 const files = ref([]);
 const selectedFile = ref(null);
 const isPushing = ref(false);
+const diffViewDialog = ref(null);
 
 watch(() => props.task, async (newTask) => {
   if (!newTask) return;
@@ -38,7 +39,10 @@ watch(() => props.task, async (newTask) => {
 }, { immediate: true });
 
 const handleFileSelect = (file) => {
-  selectedFile.value = file
+  selectedFile.value = file;
+  nextTick(() => {
+    diffViewDialog.value.open();
+  });
 };
 
 const pushChanges = async () => {

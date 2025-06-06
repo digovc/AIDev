@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref } from "vue";
+import { nextTick, ref } from "vue";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -43,17 +43,6 @@ const route = useRoute();
 
 let monacoEditor = null;
 let model = null;
-
-const open = async () => {
-  await nextTick();
-  await loadFile();
-  dialogRef.value.showModal();
-  initEditor();
-};
-
-const close = () => {
-  dialogRef.value.close();
-};
 
 const initEditor = () => {
   if (!editorContainer.value) {
@@ -127,22 +116,24 @@ const handleClose = () => {
   close();
 };
 
-onMounted(async () => {
+const open = async () => {
   shortcutService.on('close', handleClose);
-});
 
-onUnmounted(() => {
+  await nextTick();
+  await loadFile();
+  initEditor();
+
+  dialogRef.value.showModal();
+};
+
+const close = () => {
   shortcutService.off('close', handleClose);
 
-  if (monacoEditor) {
-    monacoEditor.dispose();
-    monacoEditor = null;
-  }
-  if (model) {
-    model.dispose();
-    model = null;
-  }
-});
+  monacoEditor?.dispose();
+  model?.dispose();
+
+  dialogRef.value.close();
+};
 
 defineExpose({
   open

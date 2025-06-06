@@ -1,5 +1,5 @@
 <template>
-  <div class="group bg-gray-800 rounded-lg p-2 flex justify-between items-center mb-2 gap-2 cursor-pointer hover:bg-gray-700" @click="$emit('click')">
+  <div class="group bg-gray-800 rounded-lg p-2 flex justify-between items-center mb-2 gap-2 cursor-pointer hover:bg-gray-700">
     <div class="text-xs text-gray-300">
       {{ file.path }}
     </div>
@@ -47,6 +47,10 @@ const deleteFile = () => {
 
 const statusClass = computed(() => {
   switch (props.file.status) {
+    case 'D':
+      return 'text-red-500';
+    case 'R':
+      return 'text-orange-500';
     case 'M':
       return 'text-yellow-500';
     case 'A':
@@ -58,6 +62,10 @@ const statusClass = computed(() => {
 
 const statusText = computed(() => {
   switch (props.file.status) {
+    case 'D':
+      return 'Del';
+    case 'R':
+      return 'Ren';
     case 'M':
     case 'AM':
       return 'Mod';

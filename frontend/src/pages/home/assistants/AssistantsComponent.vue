@@ -6,7 +6,7 @@
         Novo Assistente
       </button>
     </div>
-    <AssistantFormComponent ref="assistantFormRef" @assistant-created="onAssistantCreated" @assistant-updated="onAssistantUpdated"/>
+    <AssistantFormDialog ref="assistantFormRef" @assistant-created="onAssistantCreated" @assistant-updated="onAssistantUpdated"/>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <AssistantComponent v-for="assistant in assistants" :key="assistant.id" :assistant="assistant" @edit-assistant="editAssistant"/>
     </div>
@@ -19,7 +19,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import AssistantComponent from './AssistantComponent.vue';
-import AssistantFormComponent from '@/components/AssistantFormComponent.vue';
+import AssistantFormDialog from '@/components/AssistantFormDialog.vue';
 import { assistantsApi } from "@/api/assistants.api.js";
 
 const assistants = ref([]);
