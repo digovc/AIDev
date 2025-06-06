@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { tasksApi } from '@/api/tasks.api.js';
 import ReferencesDialog from '@/pages/project/task/ReferencesDialog.vue';
@@ -155,6 +155,8 @@ const saveAndRunTask = async () => {
     loading.value = true;
     await saveTask();
     await tasksApi.runTask(task.id);
+    await nextTick();
+    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }/chat`);
   } catch (error) {
     console.error('Erro ao executar tarefa:', error);
     alert('Ocorreu um erro ao executar a tarefa. Por favor, tente novamente.');
