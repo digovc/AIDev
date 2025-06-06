@@ -29,7 +29,7 @@ const openTab = (tab) => {
 };
 
 const isActive = (tab) => {
-  return activeTab.value?.route === tab.route;
+  return router.currentRoute.value.name === tab.route;
 };
 
 onMounted(() => {
