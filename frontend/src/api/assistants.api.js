@@ -1,21 +1,19 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export const assistantsApi = {
   async createAssistant(assistant) {
-    return await axios.post(`${API_URL}/assistants`, assistant);
+    return await axios.post(`/assistants`, assistant);
   },
 
   async updateAssistant(id, assistant) {
-    return await axios.put(`${API_URL}/assistants/${id}`, assistant);
+    return await axios.put(`/assistants/${id}`, assistant);
   },
 
   async listAssistants() {
-    return await axios.get(`${API_URL}/assistants`);
+    return await axios.get(`/assistants`);
   },
 
   async deleteAssistant(id) {
-    return await axios.delete(`${API_URL}/assistants/${id}`);
+    return await axios.delete(`/assistants/${id}`);
   }
 };
