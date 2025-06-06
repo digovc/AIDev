@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import DiffFilesComponent from './DiffFilesComponent.vue';
 import DiffViewComponent from './DiffViewComponent.vue';
 import { gitApi } from "@/api/git.api.js";
@@ -49,6 +49,7 @@ const pushChanges = async () => {
   try {
     await gitApi.pushChanges(props.task.id);
     files.value = []
+    await nextTick();
     alert('Alterações enviadas com sucesso!');
   } catch (error) {
     console.error('Failed to push changes:', error);
