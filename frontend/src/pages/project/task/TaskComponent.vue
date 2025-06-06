@@ -37,6 +37,7 @@ import TabsComponent from '@/components/TabsComponent.vue';
 import { tasksApi } from '@/api/tasks.api.js';
 import { runningTasksService } from "@/services/running-tasks.service.js";
 import { socketIOService } from "@/services/socket.io.js";
+import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   project: {
@@ -134,36 +135,24 @@ const taskUpdated = (updatedTask) => {
   task.value = updatedTask;
 };
 
-const handleKeyPress = (event) => {
-  if (event.defaultPrevented) return;
+const handleExecute = () => {
+  runTask();
+};
 
-  const isScapePressed = event.key === 'Escape';
-
-  if (isScapePressed) {
-    event.preventDefault();
-    event.stopPropagation();
-    goBack();
-    return false;
-  }
-
-  if (event.key === 'E' && event.ctrlKey && event.shiftKey) {
-    event.preventDefault();
-    event.stopPropagation();
-    runTask();
-    return false;
-  }
-
-  return true;
+const handleClose = () => {
+  goBack();
 };
 
 onMounted(async () => {
   await loadTask();
   socketIOService.socket.on('task-updated', taskUpdated);
-  window.addEventListener('keydown', handleKeyPress);
+  shortcutService.on('execute', handleExecute);
+  shortcutService.on('close', handleClose);
 });
 
 onUnmounted(() => {
   socketIOService.socket.off('task-updated', taskUpdated);
-  window.removeEventListener('keydown', handleKeyPress);
+  shortcutService.off('execute', handleExecute);
+  shortcutService.off('close', handleClose);
 });
 </script>

@@ -25,6 +25,7 @@ import { tasksApi } from '@/api/tasks.api.js';
 import { socketIOService } from "@/services/socket.io.js";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   project: {
@@ -125,15 +126,6 @@ const handleEdit = (task) => {
   emit('taskSelected', task);
 };
 
-const handleKeyPress = (event) => {
-  const isPressed = event.ctrlKey && event.shiftKey && event.key === 'N';
-  if (isPressed) {
-    event.preventDefault();
-    showTaskForm();
-  }
-};
-
-
 const markTaskAsDone = async (task) => {
   task.status = 'done';
   try {
@@ -143,6 +135,7 @@ const markTaskAsDone = async (task) => {
     alert('Erro ao concluir tarefa: ' + error.message);
   }
 };
+
 
 const loadTasks = async () => {
   const result = await tasksApi.getTasksByProjectId(props.project.id);
@@ -172,16 +165,20 @@ const taskUpdated = (task) => {
   }
 };
 
+const handleNew = () => {
+  showTaskForm();
+};
+
 onMounted(async () => {
   await loadTasks()
-  window.addEventListener('keydown', handleKeyPress);
   socketIOService.socket.on('task-created', taskCreated);
   socketIOService.socket.on('task-updated', taskUpdated);
+  shortcutService.on('new', handleNew);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyPress);
   socketIOService.socket.off('task-created', taskCreated);
   socketIOService.socket.off('task-updated', taskUpdated);
+  shortcutService.off('new', handleNew);
 });
 </script>

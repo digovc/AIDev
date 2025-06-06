@@ -17,7 +17,7 @@
           Nenhuma referência adicionada
         </div>
 
-        <div v-else class="space-y-2 pt-4 grow overflow-y-auto">
+        <div v-else class="space-y-2 pt-4 grow">
           <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)" @view="openFileViewDialog(ref)"/>
         </div>
       </div>
@@ -74,6 +74,7 @@ import { faCopy, faPlay, faPlus, faSave, faTimes } from '@fortawesome/free-solid
 import { conversationsApi } from '@/api/conversations.api.js';
 import { socketIOService } from "@/services/socket.io.js";
 import { runningTasksService } from "@/services/running-tasks.service.js";
+import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   project: {
@@ -279,20 +280,13 @@ const taskUpdated = (updatedTask) => {
   }
 };
 
-const handleKeyPress = (event) => {
-  if (event.key === 'E' && event.ctrlKey && event.shiftKey) {
-    event.preventDefault();
-    event.stopPropagation();
-    saveAndRunTask();
-    return false;
-  }
-
-  return true;
+const handleExecute = () => {
+  saveAndRunTask();
 };
 
 onMounted(async () => {
   socketIOService.socket.on('task-updated', taskUpdated);
-  window.addEventListener('keydown', handleKeyPress);
+  shortcutService.on('execute', handleExecute);
 
   await loadTask();
   await loadAssistants();
@@ -301,6 +295,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   socketIOService.socket.off('task-updated', taskUpdated);
-  window.removeEventListener('keydown', handleKeyPress);
+  shortcutService.off('execute', handleExecute);
 });
 </script>

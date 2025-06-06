@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col md:flex-row items-start md:items-center bg-gray-700 p-2 rounded mb-2 hover:bg-gray-600 gap-1 transition-colors" @click="$emit('edit', task)" tabindex="0" @keydown.enter="$emit('edit', task)" @keydown.space="$emit('edit', task)">
-    <div class="bg-blue-600 text-white px-2 py-1 rounded font-mono text-xs mr-3">
+    <div class="bg-gray-600 text-white px-2 py-1 rounded font-mono text-xs mr-3">
       #{{ task.id }}
     </div>
     <div class="flex-grow">

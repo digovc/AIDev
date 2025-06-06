@@ -21,10 +21,11 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import { gitApi } from "@/api/git.api.js";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { faTimes, faRightLeft } from "@fortawesome/free-solid-svg-icons";
+import { faRightLeft, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { languageDetector } from "@/services/language.detector.js";
 import "@/services/monaco.worker.js";
+import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   task: {
@@ -51,8 +52,6 @@ const toggleSplitView = () => {
   });
 };
 
-// Mantenha referências aos modelos para fácil acesso se necessário,
-// embora possamos obtê-los dos editores também.
 let originalModelInstance = null;
 let modifiedModelInstance = null;
 
@@ -126,8 +125,9 @@ const handleEditorMouseDown = (event, editorInstance, editorType) => {
   const lineNumber = target.position.lineNumber;
   const model = editorInstance.getModel();
   const lineContent = model ? model.getLineContent(lineNumber) : '';
-  
-  const textToCopy = `Ref: ${props.file.path}\nLine ${lineNumber}: ${lineContent}`;
+  const lineTrimmedContent = lineContent.trim();
+
+  const textToCopy = `Ref: ${ props.file.path }\nLine ${ lineNumber }: ${ lineTrimmedContent }`;
   navigator.clipboard.writeText(textToCopy);
 };
 
@@ -141,19 +141,13 @@ const loadVersions = async () => {
   }
 };
 
-const handleKeyPress = (event) => {
-  if (event.key === 'Escape') {
-    event.preventDefault();
-    event.stopPropagation();
-    event.defaultPrevented = true;
-    emit('close');
-    return false;
-  }
+const handleClose = () => {
+  emit('close');
 };
 
 onMounted(async () => {
   await loadVersions();
-  window.addEventListener('keydown', handleKeyPress);
+  shortcutService.on('close', handleClose);
 
   if (versions.value) {
     initEditor();
@@ -161,7 +155,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyPress);
+  shortcutService.off('close', handleClose);
 
   if (monacoDiffEditor) {
     monacoDiffEditor.dispose();

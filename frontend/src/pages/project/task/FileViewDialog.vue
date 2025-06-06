@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { nextTick, onUnmounted, ref } from "vue";
+import { nextTick, onMounted, onUnmounted, ref } from "vue";
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -27,6 +27,7 @@ import { languageDetector } from "@/services/language.detector.js";
 import "@/services/monaco.worker.js";
 import { filesApi } from "@/api/files.api.js";
 import { useRoute } from "vue-router";
+import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   file: {
@@ -98,8 +99,9 @@ const handleEditorMouseDown = (event, editorInstance) => {
   const lineNumber = target.position.lineNumber;
   const model = editorInstance.getModel();
   const lineContent = model ? model.getLineContent(lineNumber) : '';
+  const lineTrimmedContent = lineContent.trim();
 
-  const textToCopy = `Ref: ${props.file.path}\nLine ${lineNumber}: ${lineContent}`;
+  const textToCopy = `Ref: ${ props.file.path }\nLine ${ lineNumber }: ${ lineTrimmedContent }`;
   navigator.clipboard.writeText(textToCopy);
 };
 
@@ -121,7 +123,17 @@ const loadFile = async () => {
   }
 };
 
+const handleClose = () => {
+  close();
+};
+
+onMounted(async () => {
+  shortcutService.on('close', handleClose);
+});
+
 onUnmounted(() => {
+  shortcutService.off('close', handleClose);
+
   if (monacoEditor) {
     monacoEditor.dispose();
     monacoEditor = null;
@@ -144,10 +156,8 @@ dialog::backdrop {
 
 dialog {
   border: none;
-  width: 80vw;
-  height: 80vh;
-  max-width: 90vw;
-  max-height: 90vh;
+  width: 90vw;
+  height: 90vh;
   position: fixed;
   top: 50%;
   left: 50%;

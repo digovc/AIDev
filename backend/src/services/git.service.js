@@ -118,7 +118,7 @@ class GitService {
       await execAsync('git add -A', { cwd: projectPath });
 
       // Create a commit with the task title as the message
-      const commitMessage = `${ task.title } - ${ new Date().toISOString() }`;
+      const commitMessage = task.title;
       await execAsync(`git commit -m "${ commitMessage }"`, { cwd: projectPath });
 
       // Push the changes to the remote repository
