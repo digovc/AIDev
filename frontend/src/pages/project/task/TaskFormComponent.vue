@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-gray-900 rounded-lg px-1 flex flex-col space-y-2">
-    <form @submit.prevent="saveTask" class="flex flex-col grow space-y-2">
+  <div class="bg-gray-900 rounded-lg flex flex-col space-y-2">
+    <form class="flex flex-col grow space-y-2">
       <div class="mb-4">
         <label for="title" class="form-label">Título</label>
         <input type="text" id="title" v-model="task.title" class="form-input" required ref="titleInput"/>
@@ -17,8 +17,8 @@
           Nenhuma referência adicionada
         </div>
 
-        <div v-else class="space-y-2 pt-4 grow overflow-y-auto">
-          <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)"/>
+        <div v-else class="space-y-2 pt-4 grow">
+          <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)" @view="openFileViewDialog(ref)"/>
         </div>
       </div>
 
@@ -37,40 +37,44 @@
         </select>
       </div>
 
-      <div class="flex justify-end space-x-3 pt-2">
+      <div class="flex justify-end space-x-1 pt-2">
         <button v-if="!isTaskRunning" type="button" @click="saveAndRunTask" class="btn btn-primary" :disabled="loading">
-          <FontAwesomeIcon :icon="faPlay" class="mr-2"/>
-          Executar
+          <FontAwesomeIcon :icon="faPlay"/>
+          <span class="hidden md:inline md:pl-2">Executar</span>
         </button>
-        <button type="submit" class="btn btn-primary" :disabled="loading">
-          <FontAwesomeIcon :icon="faSave" class="mr-2"/>
-          {{ loading ? 'Salvando...' : 'Salvar' }}
+        <button type="submit" class="btn btn-primary" :disabled="loading" @click="saveTask">
+          <FontAwesomeIcon :icon="faSave"/>
+          <span class="hidden md:inline md:pl-2">{{ loading ? 'Salvando...' : 'Salvar' }}</span>
         </button>
         <button v-if="isEditing" type="button" @click="duplicateTask" class="btn btn-secondary" :disabled="loading">
-          <FontAwesomeIcon :icon="faCopy" class="mr-2"/>
-          Duplicar
+          <FontAwesomeIcon :icon="faCopy"/>
+          <span class="hidden md:inline md:pl-2">Duplicar</span>
         </button>
         <button type="button" @click="goBack" class="btn btn-secondary">
-          Voltar
+          <FontAwesomeIcon :icon="faTimes"/>
+          <span class="hidden md:inline md:pl-2">Voltar</span>
         </button>
       </div>
     </form>
     <ReferencesDialog ref="referencesDialog" :project="project" :task-references="task.references" @update:references="updateReferences"/>
+    <FileViewDialog ref="fileViewDialog" :file="selectedFile"/>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { tasksApi } from '@/api/tasks.api.js';
 import ReferencesDialog from '@/pages/project/task/ReferencesDialog.vue';
+import FileViewDialog from '@/pages/project/task/FileViewDialog.vue';
 import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { assistantsApi } from '@/api/assistants.api.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faCopy, faPlay, faPlus, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faCopy, faPlay, faPlus, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { conversationsApi } from '@/api/conversations.api.js';
 import { socketIOService } from "@/services/socket.io.js";
 import { runningTasksService } from "@/services/running-tasks.service.js";
+import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   project: {
@@ -87,6 +91,9 @@ const referencesDialog = ref(null);
 const route = useRoute();
 const router = useRouter();
 const titleInput = ref(null);
+
+const fileViewDialog = ref(null);
+const selectedFile = ref({});
 
 const task = reactive({
   id: null,
@@ -135,7 +142,7 @@ const saveTask = async () => {
       task.id = result.data.id;
     }
 
-    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }`);
+    await router.push(`/projects/${ props.project.id }`);
   } catch (error) {
     console.error(`Erro ao ${ isEditing.value ? 'atualizar' : 'salvar' } tarefa:`, error);
     alert(`Ocorreu um erro ao ${ isEditing.value ? 'atualizar' : 'salvar' } a tarefa. Por favor, tente novamente.`);
@@ -149,6 +156,8 @@ const saveAndRunTask = async () => {
     loading.value = true;
     await saveTask();
     await tasksApi.runTask(task.id);
+    await nextTick();
+    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }/chat`);
   } catch (error) {
     console.error('Erro ao executar tarefa:', error);
     alert('Ocorreu um erro ao executar a tarefa. Por favor, tente novamente.');
@@ -234,6 +243,11 @@ const openReferencesDialog = () => {
   referencesDialog.value.open();
 };
 
+const openFileViewDialog = (file) => {
+  selectedFile.value = file;
+  fileViewDialog.value.open();
+};
+
 const updateReferences = (newReferences) => {
   task.references = newReferences;
 };
@@ -266,20 +280,13 @@ const taskUpdated = (updatedTask) => {
   }
 };
 
-const handleKeyPress = (event) => {
-  if (event.key === 'E' && event.ctrlKey && event.shiftKey) {
-    event.preventDefault();
-    event.stopPropagation();
-    saveAndRunTask();
-    return false;
-  }
-
-  return true;
+const handleExecute = () => {
+  saveAndRunTask();
 };
 
 onMounted(async () => {
   socketIOService.socket.on('task-updated', taskUpdated);
-  window.addEventListener('keydown', handleKeyPress);
+  shortcutService.on('execute', handleExecute);
 
   await loadTask();
   await loadAssistants();
@@ -288,6 +295,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   socketIOService.socket.off('task-updated', taskUpdated);
-  window.removeEventListener('keydown', handleKeyPress);
+  shortcutService.off('execute', handleExecute);
 });
 </script>

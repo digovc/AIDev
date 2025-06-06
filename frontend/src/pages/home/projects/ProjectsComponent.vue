@@ -1,7 +1,7 @@
 <template>
   <div class="p-4">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Meus Projetos</h1>
+      <h1 class="text-2xl font-bold">Projetos</h1>
       <button @click="showProjectForm" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
         Novo Projeto
       </button>
@@ -22,7 +22,7 @@
     <div v-if="filteredProjects.length === 0 && searchQuery" class="text-center py-10 text-gray-400">
       Nenhum projeto encontrado para "{{ searchQuery }}"
     </div>
-    <ProjectFormComponent ref="projectFormRef" @project-created="onProjectCreated"/>
+    <ProjectFormDialog ref="projectFormRef" @project-created="onProjectCreated"/>
   </div>
 </template>
 
@@ -30,7 +30,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { projectsApi } from '@/api/projects.api.js';
 import ProjectComponent from './ProjectComponent.vue';
-import ProjectFormComponent from '@/components/ProjectFormComponent.vue';
+import ProjectFormDialog from '@/components/ProjectFormDialog.vue';
 
 const projects = ref([]);
 const searchQuery = ref('');

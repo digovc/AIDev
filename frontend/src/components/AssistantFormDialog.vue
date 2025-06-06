@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { assistantsApi } from '@/api/assistants.api';
 
 const props = defineProps({
@@ -73,20 +73,6 @@ const assistant = reactive({
 });
 
 const isEditing = computed(() => !!assistant.id);
-
-const open = (assistantToEdit = null) => {
-  if (assistantToEdit) {
-    Object.assign(assistant, assistantToEdit);
-  } else {
-    resetForm();
-  }
-  dialogRef.value.showModal();
-};
-
-const close = () => {
-  dialogRef.value.close();
-  resetForm();
-};
 
 const resetForm = () => {
   assistant.id = '';
@@ -116,6 +102,20 @@ const saveAssistant = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const open = (assistantToEdit = null) => {
+  if (assistantToEdit) {
+    Object.assign(assistant, assistantToEdit);
+  } else {
+    resetForm();
+  }
+  dialogRef.value.showModal();
+};
+
+const close = () => {
+  dialogRef.value.close();
+  resetForm();
 };
 
 defineExpose({

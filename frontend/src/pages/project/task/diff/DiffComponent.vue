@@ -4,16 +4,16 @@
       <FontAwesomeIcon :icon="faUpload" class="text-gray-400 hover:text-gray-200" @click="pushChanges" :disabled="isPushing"/>
     </div>
     <div class="grow">
-      <DiffFilesComponent v-if="!selectedFile" :files="files" @select="handleFileSelect"/>
-      <DiffViewComponent v-else :file="selectedFile" :task="task" @close="selectedFile = null"/>
+      <DiffFilesComponent :files="files" @select="handleFileSelect"/>
+      <DiffViewDialog v-if="selectedFile" ref="diffViewDialog" :file="selectedFile" :task="task"/>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import DiffFilesComponent from './DiffFilesComponent.vue';
-import DiffViewComponent from './DiffViewComponent.vue';
+import DiffViewDialog from './DiffViewDialog.vue';
 import { gitApi } from "@/api/git.api.js";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
@@ -25,6 +25,7 @@ const props = defineProps({
 const files = ref([]);
 const selectedFile = ref(null);
 const isPushing = ref(false);
+const diffViewDialog = ref(null);
 
 watch(() => props.task, async (newTask) => {
   if (!newTask) return;
@@ -38,7 +39,10 @@ watch(() => props.task, async (newTask) => {
 }, { immediate: true });
 
 const handleFileSelect = (file) => {
-  selectedFile.value = file
+  selectedFile.value = file;
+  nextTick(() => {
+    diffViewDialog.value.open();
+  });
 };
 
 const pushChanges = async () => {
@@ -48,6 +52,7 @@ const pushChanges = async () => {
   isPushing.value = true;
   try {
     await gitApi.pushChanges(props.task.id);
+    files.value = []
     alert('Alterações enviadas com sucesso!');
   } catch (error) {
     console.error('Failed to push changes:', error);

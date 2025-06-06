@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col">
+  <div class="bg-gray-900 rounded-lg shadow-md p-2 flex flex-col">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-lg font-bold">Tarefas</h2>
       <button @click="showTaskForm" class="text-gray-400 hover:text-gray-200">
@@ -25,6 +25,7 @@ import { tasksApi } from '@/api/tasks.api.js';
 import { socketIOService } from "@/services/socket.io.js";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   project: {
@@ -125,15 +126,6 @@ const handleEdit = (task) => {
   emit('taskSelected', task);
 };
 
-const handleKeyPress = (event) => {
-  const isPressed = event.ctrlKey && event.shiftKey && event.key === 'N';
-  if (isPressed) {
-    event.preventDefault();
-    showTaskForm();
-  }
-};
-
-
 const markTaskAsDone = async (task) => {
   task.status = 'done';
   try {
@@ -144,9 +136,10 @@ const markTaskAsDone = async (task) => {
   }
 };
 
+
 const loadTasks = async () => {
   const result = await tasksApi.getTasksByProjectId(props.project.id);
-  tasks.value = result.data;
+  tasks.value = (result.data || []).reverse();
 };
 
 const taskCreated = (task) => {
@@ -172,16 +165,20 @@ const taskUpdated = (task) => {
   }
 };
 
+const handleNew = () => {
+  showTaskForm();
+};
+
 onMounted(async () => {
   await loadTasks()
-  window.addEventListener('keydown', handleKeyPress);
   socketIOService.socket.on('task-created', taskCreated);
   socketIOService.socket.on('task-updated', taskUpdated);
+  shortcutService.on('new', handleNew);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyPress);
   socketIOService.socket.off('task-created', taskCreated);
   socketIOService.socket.off('task-updated', taskUpdated);
+  shortcutService.off('new', handleNew);
 });
 </script>

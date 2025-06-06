@@ -1,6 +1,6 @@
 <template>
   <div class="flex h-full">
-    <div class="w-64 border-r border-gray-200 p-4">
+    <div class="w-20 md:w-64 border-r border-gray-200 p-4 overflow-y-auto">
       <div class="mb-6">
         <h2 class="text-xl font-bold mb-4">Menu</h2>
         <div class="space-y-2">

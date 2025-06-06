@@ -1,6 +1,6 @@
 import { ApiBase } from './api.base';
 
-export class ConversationsApi extends ApiBase {
+class ConversationsApi extends ApiBase {
   constructor() {
     super();
     this.baseUrl = '/conversations';

@@ -44,6 +44,7 @@ import ReferenceComponent from '@/components/ReferenceComponent.vue';
 import { debounce } from 'lodash'
 import { nextTick, ref, watch } from 'vue';
 import { referencesApi } from '@/api/references.api';
+import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   project: {
@@ -80,16 +81,9 @@ const searchReferences = debounce(async () => {
 
   try {
     const response = await referencesApi.search(props.project.id, searchQuery.value);
-    let results = response.data || [];
+    const results = response.data ?? [];
 
-    if (!results.length) {
-      const responseRetry = await referencesApi.search(props.project.id, searchQuery.value);
-      results = responseRetry.data || [];
-    }
-
-    searchResults.value = (results || []).filter(
-        result => !references.value.some(ref => ref.path === result.path)
-    );
+    searchResults.value = results.filter(result => !references.value.some(ref => ref.path === result.path));
     selectedIndex.value = searchResults.value.length > 0 ? 0 : -1;
   } catch (error) {
     console.error('Erro ao buscar referências:', error);
@@ -97,18 +91,7 @@ const searchReferences = debounce(async () => {
   } finally {
     isSearching.value = false;
   }
-}, 500);
-
-const open = () => {
-  references.value = [...props.taskReferences];
-  dialogRef.value.showModal();
-
-};
-
-const close = () => {
-  dialogRef.value.close();
-  resetForm();
-};
+}, 1000);
 
 const resetForm = () => {
   searchQuery.value = '';
@@ -131,13 +114,6 @@ const scrollToSelectedItem = () => {
 };
 
 const handleKeyDown = (e) => {
-  if (e.key === 'Escape') {
-    e.preventDefault();
-    e.stopPropagation();
-    close();
-    return;
-  }
-
   if (searchResults.value.length === 0) return;
 
   if (e.key === 'ArrowDown') {
@@ -151,7 +127,6 @@ const handleKeyDown = (e) => {
   } else if ((e.key === 'Enter' || e.type === 'click') && selectedIndex.value >= 0) {
     e.preventDefault();
     addSelectedReference();
-    // Não limpa a pesquisa, permitindo adicionar mais referências
   }
 };
 
@@ -173,6 +148,18 @@ const addSelectedReference = () => {
     // da mesma pesquisa, mas emitimos a atualização
     emit('update:references', references.value);
   }
+};
+
+const open = () => {
+  shortcutService.on('close', close);
+  references.value = [...props.taskReferences];
+  dialogRef.value.showModal();
+};
+
+const close = () => {
+  shortcutService.off('close', close);
+  dialogRef.value.close();
+  resetForm();
 };
 
 defineExpose({

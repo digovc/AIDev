@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-col p-4">
+  <div class="h-full flex flex-col p-2">
     <div v-if="loading" class="text-center py-8">
       <p class="text-lg">Carregando projeto...</p>
     </div>

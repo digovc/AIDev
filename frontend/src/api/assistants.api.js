@@ -1,21 +1,28 @@
 import axios from 'axios';
+import { ApiBase } from "@/api/api.base.js";
 
-const API_URL = import.meta.env.VITE_API_URL;
+class AssistantsApi extends ApiBase {
+  constructor() {
+    super();
+    this.baseUrl = '/assistants';
+  }
 
-export const assistantsApi = {
   async createAssistant(assistant) {
-    return await axios.post(`${API_URL}/assistants`, assistant);
-  },
+    return this.client.post(`/assistants`, assistant);
+  }
 
   async updateAssistant(id, assistant) {
-    return await axios.put(`${API_URL}/assistants/${id}`, assistant);
-  },
+    return this.client.put(`/assistants/${id}`, assistant);
+  }
 
   async listAssistants() {
-    return await axios.get(`${API_URL}/assistants`);
-  },
+    return this.client.get(`/assistants`);
+  }
 
   async deleteAssistant(id) {
-    return await axios.delete(`${API_URL}/assistants/${id}`);
+    return this.client.delete(`/assistants/${id}`);
   }
-};
+}
+
+
+export const assistantsApi = new AssistantsApi();

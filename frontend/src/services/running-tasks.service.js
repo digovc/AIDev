@@ -14,6 +14,12 @@ class RunningTasksService {
       if (!this._runningTasks.value.includes(taskId)) return;
       this._runningTasks.value = this._runningTasks.value.filter(t => t !== taskId);
     });
+
+    socketIOService.socket.on('block-delta', (blockDelta) => {
+      const taskId = blockDelta.taskId;
+      if (this._runningTasks.value.includes(taskId)) return;
+      this._runningTasks.value.push(taskId);
+    });
   }
 
   isRunning(taskId) {

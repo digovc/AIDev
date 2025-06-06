@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md p-4 flex flex-col">
+  <div class="bg-gray-900 rounded-lg shadow-md p-2 flex flex-col">
     <div class="flex justify-between items-center mb-4">
       <div class="flex items-center space-x-4">
         <h2 class="text-lg font-bold">{{ taskTitle }}</h2>
@@ -13,8 +13,8 @@
         <button v-if="isRunning && task?.id" @click="stopTask" :disabled="loading">
           <FontAwesomeIcon :icon="faStop" class="text-red-500 hover:text-red-300"/>
         </button>
-        <button @click="goBack" class="hover:text-gray-200">
-          <FontAwesomeIcon :icon="faTimes"/>
+        <button @click="goBack" class="text-gray-400 hover:text-gray-200">
+          <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
         </button>
       </div>
     </div>
@@ -22,7 +22,7 @@
     <div>
       <TabsComponent :tabs="tabs"/>
     </div>
-    <div class="flex-1 overflow-y-auto pt-4 px-2">
+    <div class="flex-1 overflow-y-auto pt-2 px-1">
       <RouterView :project="project" :task="task"/>
     </div>
   </div>
@@ -37,6 +37,7 @@ import TabsComponent from '@/components/TabsComponent.vue';
 import { tasksApi } from '@/api/tasks.api.js';
 import { runningTasksService } from "@/services/running-tasks.service.js";
 import { socketIOService } from "@/services/socket.io.js";
+import { shortcutService } from "@/services/shortcut.service.js";
 
 const props = defineProps({
   project: {
@@ -134,36 +135,24 @@ const taskUpdated = (updatedTask) => {
   task.value = updatedTask;
 };
 
-const handleKeyPress = (event) => {
-  if (event.defaultPrevented) return;
+const handleExecute = () => {
+  runTask();
+};
 
-  const isScapePressed = event.key === 'Escape';
-
-  if (isScapePressed) {
-    event.preventDefault();
-    event.stopPropagation();
-    goBack();
-    return false;
-  }
-
-  if (event.key === 'E' && event.ctrlKey && event.shiftKey) {
-    event.preventDefault();
-    event.stopPropagation();
-    runTask();
-    return false;
-  }
-
-  return true;
+const handleClose = () => {
+  goBack();
 };
 
 onMounted(async () => {
   await loadTask();
   socketIOService.socket.on('task-updated', taskUpdated);
-  window.addEventListener('keydown', handleKeyPress);
+  shortcutService.on('execute', handleExecute);
+  shortcutService.on('close', handleClose);
 });
 
 onUnmounted(() => {
   socketIOService.socket.off('task-updated', taskUpdated);
-  window.removeEventListener('keydown', handleKeyPress);
+  shortcutService.off('execute', handleExecute);
+  shortcutService.off('close', handleClose);
 });
 </script>

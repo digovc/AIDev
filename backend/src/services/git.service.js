@@ -10,7 +10,10 @@ const execAsync = promisify(exec);
 class GitService {
   async getFilesChanged(taskId) {
     try {
-      const projectPath = await this._getProjectPath(taskId);
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
+
+      // Add all new files to the staging area
+      await execAsync('git add -A', { cwd: projectPath });
 
       // Execute git status --porcelain command
       const { stdout, stderr } = await execAsync('git status --porcelain', { cwd: projectPath });
@@ -35,7 +38,7 @@ class GitService {
 
   async getContentVersions(taskId, filePath) {
     try {
-      const projectPath = await this._getProjectPath(taskId);
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // Get current file content
       const previousContent = await execAsync(`git show HEAD:${ filePath }`, { cwd: projectPath })
@@ -53,7 +56,7 @@ class GitService {
 
   async getRemoteBranches(taskId) {
     try {
-      const projectPath = await this._getProjectPath(taskId);
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // Fetch remote branches
       const { stdout, stderr } = await execAsync('git branch -r', { cwd: projectPath });
@@ -74,7 +77,7 @@ class GitService {
 
   async checkout(taskId, branch) {
     try {
-      const projectPath = await this._getProjectPath(taskId);
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // if some changes exist, throw an error
       const { stdout, stderr } = await execAsync('git status --porcelain', { cwd: projectPath });
@@ -105,17 +108,17 @@ class GitService {
 
   async pushChanges(taskId) {
     try {
-      const { task, projectPath } = await this._getProjectPath(taskId);
+      const { task, projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // Switch to a branch formatted as 'task-<task-id>'
       const branchName = `task-${ taskId }`;
-      await execAsync(`git checkout -b ${ branchName }`, { cwd: projectPath });
+      await execAsync(`git checkout ${ branchName } || git checkout -b ${ branchName }`, { cwd: projectPath });
 
       // Add all changes (modified, added, or deleted files)
       await execAsync('git add -A', { cwd: projectPath });
 
       // Create a commit with the task title as the message
-      const commitMessage = `${ task.title } - ${ new Date().toISOString() }`;
+      const commitMessage = task.title;
       await execAsync(`git commit -m "${ commitMessage }"`, { cwd: projectPath });
 
       // Push the changes to the remote repository
@@ -127,7 +130,41 @@ class GitService {
     }
   }
 
-  async _getProjectPath(taskId) {
+  async rollback(taskId, filePath) {
+    try {
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
+
+      // Execute git checkout command to revert the file
+      const { stderr } = await execAsync(`git checkout HEAD -- "${ filePath }"`, { cwd: projectPath });
+
+      if (stderr) {
+        throw new Error(`Failed to rollback file: ${ stderr }`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      throw new Error(`Error in GitService.rollback: ${ error.message }`);
+    }
+  }
+
+  async deleteFile(taskId, filePath) {
+    try {
+      const { projectPath } = await this._getTaskAndProjectPath(taskId);
+
+      // Delete the file from the repository
+      const { stderr } = await execAsync(`rm -f "${ filePath }"`, { cwd: projectPath });
+
+      if (stderr) {
+        throw new Error(`Failed to delete file: ${ stderr }`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      throw new Error(`Error in GitService.deleteFile: ${ error.message }`);
+    }
+  }
+
+  async _getTaskAndProjectPath(taskId) {
     const task = await tasksStore.getById(taskId);
     if (!task) {
       throw new Error('Task not found');

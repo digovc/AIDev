@@ -1,6 +1,6 @@
 class LanguageDetector {
   getLanguage(filePath) {
-    const extension = filePath.split('.').pop();
+    const extension = filePath?.split('.').pop();
     switch (extension) {
       case 'js':
         return 'javascript';

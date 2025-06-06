@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-gray-900 rounded-lg shadow-md py-1 px-4">
+  <div class="bg-gray-900 rounded-lg shadow-md py-1 px-2">
     <div class="flex justify-between items-center">
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2">
         <h1 class="text-lg font-bold">{{ project?.name }}</h1>
         <div class="text-gray-300 text-xs">
           {{ project?.path }}
@@ -17,7 +17,7 @@
         <FontAwesomeIcon :icon="faTimes" class="text-2xl"/>
       </button>
     </div>
-    <ProjectFormComponent ref="projectFormRef" @project-updated="onProjectUpdated"/>
+    <ProjectFormDialog ref="projectFormRef" @project-updated="onProjectUpdated"/>
     <BranchDialog ref="branchDialogRef" :project="project"/>
   </div>
 </template>
@@ -25,7 +25,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
-import ProjectFormComponent from '@/components/ProjectFormComponent.vue';
+import ProjectFormDialog from '@/components/ProjectFormDialog.vue';
 import BranchDialog from './BranchDialog.vue';
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCodeBranch, faEdit, faTimes } from "@fortawesome/free-solid-svg-icons";

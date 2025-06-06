@@ -1,6 +1,6 @@
 import { ApiBase } from './api.base';
 
-export class GitApi extends ApiBase {
+class GitApi extends ApiBase {
   constructor() {
     super();
     this.baseUrl = '/git';
@@ -21,6 +21,16 @@ export class GitApi extends ApiBase {
 
   async pushChanges(taskId) {
     return this.client.post(`${ this.baseUrl }/push/${ taskId }`);
+  }
+
+  async rollback(taskId, filePath) {
+    const b64Path = btoa(filePath);
+    return this.client.post(`${ this.baseUrl }/rollback/${ taskId }/${ b64Path }`);
+  }
+
+  async deleteFile(taskId, filePath) {
+    const b64Path = btoa(filePath);
+    return this.client.delete(`${ this.baseUrl }/delete/${ taskId }/${ b64Path }`);
   }
 
   async checkout(branch) {
