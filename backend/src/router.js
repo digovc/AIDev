@@ -8,6 +8,8 @@ const projectsController = require('./controllers/projects.controller');
 const referencesController = require("./controllers/references.controller");
 const settingsController = require("./controllers/settings.controller");
 const tasksController = require("./controllers/tasks.controller");
+const authController = require('./controllers/auth.controller');
+const authMiddleware = require('./middlewares/auth.middleware');
 
 class Router {
   constructor() {
@@ -19,6 +21,7 @@ class Router {
     });
 
     // Register all controller endpoints
+    authController.registerEndpoints(this.expressRouter);
     assistantsController.registerEndpoints(this.expressRouter);
     conversationsController.registerEndpoints(this.expressRouter);
     filesController.registerEndpoints(this.expressRouter);
@@ -28,6 +31,13 @@ class Router {
     referencesController.registerEndpoints(this.expressRouter);
     settingsController.registerEndpoints(this.expressRouter);
     tasksController.registerEndpoints(this.expressRouter);
+
+    // Add middleware protection
+    this.expressRouter.use((req, res, next) => {
+      const publicRoutes = ['/health-check', '/login'];
+      if (publicRoutes.includes(req.path)) return next();
+      authMiddleware.handler()(req, res, next);
+    });
   }
 
   getRouter() {
