@@ -132,7 +132,7 @@ class GitService {
       const { projectPath } = await this._getTaskAndProjectPath(taskId);
 
       // Execute git checkout command to revert the file
-      const { stdout, stderr } = await execAsync(`git checkout HEAD -- "${ filePath }"`, { cwd: projectPath });
+      const { stderr } = await execAsync(`git checkout HEAD -- "${ filePath }"`, { cwd: projectPath });
 
       if (stderr) {
         throw new Error(`Failed to rollback file: ${ stderr }`);

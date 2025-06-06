@@ -1,7 +1,11 @@
 <template>
   <div class="h-full bg-gray-800 p-2 overflow-y-auto">
     <template v-if="files.length > 0">
-      <DiffFileComponent v-for="file in files" :key="file.path" :file="file" @click="handleFileClick(file)" @rollback="handleRollback"/>
+      <template v-for="file in files" :key="file.path">
+        <template v-if="!file.isRolledBack">
+          <DiffFileComponent :file="file" @click="handleFileClick(file)" @rollback="handleRollback"/>
+        </template>
+      </template>
     </template>
     <template v-else>
       <div class="flex items-center justify-center h-full text-gray-400">
@@ -34,5 +38,6 @@ const handleFileClick = (file) => {
 const handleRollback = async (file) => {
   await gitApi.rollback(route.params.id, file.path);
   emit('rollback');
+  file.isRolledBack = true;
 };
 </script>
