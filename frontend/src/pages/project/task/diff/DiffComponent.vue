@@ -48,6 +48,7 @@ const pushChanges = async () => {
   isPushing.value = true;
   try {
     await gitApi.pushChanges(props.task.id);
+    files.value = []
     alert('Alterações enviadas com sucesso!');
   } catch (error) {
     console.error('Failed to push changes:', error);

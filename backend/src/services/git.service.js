@@ -109,7 +109,7 @@ class GitService {
 
       // Switch to a branch formatted as 'task-<task-id>'
       const branchName = `task-${ taskId }`;
-      await execAsync(`git checkout -b ${ branchName }`, { cwd: projectPath });
+      await execAsync(`git checkout ${ branchName } || git checkout -b ${ branchName }`, { cwd: projectPath });
 
       // Add all changes (modified, added, or deleted files)
       await execAsync('git add -A', { cwd: projectPath });
