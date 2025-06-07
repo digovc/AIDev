@@ -20,8 +20,14 @@ class Router {
       res.json({ status: 'ok', version: '1.0.0 alpha' });
     });
 
-    // Register all controller endpoints
+    // Register public endpoints (no authentication required)
+    // Health check is already registered above
     authController.registerEndpoints(this.expressRouter);
+
+    // Apply authentication middleware for all subsequent routes
+    this.expressRouter.use(authMiddleware.handler());
+
+    // Register protected controller endpoints
     assistantsController.registerEndpoints(this.expressRouter);
     conversationsController.registerEndpoints(this.expressRouter);
     filesController.registerEndpoints(this.expressRouter);
@@ -31,13 +37,6 @@ class Router {
     referencesController.registerEndpoints(this.expressRouter);
     settingsController.registerEndpoints(this.expressRouter);
     tasksController.registerEndpoints(this.expressRouter);
-
-    // Add middleware protection
-    this.expressRouter.use((req, res, next) => {
-      const publicRoutes = ['/health-check', '/login'];
-      if (publicRoutes.includes(req.path)) return next();
-      authMiddleware.handler()(req, res, next);
-    });
   }
 
   getRouter() {
