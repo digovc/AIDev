@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
 const settingsStore = require('../stores/settings.store');
 
 class GoogleProvider {
@@ -20,8 +20,7 @@ class GoogleProvider {
       throw new Error('API key is required');
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: assistant.model || 'gemini-2.0-flash' });
+    const genAI = new GoogleGenAI({ apiKey });
 
     streamCallback({ type: 'message_start', inputTokens: 0 });
     let isRetryRequired = false;
@@ -29,14 +28,21 @@ class GoogleProvider {
     try {
       const toolsFormatted = this.formatTools(tools);
 
-      const result = await model.generateContentStream({
+      const result = await genAI.models.generateContentStream({
+        model: assistant.model || 'gemini-2.0-flash',
         contents: formattedMessages,
-        tools: [{ functionDeclarations: toolsFormatted }],
+        config: {
+          tools: [{ functionDeclarations: toolsFormatted }],
+          thinkingConfig: {
+            includeThoughts: true,
+            thinkingBudget: 4096,
+          },
+        }
       });
 
       const currentBlock = {};
 
-      for await (const chunk of result.stream) {
+      for await (const chunk of result) {
         if (cancelationToken.isCanceled()) {
           throw new Error('Stream canceled');
         }

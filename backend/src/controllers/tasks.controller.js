@@ -29,6 +29,10 @@ class TasksController extends CrudControllerBase {
     router.post(`/${ this.modelName }/archive`, (req, res) => {
       this.archiveTasks(req, res).catch((e) => this.errorHandler(e, res));
     });
+
+    router.get(`/${ this.modelName }/running`, (req, res) => {
+      this.listRunningTasks(req, res).catch((e) => this.errorHandler(e, res));
+    });
   }
 
   async runTask(req, res) {
@@ -81,6 +85,7 @@ class TasksController extends CrudControllerBase {
     res.json({ success: true, message: 'Task completed', task });
   }
 
+
   async stopTask(req, res) {
     const taskId = req.params.taskId;
 
@@ -99,6 +104,11 @@ class TasksController extends CrudControllerBase {
     task.status = 'backlog';
     await tasksStore.update(task.id, task);
     res.json({ success: true, message: 'Stopping task' });
+  }
+
+  async listRunningTasks(req, res) {
+    const runningTaskIds = taskRunnerService.executingTasks;
+    res.json(runningTaskIds);
   }
 
   async getByProjectId(req, res) {

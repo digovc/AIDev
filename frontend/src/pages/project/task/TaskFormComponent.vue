@@ -281,6 +281,7 @@ const taskUpdated = (updatedTask) => {
 };
 
 const handleExecute = () => {
+  console.log('handleExecute');
   saveAndRunTask();
 };
 
