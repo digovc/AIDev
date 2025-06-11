@@ -14,6 +14,7 @@ class ShortcutService {
   }
 
   handleKeyDown(event) {
+    console.log(event);
     if (event.key === 'Escape') {
       this._runCommand('close', event);
     } else if (event.key === 'E' && event.ctrlKey && event.shiftKey) {
@@ -22,6 +23,12 @@ class ShortcutService {
       this._runCommand('save', event);
     } else if (event.key === 'N' && event.ctrlKey && event.shiftKey) {
       this._runCommand('new', event);
+    } else if (event.key === '1' && event.ctrlKey) {
+      this._runCommand('tab-details', event);
+    } else if (event.key === '2' && event.ctrlKey) {
+      this._runCommand('tab-history', event);
+    } else if (event.key === '3' && event.ctrlKey) {
+      this._runCommand('tab-changes', event);
     }
   }
 

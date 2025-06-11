@@ -143,16 +143,38 @@ const handleClose = () => {
   goBack();
 };
 
+const handleTabDetails = () => {
+  router.push({ name: 'task-details', params: route.params });
+};
+
+const handleTabHistory = () => {
+  if (task.value?.id) {
+    router.push({ name: 'task-chat', params: route.params });
+  }
+};
+
+const handleTabChanges = () => {
+  if (task.value?.id) {
+    router.push({ name: 'task-diff', params: route.params });
+  }
+};
+
 onMounted(async () => {
   await loadTask();
   socketIOService.socket.on('task-updated', taskUpdated);
   shortcutService.on('execute', handleExecute);
   shortcutService.on('close', handleClose);
+  shortcutService.on('tab-details', handleTabDetails);
+  shortcutService.on('tab-history', handleTabHistory);
+  shortcutService.on('tab-changes', handleTabChanges);
 });
 
 onUnmounted(() => {
   socketIOService.socket.off('task-updated', taskUpdated);
   shortcutService.off('execute', handleExecute);
   shortcutService.off('close', handleClose);
+  shortcutService.off('tab-details', handleTabDetails);
+  shortcutService.off('tab-history', handleTabHistory);
+  shortcutService.off('tab-changes', handleTabChanges);
 });
 </script>
