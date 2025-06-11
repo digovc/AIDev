@@ -5,8 +5,8 @@ class ShortcutService {
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
-  on(command, callback) {
-    this._listners.push({ command, callback });
+  on(command, callback, priority = 0) {
+    this._listners.push({ command, callback, priority });
   }
 
   off(command, callback) {
@@ -26,7 +26,15 @@ class ShortcutService {
   }
 
   _runCommand(command, event) {
-    const lastListener = this._listners.findLast(l => l.command === command);
+    const relevantListeners = this._listners.filter(l => l.command === command);
+
+    if (relevantListeners.length === 0) return;
+
+    const maxPriority = Math.max(...relevantListeners.map(l => l.priority));
+    const listenersWithMaxPriority = relevantListeners.filter(l => l.priority === maxPriority);
+
+    const lastListener = listenersWithMaxPriority.findLast(l => l.command === command); // findLast ensures the last registered with max priority
+
     if (lastListener) {
       lastListener.callback(event);
     }

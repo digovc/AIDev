@@ -287,7 +287,7 @@ const handleExecute = () => {
 
 onMounted(async () => {
   socketIOService.socket.on('task-updated', taskUpdated);
-  shortcutService.on('execute', handleExecute);
+  shortcutService.on('execute', handleExecute, 1);
 
   await loadTask();
   await loadAssistants();
