@@ -23,6 +23,19 @@ class MessagesStore extends StoreBase {
     }
   }
 
+  async delete(id) {
+    const message = await this.getById(id);
+    if (!message) return false;
+
+    const conversation = await conversationsStore.getById(message.conversationId);
+    if (conversation) {
+      conversation.messages = conversation.messages.filter(msgId => msgId !== id);
+      await conversationsStore.update(conversation.id, conversation);
+    }
+
+    await super.delete(id);
+  }
+
   async getByConversationId(conversationId) {
     const conversation = await conversationsStore.getById(conversationId);
 

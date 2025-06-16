@@ -29,7 +29,7 @@ class GoogleProvider {
       const toolsFormatted = this.formatTools(tools);
 
       const result = await genAI.models.generateContentStream({
-        model: assistant.model || 'gemini-2.0-flash',
+        model: assistant.model || 'gemini-2.5-flash',
         contents: formattedMessages,
         config: {
           tools: [{ functionDeclarations: toolsFormatted }],
@@ -92,6 +92,12 @@ class GoogleProvider {
     // Se não há texto ou chamada de função, ignoramos
     if (!parts.text && !parts.functionCall) return;
 
+    if (currentBlock.isOpen && currentBlock.type === 'reasoning' && !parts.thought) {
+      currentBlock.isOpen = false;
+      currentBlock.type = undefined;
+      currentBlock.toolUseId = undefined;
+    }
+
     if (parts.functionCall) {
       currentBlock.isOpen = false;
       const functionCall = parts.functionCall;
@@ -105,8 +111,10 @@ class GoogleProvider {
     }
 
     if (!currentBlock.isOpen && parts.text) {
+      const type = parts.thought ? 'reasoning' : 'text';
       currentBlock.isOpen = true;
-      return streamCallback({ type: 'block_start', blockType: 'text', content: parts.text ?? '' });
+      currentBlock.type = type;
+      return streamCallback({ type: 'block_start', blockType: type, content: parts.text ?? '' });
     }
 
     if (currentBlock.isOpen && parts.text) {

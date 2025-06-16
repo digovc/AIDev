@@ -4,8 +4,8 @@
       <FontAwesomeIcon :icon="faBrain" class="mr-2"/>
       <span class="font-semibold">Thinking...</span>
     </div>
-    <div class="bg-[#0d1117] p-2 rounded">
-      <p class="text-gray-400 text-xs" v-html="formattedContent"/>
+    <div class="bg-[#0d1117] p-2 rounded text-xs! text-gray-400!">
+      <VMarkdownView :content="content" mode="dark"/>
     </div>
   </div>
 </template>
@@ -13,17 +13,13 @@
 import 'vue3-markdown/dist/style.css'
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faBrain } from "@fortawesome/free-solid-svg-icons";
-import { computed } from "vue";
+import { VMarkdownView } from "vue3-markdown";
 
 const props = defineProps({
   content: {
     type: String,
     required: true
   }
-});
-
-const formattedContent = computed(() => {
-  return props.content.replace(/\n/g, '<br/>');
 });
 
 </script>

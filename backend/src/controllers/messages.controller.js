@@ -15,6 +15,10 @@ class MessagesController extends CrudControllerBase {
     router.get(`/${ this.modelName }/conversation/:conversationId`, (req, res) => {
       this.getByConversationId(req, res).catch((e) => this.errorHandler(e, res));
     });
+
+    router.delete(`/${ this.modelName }/:id`, (req, res) => {
+      this.deleteMessage(req, res).catch((e) => this.errorHandler(e, res));
+    });
   }
 
   async getByConversationId(req, res) {
@@ -35,6 +39,12 @@ class MessagesController extends CrudControllerBase {
     }
 
     res.status(201).json(message);
+  }
+
+  async deleteMessage(req, res) {
+    const messageId = req.params.id;
+    await this.store.delete(messageId);
+    res.status(200).json({ success: true });
   }
 }
 

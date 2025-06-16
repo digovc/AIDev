@@ -5,9 +5,14 @@
         <FontAwesomeIcon :icon="icon"/>
         <span>{{ sender }}</span>
       </div>
-      <span class="text-xs text-gray-500">
-        {{ formatTime(message.timestamp) }}
-      </span>
+      <div class="flex items-center space-x-2">
+        <span class="text-xs text-gray-500">
+          {{ formatTime(message.timestamp) }}
+        </span>
+        <button @click="$emit('delete', message.id)" class="text-gray-400 hover:text-red-400">
+          <FontAwesomeIcon :icon="faTrash"/>
+        </button>
+      </div>
     </div>
     <div v-for="(block, index) in message.blocks" :key="index" class="text-gray-300 overflow-y-auto">
       <div v-if="block.type === 'reasoning'">
@@ -28,7 +33,7 @@
 
 <script setup>
 import { computed } from "vue";
-import { faFileLines, faQuestion, faRobot, faServer, faToolbox, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faFileLines, faQuestion, faRobot, faServer, faToolbox, faUser, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import ChatMessageTextComponent from "@/pages/project/task/chat/ChatMessageTextComponent.vue";
 import ChatMessageToolComponent from "@/pages/project/task/chat/ChatMessageToolComponent.vue";
