@@ -1,3 +1,4 @@
+const OpenAIProvider = require('../providers/open-ai.provider');
 const agentTool = require("../tools/worker.tool");
 const alibabaProvider = require('../providers/alibaba.provider');
 const anthropicProvider = require('../providers/anthropic.provider');
@@ -9,9 +10,9 @@ const fileReadTool = require("../tools/file-read.tool");
 const fileWriteTool = require("../tools/file-write.tool");
 const globTool = require("../tools/glob.tool");
 const googleProvider = require('../providers/google.provider');
+const grepTool = require("../tools/grep.tool");
 const lsTool = require("../tools/ls.tool");
 const messagesStore = require('../stores/messages.store');
-const openAIProvider = require('../providers/open-ai.provider');
 const openRouterProvider = require('../providers/open-router.provider');
 const socketIOService = require("./socket-io.service");
 const taskListTool = require("../tools/task-list.tool");
@@ -27,6 +28,7 @@ const TOOLS = [
   fileReadTool,
   fileWriteTool,
   globTool,
+  grepTool,
   lsTool,
   taskListTool,
   taskWriteTool,
@@ -51,7 +53,7 @@ class AgentService {
 
     const assistant = await assistantsStore.getById(conversation.assistantId);
 
-    let providerService = openAIProvider;
+    let providerService = new OpenAIProvider();
 
     switch (assistant.provider) {
       case 'alibaba':

@@ -1,3 +1,4 @@
+const OpenAIProvider = require('../providers/open-ai.provider');
 const CancelationToken = require("./cancelation.token");
 const alibabaProvider = require('../providers/alibaba.provider');
 const anthropicProvider = require('../providers/anthropic.provider');
@@ -9,8 +10,8 @@ const fileReadTool = require("../tools/file-read.tool");
 const fileWriteTool = require("../tools/file-write.tool");
 const globTool = require("../tools/glob.tool");
 const googleProvider = require('../providers/google.provider');
+const grepTool = require("../tools/grep.tool");
 const lsTool = require("../tools/ls.tool");
-const openAIProvider = require('../providers/open-ai.provider');
 const openRouterProvider = require('../providers/open-router.provider');
 const projectsStore = require("../stores/projects.store");
 const promptParserService = require("./prompt-parser.service");
@@ -24,6 +25,7 @@ const TOOLS = [
   fileReadTool,
   fileWriteTool,
   globTool,
+  grepTool,
   lsTool,
   reportTool,
 ];
@@ -31,7 +33,7 @@ const TOOLS = [
 class WorkerService {
   async job(conversation, prompt, cancelationToken) {
     workerManager.workerStarted(conversation);
-    
+
     cancelationToken.throwIfCanceled();
     const systemMessage = await this.getSystemMessage(conversation, prompt);
     const messages = [systemMessage]
@@ -52,7 +54,7 @@ class WorkerService {
     if (!assistant) throw new Error("Assistant not found");
     if (!assistant.provider) throw new Error("Assistant has no provider");
 
-    let providerService = openAIProvider;
+    let providerService = new OpenAIProvider();
 
     switch (assistant.provider) {
       case 'alibaba':
