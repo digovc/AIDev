@@ -15,60 +15,51 @@ class AnthropicProvider {
 
     const anthropic = new Anthropic({ apiKey: apiKey, });
 
-    try {
-      const stream = await anthropic.messages.create({
-        messages: formattedMessages,
-        model: assistant.model,
-        max_tokens: 8192,
-        stream: true,
-        tools: tools,
-      });
+    const stream = await anthropic.messages.create({
+      messages: formattedMessages,
+      model: assistant.model,
+      max_tokens: 8192,
+      stream: true,
+      tools: tools,
+    });
 
-      for await (const event of stream) {
-        cancelationToken.throwIfCanceled();
-        this.translateStreamEvent(event, streamCallback);
-      }
-    } finally {
-      streamCallback({ type: 'message_stop' });
+    for await (const event of stream) {
+      cancelationToken.throwIfCanceled();
+      await this.translateStreamEvent(event, streamCallback);
     }
+
+    await streamCallback({ type: 'message_stop' });
   }
 
-  translateStreamEvent(event, streamCallback) {
+  async translateStreamEvent(event, streamCallback) {
     const type = event.type;
 
     switch (type) {
       case 'message_start':
-        streamCallback({ type: 'message_start', inputTokens: event.message.usage.input_tokens });
-        break;
+        return await streamCallback({ type: 'message_start', inputTokens: event.message.usage.input_tokens });
       case 'content_block_start':
         switch (event.content_block.type) {
           case 'text':
-            streamCallback({ type: 'block_start', blockType: event.content_block.type });
-            break
+            return await streamCallback({ type: 'block_start', blockType: event.content_block.type });
           case 'tool_use':
-            streamCallback({
+            return await streamCallback({
               type: 'block_start',
               blockType: event.content_block.type,
               tool: event.content_block.name,
               toolUseId: event.content_block.id,
               content: '',
             });
-            break
         }
         break;
       case 'content_block_stop':
-        streamCallback({ type: 'block_stop' });
-        break;
+        return await streamCallback({ type: 'block_stop' });
       case 'content_block_delta':
         switch (event.delta.type) {
           case 'text_delta':
-            streamCallback({ type: 'block_delta', delta: event.delta.text });
-            break;
+            return await streamCallback({ type: 'block_delta', delta: event.delta.text });
           case 'input_json_delta':
-            streamCallback({ type: 'block_delta', delta: event.delta.partial_json });
-            break;
+            return await streamCallback({ type: 'block_delta', delta: event.delta.partial_json });
         }
-        break;
     }
   }
 

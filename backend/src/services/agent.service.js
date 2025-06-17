@@ -167,7 +167,7 @@ class AgentService {
         }
 
         result = await tool.executeTool(conversation, toolBlock.content, cancelationToken);
-        await new Promise(resolve => setTimeout(resolve, 1));
+        await new Promise(resolve => setTimeout(resolve, 100));
       } catch (e) {
         result = { error: e.message, isError: true };
       }

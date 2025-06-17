@@ -33,14 +33,13 @@ class FileWriteTool {
     const project = await projectsStore.getById(conversation.projectId);
     const projectPath = project.path;
     const filePath = path.resolve(projectPath, input.filePath);
-    const filePathOnly = path.basename(filePath);
-
-    await fs.mkdir(filePathOnly, { recursive: true });
+    const diretory = path.dirname(filePath);
+    await fs.mkdir(diretory, { recursive: true });
     await fs.writeFile(filePath, input.content, 'utf8');
 
     return {
       success: true,
-      message: `File ${ input.file } created successfully.`
+      message: `File ${ input.filePath } created successfully.`
     };
   }
 }

@@ -18,7 +18,12 @@ class TodoWriteTool {
             type: "array",
             items: {
               type: "object",
+              required: ["id"],
               properties: {
+                id: {
+                  type: "string",
+                  description: "Unique identifier for the todo item"
+                },
                 content: {
                   type: "string",
                   description: "Brief description of the task"
@@ -26,7 +31,7 @@ class TodoWriteTool {
                 status: {
                   type: "string",
                   enum: ["pending", "in_progress", "completed"],
-                  description: "Current status of the task"
+                  description: "Current status of the task (default: pending)"
                 }
               }
             }
@@ -38,6 +43,8 @@ class TodoWriteTool {
 
   async executeTool(conversation, input) {
     if (!input.items?.length) throw new Error("The parameter items is required");
+    if (!input.items.every(x => x.id)) throw new Error("All items must have an id");
+
     const taskId = conversation.taskId;
     if (!taskId) throw new Error("The taskId is required");
     const task = await tasksStore.getById(taskId);
@@ -45,12 +52,13 @@ class TodoWriteTool {
     task.todo = task.todo ?? [];
 
     for (const item of input.items) {
-      const existingItem = task.todo.find(i => i.content === item.content);
+      const existingItem = task.todo.find(i => i.id === item.id);
 
       if (existingItem) {
         existingItem.status = item.status;
       } else {
         task.todo.push({
+          id: item.id,
           content: item.content,
           status: item.status,
         });

@@ -8,6 +8,10 @@ class TasksController extends CrudControllerBase {
   }
 
   registerEndpoints(router) {
+    router.get(`/${ this.modelName }/running`, (req, res) => {
+      this.listRunningTasks(req, res).catch((e) => this.errorHandler(e, res));
+    });
+
     super.registerEndpoints(router);
 
     router.get(`/${ this.modelName }/project/:projectId`, (req, res) => {
@@ -28,10 +32,6 @@ class TasksController extends CrudControllerBase {
 
     router.post(`/${ this.modelName }/archive`, (req, res) => {
       this.archiveTasks(req, res).catch((e) => this.errorHandler(e, res));
-    });
-
-    router.get(`/${ this.modelName }/running`, (req, res) => {
-      this.listRunningTasks(req, res).catch((e) => this.errorHandler(e, res));
     });
   }
 

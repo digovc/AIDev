@@ -28,4 +28,4 @@ IMPORTANT
 
 # TASK
 
-{{ prompt }}
+{{ prompt | safe }}

@@ -12,10 +12,11 @@ class TodoReadTool {
       input_schema: {
         type: "object",
         properties: {
-          none: {
-            description: "This parameter is not used",
-            type: "string"
-          }
+          filter: {
+            description: "Optional status filter",
+            type: "string",
+            enum: ["pending", "in_progress", "completed"],
+          },
         }
       }
     }
@@ -26,7 +27,9 @@ class TodoReadTool {
     if (!taskId) throw new Error("The taskId is required");
     const task = await tasksStore.getById(taskId);
     if (!task) throw new Error("Task not found");
-    return task.todo ?? [];
+    task.todo = task.todo ?? [];
+    if (!input.filter) return task.todo;
+    return task.todo.filter(x => x.status === input.filter);
   }
 }
 

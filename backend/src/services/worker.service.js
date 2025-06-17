@@ -122,16 +122,16 @@ class WorkerService {
         case 'block_delta':
           return this.appendBlockContent(conversation, assistantMessage, event.delta);
         case 'message_stop':
-          return await this.finishMessage(conversation, messages, assistantMessage, resolve, reject);
+          return await this.finishMessage(conversation, messages, assistantMessage, cancelationToken, resolve, reject);
       }
     } catch (error) {
       reject(error);
     }
   }
 
-  async finishMessage(conversation, messages, assistantMessage, resolve, reject) {
+  async finishMessage(conversation, messages, assistantMessage, cancelationToken, resolve, reject) {
     if (assistantMessage.blocks.some(b => b.type === 'tool_use')) {
-      await this.useTool(conversation, messages, assistantMessage, resolve, reject);
+      await this.useTool(conversation, messages, assistantMessage, cancelationToken, resolve, reject);
     } else {
       const report = this.getReportFromMessage(assistantMessage);
       resolve(report);
@@ -162,7 +162,7 @@ class WorkerService {
     lastBlock.content += content ?? '';
   }
 
-  async useTool(conversation, messages, assistantMessage, resolve, reject) {
+  async useTool(conversation, messages, assistantMessage, cancelationToken, resolve, reject) {
     const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
     const toolResults = [];
 
@@ -175,7 +175,7 @@ class WorkerService {
           toolBlock.content = JSON.parse(toolBlock.content);
         }
 
-        result = await tool.executeTool(conversation, toolBlock.content);
+        result = await tool.executeTool(conversation, toolBlock.content, cancelationToken);
 
         if (toolBlock.tool === 'report') {
           return resolve(result);
@@ -207,7 +207,7 @@ class WorkerService {
     };
 
     messages.push(toolMessage);
-    await this.runJob(conversation, messages, resolve, reject);
+    await this.runJob(conversation, messages, cancelationToken, resolve, reject);
   }
 }
 

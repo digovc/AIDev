@@ -4,8 +4,8 @@
       <FontAwesomeIcon :icon="faBrain" class="mr-2"/>
       <span class="font-semibold">Thinking...</span>
     </div>
-    <div class="bg-[#0d1117] p-2 rounded text-xs! text-gray-400!">
-      <VMarkdownView :content="content" mode="dark"/>
+    <div class="bg-[#0d1117] p-2 rounded">
+      <VMarkdownView :content="content" mode="dark" class="text-xs! text-gray-400!"/>
     </div>
   </div>
 </template>

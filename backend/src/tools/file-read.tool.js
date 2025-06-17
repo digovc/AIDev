@@ -11,9 +11,9 @@ class FileReadTool {
       description: this.DESCRIPTION,
       input_schema: {
         type: "object",
-        required: ["file"],
+        required: ["filePath"],
         properties: {
-          file: {
+          filePath: {
             type: "string",
             description: "Directory of the file to be read"
           },
@@ -29,7 +29,7 @@ class FileReadTool {
   async executeTool(conversation, input) {
     const project = await projectsStore.getById(conversation.projectId);
     const projectPath = project.path;
-    const filePath = path.resolve(projectPath, input.file);
+    const filePath = path.resolve(projectPath, input.filePath);
 
     try {
       const content = await fs.readFile(filePath, 'utf8');
@@ -41,16 +41,16 @@ class FileReadTool {
 
       return {
         success: true,
-        message: `File ${ input.file } read successfully.`,
+        message: `File ${ input.filePath } read successfully.`,
         truncated: contentPage.length !== content.length,
         content: contentPage,
       };
     } catch (error) {
       if (error.code === 'ENOENT') {
-        throw new Error(`File ${ input.file } not found.`);
+        throw new Error(`File ${ input.filePath } not found.`);
       }
 
-      throw `Error reading file ${ input.file }: ${ error.message }`;
+      throw new Error(`Error reading file ${ input.filePath }: ${ error.message }`);
     }
   }
 }

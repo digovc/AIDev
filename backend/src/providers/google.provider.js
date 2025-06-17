@@ -2,11 +2,6 @@ const { GoogleGenAI } = require('@google/genai');
 const settingsStore = require('../stores/settings.store');
 
 class GoogleProvider {
-  constructor() {
-    this.retryCount = 0;
-    this.delay = 1000;
-  }
-
   async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
     cancelationToken.throwIfCanceled();
 
@@ -20,59 +15,33 @@ class GoogleProvider {
 
     const genAI = new GoogleGenAI({ apiKey });
 
-    streamCallback({ type: 'message_start', inputTokens: 0 });
-    let isRetryRequired = false;
+    await streamCallback({ type: 'message_start', inputTokens: 0 });
 
-    try {
-      const toolsFormatted = this.formatTools(tools);
+    const toolsFormatted = this.formatTools(tools);
 
-      const result = await genAI.models.generateContentStream({
-        model: assistant.model || 'gemini-2.5-flash',
-        contents: formattedMessages,
-        config: {
-          tools: [{ functionDeclarations: toolsFormatted }],
-          thinkingConfig: {
-            includeThoughts: true,
-            thinkingBudget: 4096,
-          },
-        }
-      });
-
-      const currentBlock = {};
-
-      for await (const chunk of result) {
-        cancelationToken.throwIfCanceled();
-        await this.translateStreamEvent(chunk, currentBlock, streamCallback);
+    const result = await genAI.models.generateContentStream({
+      model: assistant.model || 'gemini-2.5-flash',
+      contents: formattedMessages,
+      config: {
+        tools: [{ functionDeclarations: toolsFormatted }],
+        thinkingConfig: {
+          includeThoughts: true,
+          thinkingBudget: 4096,
+        },
       }
+    });
 
-      this.retryCount = 0;
-      this.delay = 1000;
-    } catch (error) {
-      if (this.retryCount < 15) {
-        isRetryRequired = true;
-      } else {
-        throw error;
-      }
-    } finally {
-      if (!isRetryRequired) {
-        streamCallback({ type: 'message_stop' });
-      }
+    const currentBlock = {};
+
+    for await (const chunk of result) {
+      cancelationToken.throwIfCanceled();
+      await this.translateStreamEvent(chunk, currentBlock, streamCallback);
     }
 
-    if (isRetryRequired) {
-      await this.retry(assistant, messages, cancelationToken, tools, streamCallback);
-    }
+    streamCallback({ type: 'message_stop' });
   }
 
-  async retry(assistant, messages, cancelationToken, tools, streamCallback) {
-    console.log('Retrying Google request...');
-    this.retryCount++;
-    await new Promise(resolve => setTimeout(resolve, this.delay));
-    this.delay *= 2; // Exponential backoff
-    await this.chatCompletion(assistant, messages, cancelationToken, tools, streamCallback);
-  }
-
-  translateStreamEvent(chunk, currentBlock, streamCallback) {
+  async translateStreamEvent(chunk, currentBlock, streamCallback) {
     if (chunk.candidates?.length === 0 || !chunk.candidates) return;
     const candidate = chunk.candidates[0];
 
@@ -96,7 +65,7 @@ class GoogleProvider {
     if (parts.functionCall) {
       currentBlock.isOpen = false;
       const functionCall = parts.functionCall;
-      return streamCallback({
+      return await streamCallback({
         type: 'block_start',
         blockType: 'tool_use',
         tool: functionCall.name,
@@ -109,11 +78,11 @@ class GoogleProvider {
       const type = parts.thought ? 'reasoning' : 'text';
       currentBlock.isOpen = true;
       currentBlock.type = type;
-      return streamCallback({ type: 'block_start', blockType: type, content: parts.text ?? '' });
+      return await streamCallback({ type: 'block_start', blockType: type, content: parts.text ?? '' });
     }
 
     if (currentBlock.isOpen && parts.text) {
-      return streamCallback({ type: 'block_delta', delta: parts.text });
+      return await streamCallback({ type: 'block_delta', delta: parts.text });
     }
   }
 

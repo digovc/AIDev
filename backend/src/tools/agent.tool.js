@@ -29,7 +29,7 @@ class AgentTool {
     try {
       return await workerService.job(conversation, input.prompt, cancelationToken);
     } catch (error) {
-      throw `Error on agent job: ${ error }`;
+      throw new Error(`Error on agent job: ${ error }`);
     }
   }
 }

@@ -52,7 +52,10 @@ class TaskRunnerService {
 
   getCancelationToken(taskId) {
     const oldCancelationToken = this.cancelationTokens.find(t => t.taskId === taskId);
-    if (oldCancelationToken) return oldCancelationToken;
+    if (oldCancelationToken) {
+      oldCancelationToken.reset();
+      return oldCancelationToken;
+    }
     const cancelationToken = new CancelationToken(taskId, () => this.stopTask(taskId));
     this.cancelationTokens.push(cancelationToken);
     return cancelationToken;
