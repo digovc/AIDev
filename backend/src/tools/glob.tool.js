@@ -72,7 +72,7 @@ class GlobTool {
       stats: false,
       dot: false,
       ignore: ignorePatterns,
-      deep: 5
+      deep: 15
     });
 
     const ig = ignore();

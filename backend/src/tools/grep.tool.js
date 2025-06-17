@@ -61,7 +61,7 @@ class GrepTool {
       // Exclude pattern
       args.push('--glob', `!${pattern}`);
     });
-    // Pattern and search path
+            // Pattern and search path
     args.push(input.pattern, '.');
 
     // Execute ripgrep
