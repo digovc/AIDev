@@ -13,7 +13,8 @@ class TaskRunnerService {
   taskQueue = [];
 
   async runTask(taskId) {
-    if (this.executingTasks.includes(taskId) || this.taskQueue.includes(taskId)) return;
+    if (this.executingTasks.includes(taskId)) return;
+    if (this.taskQueue.includes(taskId)) return;
 
     // Se já existir tarefa em execução, adiciona à fila
     if (this.executingTasks.length > 0) {
@@ -30,9 +31,7 @@ class TaskRunnerService {
   async startTask(taskId) {
     this.executingTasks.push(taskId);
     const cancelationToken = this.getCancelationToken(taskId);
-    this.cancelationTokens.push(cancelationToken);
     socketIOService.io.emit('task-executing', taskId);
-
     const task = await tasksStore.getById(taskId);
     task.status = 'running';
     await tasksStore.update(task.id, task);
@@ -47,13 +46,16 @@ class TaskRunnerService {
     } catch (error) {
       await this.logError(task, conversation, cancelationToken, error);
     } finally {
-      // Quando a tarefa terminar, verifica se há próxima na fila
       await this.processNextInQueue();
     }
   }
 
   getCancelationToken(taskId) {
-    return new CancelationToken(taskId, () => this.stopTask(taskId));
+    const oldCancelationToken = this.cancelationTokens.find(t => t.taskId === taskId);
+    if (oldCancelationToken) return oldCancelationToken;
+    const cancelationToken = new CancelationToken(taskId, () => this.stopTask(taskId));
+    this.cancelationTokens.push(cancelationToken);
+    return cancelationToken;
   }
 
   async stopTask(taskId) {

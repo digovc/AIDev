@@ -166,7 +166,7 @@ class AgentService {
           toolBlock.content = JSON.parse(toolBlock.content);
         }
 
-        result = await tool.executeTool(conversation, toolBlock.content);
+        result = await tool.executeTool(conversation, toolBlock.content, cancelationToken);
         await new Promise(resolve => setTimeout(resolve, 1));
       } catch (e) {
         result = { error: e.message, isError: true };

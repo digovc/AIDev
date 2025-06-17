@@ -8,9 +8,7 @@ class GoogleProvider {
   }
 
   async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
-    if (cancelationToken.isCanceled()) {
-      return;
-    }
+    cancelationToken.throwIfCanceled();
 
     const formattedMessages = this.getMessages(messages);
     const settings = await settingsStore.getSettings();
@@ -43,10 +41,7 @@ class GoogleProvider {
       const currentBlock = {};
 
       for await (const chunk of result) {
-        if (cancelationToken.isCanceled()) {
-          throw new Error('Stream canceled');
-        }
-
+        cancelationToken.throwIfCanceled();
         await this.translateStreamEvent(chunk, currentBlock, streamCallback);
       }
 

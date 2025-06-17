@@ -8,9 +8,7 @@ class OpenAICompatibleProvider {
   }
 
   async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
-    if (cancelationToken.isCanceled()) {
-      return;
-    }
+    cancelationToken.throwIfCanceled();
 
     const formattedMessages = this.getMessages(messages);
     const settings = await settingsStore.getSettings();
@@ -38,10 +36,7 @@ class OpenAICompatibleProvider {
       const currentBlock = {}
 
       for await (const chunk of stream) {
-        if (cancelationToken.isCanceled()) {
-          throw new Error('Stream canceled');
-        }
-
+        cancelationToken.throwIfCanceled();
         this.translateStreamEvent(chunk, currentBlock, streamCallback);
       }
     } finally {

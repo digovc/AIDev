@@ -28,19 +28,22 @@ const TOOLS = [
 ];
 
 class WorkerService {
-  async job(conversation, prompt) {
+  async job(conversation, prompt, cancelationToken) {
+    cancelationToken.throwIfCanceled();
     const systemMessage = await this.getSystemMessage(conversation, prompt);
     const messages = [systemMessage]
     return new Promise((resolve, reject) => {
       try {
-        this.runJob(conversation, messages, resolve, reject)
+        this.runJob(conversation, messages, cancelationToken, resolve, reject)
       } catch (error) {
         reject(error);
       }
     });
   }
 
-  async runJob(conversation, messages, resolve, reject) {
+  async runJob(conversation, messages, cancelationToken, resolve, reject) {
+    cancelationToken.throwIfCanceled();
+
     if (!conversation?.assistantId) throw new Error("Conversation has no assistant");
     const assistant = await assistantsStore.getById(conversation.assistantId);
     if (!assistant) throw new Error("Assistant not found");
@@ -78,15 +81,21 @@ class WorkerService {
     };
 
     messages.push(assistantMessage);
-    const cancelationToken = new CancelationToken();
 
     await providerService.chatCompletion(
       assistant,
       messages,
       cancelationToken,
       toolDefinitions,
-      (event) => this.receiveStream(conversation, messages, assistantMessage, event, resolve, reject)
-    );
+      (event) => this.receiveStream(
+        conversation,
+        messages,
+        assistantMessage,
+        event,
+        cancelationToken,
+        resolve,
+        reject
+      ));
   }
 
   async getSystemMessage(conversation, prompt) {
@@ -102,8 +111,9 @@ class WorkerService {
     };
   }
 
-  async receiveStream(conversation, messages, assistantMessage, event, resolve, reject) {
+  async receiveStream(conversation, messages, assistantMessage, event, cancelationToken, resolve, reject) {
     try {
+      cancelationToken.throwIfCanceled();
       const type = event.type;
 
       switch (type) {

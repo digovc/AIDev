@@ -22,11 +22,12 @@ class AgentTool {
     }
   };
 
-  async executeTool(conversation, input) {
+  async executeTool(conversation, input, cancelationToken) {
+    cancelationToken.throwIfCanceled();
     if (!input.prompt) throw new Error("The parameter prompt is required");
 
     try {
-      return await workerService.job(conversation, input.prompt);
+      return await workerService.job(conversation, input.prompt, cancelationToken);
     } catch (error) {
       throw `Error on agent job: ${ error }`;
     }

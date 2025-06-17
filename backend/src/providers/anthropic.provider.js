@@ -3,9 +3,7 @@ const settingsStore = require('../stores/settings.store');
 
 class AnthropicProvider {
   async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
-    if (cancelationToken.isCanceled()) {
-      return;
-    }
+    cancelationToken.throwIfCanceled();
 
     const formattedMessages = this.getMessages(messages);
     const settings = await settingsStore.getSettings();
@@ -27,10 +25,7 @@ class AnthropicProvider {
       });
 
       for await (const event of stream) {
-        if (cancelationToken.isCanceled()) {
-          return stream.controller.abort();
-        }
-
+        cancelationToken.throwIfCanceled();
         this.translateStreamEvent(event, streamCallback);
       }
     } finally {
