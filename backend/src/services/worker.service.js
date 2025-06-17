@@ -49,6 +49,7 @@ class WorkerService {
   async runJob(conversation, messages, cancelationToken, resolve, reject) {
     cancelationToken.throwIfCanceled();
 
+    if (messages.length > 50) throw new Error("Worker job caused too many conversation turns (50 max)");
     if (!conversation?.assistantId) throw new Error("Conversation has no assistant");
     const assistant = await assistantsStore.getById(conversation.assistantId);
     if (!assistant) throw new Error("Assistant not found");

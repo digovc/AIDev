@@ -67,6 +67,9 @@ class TodoWriteTool {
 
     await tasksStore.update(taskId, task);
 
+    const socketIOService = require('../services/socket-io.service');
+    socketIOService.emitEvent('todoUpdated', { taskId });
+
     return {
       success: true,
       message: `Todo list updated successfully.`

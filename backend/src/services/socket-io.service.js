@@ -23,6 +23,14 @@ class SockerIOService {
 
     return this.io;
   }
+
+  emitEvent(eventName, data) {
+    if (this.io) {
+      this.io.emit(eventName, data);
+    } else {
+      console.warn('Socket.IO is not initialized yet.');
+    }
+  }
 }
 
 module.exports = new SockerIOService();
