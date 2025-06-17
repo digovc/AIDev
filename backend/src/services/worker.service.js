@@ -12,6 +12,7 @@ const googleProvider = require('../providers/google.provider');
 const lsTool = require("../tools/ls.tool");
 const openAIProvider = require('../providers/open-ai.provider');
 const openRouterProvider = require('../providers/open-router.provider');
+const projectsStore = require("../stores/projects.store");
 const promptParserService = require("./prompt-parser.service");
 const reportTool = require("../tools/report.tool");
 const toolFormatterService = require("./tool-formatter.service");
@@ -28,7 +29,7 @@ const TOOLS = [
 
 class WorkerService {
   async job(conversation, prompt) {
-    const systemMessage = await this.getSystemMessage(prompt);
+    const systemMessage = await this.getSystemMessage(conversation, prompt);
     const messages = [systemMessage]
     return new Promise((resolve, reject) => {
       try {
@@ -84,13 +85,14 @@ class WorkerService {
       messages,
       cancelationToken,
       toolDefinitions,
-      (event) => this.receiveStream(conversation, assistantMessage, messages, event, resolve, reject)
+      (event) => this.receiveStream(conversation, messages, assistantMessage, event, resolve, reject)
     );
   }
 
-  async getSystemMessage(prompt) {
+  async getSystemMessage(conversation, prompt) {
+    const project = await projectsStore.getById(conversation.projectId);
     const workerPrompt = './assets/prompts/worker.md';
-    const systemPrompt = await promptParserService.parsePrompt(workerPrompt, { prompt });
+    const systemPrompt = await promptParserService.parsePrompt(workerPrompt, { prompt, project });
     const now = new Date();
 
     return {
@@ -100,7 +102,7 @@ class WorkerService {
     };
   }
 
-  async receiveStream(conversation, assistantMessage, messages, event, resolve, reject) {
+  async receiveStream(conversation, messages, assistantMessage, event, resolve, reject) {
     try {
       const type = event.type;
 
@@ -110,16 +112,16 @@ class WorkerService {
         case 'block_delta':
           return this.appendBlockContent(conversation, assistantMessage, event.delta);
         case 'message_stop':
-          return await this.finishMessage(conversation, assistantMessage, resolve, reject);
+          return await this.finishMessage(conversation, messages, assistantMessage, resolve, reject);
       }
     } catch (error) {
       reject(error);
     }
   }
 
-  async finishMessage(conversation, assistantMessage, resolve, reject) {
+  async finishMessage(conversation, messages, assistantMessage, resolve, reject) {
     if (assistantMessage.blocks.some(b => b.type === 'tool_use')) {
-      await this.useTool(conversation, assistantMessage, resolve, reject);
+      await this.useTool(conversation, messages, assistantMessage, resolve, reject);
     } else {
       const report = this.getReportFromMessage(assistantMessage);
       resolve(report);
@@ -150,7 +152,7 @@ class WorkerService {
     lastBlock.content += content ?? '';
   }
 
-  async useTool(conversation, assistantMessage, resolve, reject) {
+  async useTool(conversation, messages, assistantMessage, resolve, reject) {
     const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
     const toolResults = [];
 
@@ -194,7 +196,8 @@ class WorkerService {
       }))
     };
 
-    await this.runJob(conversation, toolMessage, resolve, reject);
+    messages.push(toolMessage);
+    await this.runJob(conversation, messages, resolve, reject);
   }
 }
 

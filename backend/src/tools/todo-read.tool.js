@@ -9,6 +9,15 @@ class TodoReadTool {
     return {
       name: "todoRead",
       description: this.DESCRIPTION,
+      input_schema: {
+        type: "object",
+        properties: {
+          none: {
+            description: "This parameter is not used",
+            type: "string"
+          }
+        }
+      }
     }
   };
 

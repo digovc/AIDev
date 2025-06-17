@@ -2,7 +2,7 @@ const path = require('path');
 const fg = require('fast-glob');
 const ignore = require('ignore');
 const projectsStore = require("../stores/projects.store");
-const { readFileSync } = require("node:fs");
+const { readFileSync, readFile } = require("node:fs");
 
 class GlobTool {
   DESCRIPTION = readFileSync(path.join(__dirname, "./glob.txt"), "utf8");
@@ -90,7 +90,7 @@ class GlobTool {
       const gitignorePath = path.join(currentPath, '.gitignore');
 
       try {
-        const gitignoreContent = await fs.readFile(gitignorePath, 'utf8');
+        const gitignoreContent = await readFile(gitignorePath, 'utf8');
         ig.add(gitignoreContent);
       } catch (error) {
         // Arquivo .gitignore não existe, ignorar erro
