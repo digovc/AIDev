@@ -63,7 +63,7 @@ const router = createRouter({
             {
               path: 'agentes',
               name: 'task-agents',
-              component: () => import('./pages/project/task/AgentsPlaceholder.vue'),
+              component: () => import('./pages/project/task/workers/Workers.vue'),
             },
           ]
         }

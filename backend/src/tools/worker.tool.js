@@ -3,7 +3,7 @@ const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 
 class WorkerTool {
-  DESCRIPTION = readFileSync(join(__dirname, "./agent.txt"), "utf8");
+  DESCRIPTION = readFileSync(join(__dirname, "./worker.txt"), "utf8");
 
   getDefinition() {
     return {

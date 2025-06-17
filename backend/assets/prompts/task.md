@@ -43,6 +43,6 @@ To resolve this task, you can use the available tools following these rules:
 IMPORTANT
 - In your thinking process, if you realize that something requires a tool call, cut your thinking short and proceed directly to the tool call.
 - Don't overthink - act efficiently when file operations are needed.
-- Delegate specific items to multiple agents whenever possible for maximum efficiency.
-- Call other agents tool ONLY when multiple work can be done in parallel. Otherwise, do the job yourself for more quick results.
+- Delegate specific items to multiple workers whenever possible for maximum efficiency.
+- Call other workers ONLY when multiple work can be done in parallel. Otherwise, do the job yourself for more quick results.
 - Maintain an up-to-date to-do list for this task and let it guide your work.

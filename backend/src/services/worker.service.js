@@ -16,6 +16,7 @@ const projectsStore = require("../stores/projects.store");
 const promptParserService = require("./prompt-parser.service");
 const reportTool = require("../tools/report.tool");
 const toolFormatterService = require("./tool-formatter.service");
+const workerManager = require("./worker.manager");
 
 const TOOLS = [
   fileEditTool,
@@ -29,6 +30,8 @@ const TOOLS = [
 
 class WorkerService {
   async job(conversation, prompt, cancelationToken) {
+    workerManager.workerStarted(conversation);
+    
     cancelationToken.throwIfCanceled();
     const systemMessage = await this.getSystemMessage(conversation, prompt);
     const messages = [systemMessage]
@@ -118,6 +121,7 @@ class WorkerService {
 
       switch (type) {
         case 'block_start':
+          workerManager.workerRunning(conversation);
           return this.createBlock(assistantMessage, event);
         case 'block_delta':
           return this.appendBlockContent(conversation, assistantMessage, event.delta);
@@ -134,6 +138,7 @@ class WorkerService {
       await this.useTool(conversation, messages, assistantMessage, cancelationToken, resolve, reject);
     } else {
       const report = this.getReportFromMessage(assistantMessage);
+      workerManager.workerFinished(conversation);
       resolve(report);
     }
   }
@@ -160,6 +165,7 @@ class WorkerService {
   async appendBlockContent(conversation, assistantMessage, content) {
     const lastBlock = assistantMessage.blocks[assistantMessage.blocks.length - 1];
     lastBlock.content += content ?? '';
+    workerManager.workerSessionMessagesCount(conversation, assistantMessage.blocks.length);
   }
 
   async useTool(conversation, messages, assistantMessage, cancelationToken, resolve, reject) {
