@@ -1,17 +1,13 @@
 <template>
   <div class="p-4">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <WorkerCard
-        v-for="worker in workers"
-        :key="worker.conversationId"
-        :worker="worker"
-      />
+      <WorkerCard v-for="worker in workers" :key="worker.conversationId" :worker="worker"/>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { tasksApi } from '@/api/tasks.api.js';
 import { socketIOService } from '@/services/socket.io.js';
@@ -82,7 +78,7 @@ onMounted(async () => {
   socket.on('worker-started', handleWorkerStarted);
   socket.on('worker-running', handleWorkerRunning);
   socket.on('worker-finished', handleWorkerFinished);
-  socket.on('worker-session-messages-count', handleWorkerMessagesCount);
+  socket.on('worker-messages-count', handleWorkerMessagesCount);
 });
 
 onUnmounted(() => {
@@ -90,7 +86,7 @@ onUnmounted(() => {
   socket.off('worker-started', handleWorkerStarted);
   socket.off('worker-running', handleWorkerRunning);
   socket.off('worker-finished', handleWorkerFinished);
-  socket.off('worker-session-messages-count', handleWorkerMessagesCount);
+  socket.off('worker-messages-count', handleWorkerMessagesCount);
 });
 </script>
 

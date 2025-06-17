@@ -26,9 +26,9 @@ class ShortcutService {
     } else if (event.key === '1' && event.ctrlKey) {
       this._runCommand('tab-details', event);
     } else if (event.key === '2' && event.ctrlKey) {
-      this._runCommand('tab-history', event);
+      this._runCommand('tab-plan', event);
     } else if (event.key === '3' && event.ctrlKey) {
-      this._runCommand('tab-changes', event);
+      this._runCommand('tab-history', event);
     }
   }
 

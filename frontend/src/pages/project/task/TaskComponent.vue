@@ -62,8 +62,8 @@ const tabs = computed(() => {
     baseTabs.push(
         { title: 'Plano', route: 'task-plan', params },
         { title: 'Histórico', route: 'task-chat', params },
-        { title: 'Alterações', route: 'task-diff', params },
         { title: 'Agentes', route: 'task-agents', params },
+        { title: 'Alterações', route: 'task-diff', params },
     );
   }
 

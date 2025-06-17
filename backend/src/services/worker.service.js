@@ -1,5 +1,4 @@
 const OpenAIProvider = require('../providers/open-ai.provider');
-const CancelationToken = require("./cancelation.token");
 const alibabaProvider = require('../providers/alibaba.provider');
 const anthropicProvider = require('../providers/anthropic.provider');
 const assistantsStore = require('../stores/assistants.store');
@@ -32,9 +31,10 @@ const TOOLS = [
 
 class WorkerService {
   async job(conversation, prompt, cancelationToken) {
-    workerManager.workerStarted(conversation);
-
     cancelationToken.throwIfCanceled();
+    workerManager.workerStarted(conversation);
+    workerManager.workerRunning(conversation);
+
     const systemMessage = await this.getSystemMessage(conversation, prompt);
     const messages = [systemMessage]
     return new Promise((resolve, reject) => {
@@ -48,6 +48,7 @@ class WorkerService {
 
   async runJob(conversation, messages, cancelationToken, resolve, reject) {
     cancelationToken.throwIfCanceled();
+    workerManager.workerSessionMessagesCount(conversation, messages.length);
 
     if (messages.length > 50) throw new Error("Worker job caused too many conversation turns (50 max)");
     if (!conversation?.assistantId) throw new Error("Conversation has no assistant");
@@ -124,7 +125,6 @@ class WorkerService {
 
       switch (type) {
         case 'block_start':
-          workerManager.workerRunning(conversation);
           return this.createBlock(assistantMessage, event);
         case 'block_delta':
           return this.appendBlockContent(conversation, assistantMessage, event.delta);
@@ -141,7 +141,6 @@ class WorkerService {
       await this.useTool(conversation, messages, assistantMessage, cancelationToken, resolve, reject);
     } else {
       const report = this.getReportFromMessage(assistantMessage);
-      workerManager.workerFinished(conversation);
       resolve(report);
     }
   }
@@ -168,7 +167,6 @@ class WorkerService {
   async appendBlockContent(conversation, assistantMessage, content) {
     const lastBlock = assistantMessage.blocks[assistantMessage.blocks.length - 1];
     lastBlock.content += content ?? '';
-    workerManager.workerSessionMessagesCount(conversation, assistantMessage.blocks.length);
   }
 
   async useTool(conversation, messages, assistantMessage, cancelationToken, resolve, reject) {

@@ -1,6 +1,7 @@
 const workerService = require("../services/worker.service");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
+const workerManager = require("../services/worker.manager");
 
 class WorkerTool {
   DESCRIPTION = readFileSync(join(__dirname, "./worker.txt"), "utf8");
@@ -30,6 +31,8 @@ class WorkerTool {
       return await workerService.job(conversation, input.prompt, cancelationToken);
     } catch (error) {
       throw new Error(`Error on worker: ${ error }`);
+    } finally {
+      workerManager.workerFinished(conversation);
     }
   }
 }

@@ -11,13 +11,17 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { tasksApi } from '@/api/tasks.api.js';
-import { socketIOService } from "@/services/socket.io.js";
+import { computed } from 'vue';
 
-const route = useRoute();
-const todoItems = ref([]);
+const props = defineProps({
+  task: {
+    type: Object
+  }
+});
+
+const todoItems = computed(() => {
+  return props.task?.todo ?? [];
+});
 
 const statusClass = (status) => {
   switch (status) {
@@ -44,25 +48,4 @@ const statusLabel = (status) => {
       return 'Desconhecido';
   }
 };
-
-const loadTodoItems = async () => {
-  try {
-    const taskId = route.params.taskId;
-    if (!taskId) return;
-
-    const response = await tasksApi.getTaskById(taskId);
-    todoItems.value = response.data.todo || [];
-  } catch (error) {
-    console.error('Erro ao carregar itens de planejamento:', error);
-    alert('Não foi possível carregar os itens de planejamento.');
-  }
-};
-
-onMounted(async () => {
-  await loadTodoItems();
-
-  socketIOService.socket.on('todo-updated', async (data) => {
-    await loadTodoItems();
-  });
-});
 </script>

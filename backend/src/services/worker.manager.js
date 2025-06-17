@@ -2,9 +2,9 @@ const socketIOService = require('./socket-io.service');
 
 class WorkerManager {
   constructor() {
-    // Map of taskId -> Set of active conversationIds
     this.activeWorkers = new Map();
   }
+
   workerStarted(conversation) {
     const { taskId, id: conversationId } = conversation;
     // track active worker sessions
@@ -45,7 +45,7 @@ class WorkerManager {
   }
 
   workerSessionMessagesCount(conversation, count) {
-    socketIOService.io.emit('worker-session-messages-count', {
+    socketIOService.io.emit('worker-messages-count', {
       taskId: conversation.taskId,
       conversationId: conversation.id,
       count,
