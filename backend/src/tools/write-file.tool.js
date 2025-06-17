@@ -24,7 +24,11 @@ class WriteFileTool {
               properties: {
                 original_snippet: {
                   type: "string",
-                  description: "The exact text snippet to find and replace"
+                  description: "The exact text snippet to find and replace." +
+                    "Keep this value concise and short." +
+                    "Break large changes into multiple blocks." +
+                    "Include just the changing lines, and a few surrounding lines if necessary for uniqueness." +
+                    "Do not include long runs of unchanged lines."
                 },
                 new_snippet: {
                   type: "string",
