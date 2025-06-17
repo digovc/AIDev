@@ -1,0 +1,66 @@
+const tasksStore = require('../stores/tasks.store');
+const DESCRIPTION = require('./todo-write.txt');
+
+class TodoWriteTool {
+  getDefinition() {
+    return {
+      name: "todoWrite",
+      description: DESCRIPTION,
+      input_schema: {
+        type: "object",
+        required: ["items"],
+        properties: {
+          items: {
+            description: "List of todo items to add or update",
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                content: {
+                  type: "string",
+                  description: "Brief description of the task"
+                },
+                status: {
+                  type: "string",
+                  enum: ["pending", "in_progress", "completed"],
+                  description: "Current status of the task"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+
+  async executeTool(conversation, input) {
+    if (!input.items?.length) throw new Error("The parameter items is required");
+    const taskId = conversation.taskId;
+    if (!taskId) throw new Error("The taskId is required");
+    const task = await tasksStore.getById(taskId);
+    if (!task) throw new Error("Task not found");
+    task.todo = task.todo ?? [];
+
+    for (const item of input.items) {
+      const existingItem = task.todo.find(i => i.content === item.content);
+
+      if (existingItem) {
+        existingItem.status = item.status;
+      } else {
+        task.todo.push({
+          content: item.content,
+          status: item.status,
+        });
+      }
+    }
+
+    await tasksStore.update(taskId, task);
+
+    return {
+      success: true,
+      message: `Todo list updated successfully.`
+    };
+  }
+}
+
+module.exports = new TodoWriteTool();

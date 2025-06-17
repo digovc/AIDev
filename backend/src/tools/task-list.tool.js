@@ -1,9 +1,9 @@
 const tasksStore = require('../stores/tasks.store');
 
-class ListTasksTool {
+class TaskListTool {
   getDefinition() {
     return {
-      name: "list_tasks",
+      name: "taskList",
       description: "Lists the tasks of the project",
       input_schema: {
         type: "object",
@@ -23,12 +23,8 @@ class ListTasksTool {
   };
 
   async executeTool(conversation, input) {
-    if (input.status) {
-      return await tasksStore.getByProjectId(conversation.projectId, input.status);
-    }
-
-    return await tasksStore.getByProjectId(conversation.projectId);
+    return await tasksStore.getByProjectId(conversation.projectId, input.status);
   }
 }
 
-module.exports = new ListTasksTool();
+module.exports = new TaskListTool();

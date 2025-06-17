@@ -1,9 +1,9 @@
 const tasksStore = require('../stores/tasks.store');
 
-class WriteTaskTool {
+class TaskWriteTool {
   getDefinition() {
     return {
-      name: "write_task",
+      name: "taskWrite",
       description: "Adds or updates a project task",
       input_schema: {
         type: "object",
@@ -19,10 +19,6 @@ class WriteTaskTool {
           },
           description: {
             description: "Detailed description of the task",
-            type: "string"
-          },
-          append_description: {
-            description: "Appends text to the current task description",
             type: "string"
           },
           status: {
@@ -48,18 +44,12 @@ class WriteTaskTool {
   }
 
   async createTask(conversation, input) {
-    if (!input.title) {
-      throw new Error("To create a task the 'title' field is required");
-    }
-
-    if (input.append_description) {
-      input.append_description = `\n\nAssistente:\n${ input.append_description }`;
-    }
+    if (!input.title) throw new Error("To create a task the 'title' field is required");
 
     const task = {
       projectId: conversation.projectId,
       title: input.title,
-      description: (input.description || "") + (input.append_description || ""),
+      description: input.description ?? "",
       status: input.status || "backlog"
     };
 
@@ -73,23 +63,13 @@ class WriteTaskTool {
   }
 
   async updateTask(conversation, input) {
-    if (!input.id) {
-      throw new Error("To update a task the 'id' field is required");
-    }
-
     const task = await tasksStore.getById(input.id);
+    if (!task) throw new Error("Task not found");
 
-    if (!task) {
-      throw new Error("Task not found");
-    }
-
-    if (input.append_description) {
-      input.append_description = `\n\nAssistente:\n${ input.append_description }`;
-    }
+    task.description = task.description ?? "";
 
     if (input.title) task.title = input.title;
-    if (input.description) task.description = input.description;
-    if (input.append_description) task.description += input.append_description;
+    if (input.description) task.description += `\n\n${ input.description }`;
     if (input.status) task.status = input.status;
 
     await tasksStore.update(input.id, task);
@@ -101,4 +81,4 @@ class WriteTaskTool {
   }
 }
 
-module.exports = new WriteTaskTool();
+module.exports = new TaskWriteTool();

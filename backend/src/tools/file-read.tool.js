@@ -1,12 +1,13 @@
 const fs = require('fs').promises;
 const path = require('path');
 const projectsStore = require('../stores/projects.store');
+const DESCRIPTION = require('./file-read.txt');
 
-class ReadFileTool {
+class FileReadTool {
   getDefinition() {
     return {
-      name: "read_file",
-      description: "Reads the content of a file in the project",
+      name: "fileRead",
+      description: DESCRIPTION,
       input_schema: {
         type: "object",
         required: ["file"],
@@ -14,7 +15,11 @@ class ReadFileTool {
           file: {
             type: "string",
             description: "Directory of the file to be read"
-          }
+          },
+          offset: {
+            type: "number",
+            description: "The number of lines to skip from the beginning of the file (default 0)"
+          },
         }
       }
     }
@@ -27,11 +32,17 @@ class ReadFileTool {
 
     try {
       const content = await fs.readFile(filePath, 'utf8');
+      const lines = content.split('\n');
+      const offset = input.offset || 0;
+      const limit = 1000;
+
+      const contentPage = lines.slice(offset, offset + limit).join('\n');
 
       return {
         success: true,
-        content: content,
-        message: `File ${ input.file } read successfully.`
+        message: `File ${ input.file } read successfully.`,
+        truncated: contentPage.length !== content.length,
+        content: contentPage,
       };
     } catch (error) {
       if (error.code === 'ENOENT') {
@@ -43,4 +54,4 @@ class ReadFileTool {
   }
 }
 
-module.exports = new ReadFileTool();
+module.exports = new FileReadTool();
