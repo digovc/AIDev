@@ -2,10 +2,26 @@ const path = require('path');
 const fg = require('fast-glob');
 const ignore = require('ignore');
 const projectsStore = require("../stores/projects.store");
-const { readFileSync, readFile } = require("node:fs");
+const { readFileSync } = require("node:fs");
+const fs = require("node:fs");
+
+const FIXED_IGNORE_PATTERNS = [
+  '**/node_modules/',
+  '**/__pycache__/',
+  '**/.git/',
+  '**/dist/',
+  '**/build/',
+  '**/target/',
+  '**/vendor/',
+  '**/bin/',
+  '**/obj/',
+  '**/.idea/',
+  '**/.vscode/',
+];
 
 class GlobTool {
   DESCRIPTION = readFileSync(path.join(__dirname, "./glob.txt"), "utf8");
+
   getDefinition() {
     return {
       name: "glob",
@@ -21,6 +37,13 @@ class GlobTool {
           path: {
             description: "The directory to search in. If not specified, the current working directory will be used",
             type: "string"
+          },
+          ignore: {
+            description: "List of glob patterns to ignore",
+            type: "array",
+            items: {
+              type: "string"
+            }
           }
         }
       }
@@ -32,75 +55,51 @@ class GlobTool {
 
     const project = await projectsStore.getById(conversation.projectId);
     const basePath = input.path ? path.join(project.path, input.path) : project.path;
+    const rootGitIgnorePath = path.join(project.path, '.gitignore');
+    const ignoreContent = fs.readFileSync(rootGitIgnorePath, 'utf8');
+
+    const ignorePatterns = ignoreContent.split('\n')
+      .filter(x => !x.startsWith('#'))
+      .filter(x => x.trim() !== '')
+      .concat(input.ignore ?? [])
+      .concat(FIXED_IGNORE_PATTERNS);
 
     // Buscar todos os arquivos correspondentes ao padrão
     const files = await fg(input.pattern, {
       cwd: basePath,
-      absolute: true,
+      absolute: false,
       onlyFiles: true,
-      stats: true,
-      dot: true,
+      stats: false,
+      dot: false,
+      ignore: ignorePatterns,
+      deep: 5
     });
 
-    // Carregar regras de .gitignore
-    const ig = await this._loadGitignoreRules(basePath);
+    const ig = ignore();
 
-    // Filtrar arquivos ignorados e processar estatísticas
-    const processedFiles = [];
-    for (const file of files) {
-      const relativePath = path.relative(basePath, file.path);
-
-      // Ignorar arquivos listados no .gitignore
-      if (ig.ignores(relativePath)) continue;
-
-      processedFiles.push({
-        path: file.path,
-        mtime: file.stats.mtime
-      });
+    for (const pattern of ignorePatterns) {
+      ig.add(pattern);
     }
 
-    // Ordenar por modificação recente (decrescente)
-    processedFiles.sort((a, b) => b.mtime - a.mtime);
+    const processedFiles = [];
+    for (const file of files) {
+      const relativePath = path.relative(basePath, file);
+      if (ig.ignores(relativePath)) continue;
+      processedFiles.push(file);
+    }
 
     const totalFiles = processedFiles.length;
     const truncated = totalFiles > 100;
 
-    // Limitar a 100 arquivos
     const limitedFiles = processedFiles.slice(0, 100);
 
     return {
       success: true,
-      files: limitedFiles.map(file => ({
-        path: file.path,
-        mtime: file.mtime.toISOString(),
-      })),
+      files: limitedFiles,
       count: limitedFiles.length,
       truncated,
       total: totalFiles,
     };
-  }
-
-  // Carrega regras de .gitignore recursivamente
-  async _loadGitignoreRules(basePath) {
-    const ig = ignore();
-    let currentPath = basePath;
-    const rootPath = path.parse(basePath).root;
-
-    while (currentPath !== rootPath) {
-      const gitignorePath = path.join(currentPath, '.gitignore');
-
-      try {
-        const gitignoreContent = await readFile(gitignorePath, 'utf8');
-        ig.add(gitignoreContent);
-      } catch (error) {
-        // Arquivo .gitignore não existe, ignorar erro
-      }
-
-      // Subir um nível no diretório
-      currentPath = path.dirname(currentPath);
-    }
-
-    return ig;
   }
 }
 

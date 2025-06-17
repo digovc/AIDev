@@ -12,6 +12,9 @@
         <button @click="$emit('delete', message.id)" class="text-gray-400 hover:text-red-400">
           <FontAwesomeIcon :icon="faTrash"/>
         </button>
+        <button @click="copyMessageContent" class="text-gray-400 hover:text-blue-400 ml-2">
+          <FontAwesomeIcon :icon="faCopy"/>
+        </button>
       </div>
     </div>
     <div v-for="(block, index) in message.blocks" :key="index" class="text-gray-300 overflow-y-auto">
@@ -33,7 +36,7 @@
 
 <script setup>
 import { computed } from "vue";
-import { faFileLines, faQuestion, faRobot, faServer, faToolbox, faUser, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faFileLines, faQuestion, faRobot, faServer, faToolbox, faUser, faTrash, faCopy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import ChatMessageTextComponent from "@/pages/project/task/chat/ChatMessageTextComponent.vue";
 import ChatMessageToolComponent from "@/pages/project/task/chat/ChatMessageToolComponent.vue";
@@ -100,5 +103,14 @@ const formatTime = (timestamp) => {
 
   const date = new Date(timestamp);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const copyMessageContent = () => {
+  const messageContent = props.message.blocks.map(block => block.content).join('\n');
+  navigator.clipboard.writeText(messageContent).then(() => {
+    // Optional: Show a notification or tooltip here
+  }).catch(err => {
+    console.error('Failed to copy message content:', err);
+  });
 };
 </script>

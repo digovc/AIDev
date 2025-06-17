@@ -64,15 +64,15 @@ class OpenAiProvider {
     if (!currentBlock.isOpen) {
       currentBlock.isOpen = true;
 
-      if (!delta.tool_calls || !delta.tool_calls.length) {
-        const type = delta.content != null ? 'text' : 'reasoning';
+      if (!delta.tool_calls?.length) {
+        const type = delta.reasoning_content != null ? 'reasoning' : 'text';
         currentBlock.type = type;
         currentBlock.toolUseId = undefined;
         const content = delta.content ?? delta.reasoning_content ?? '';
         return await streamCallback({ type: 'block_start', blockType: type, content: content });
       }
 
-      if (delta.tool_calls && delta.tool_calls.length) {
+      if (delta.tool_calls?.length) {
         const toolCall = delta.tool_calls[0];
 
         currentBlock.type = 'tool_use';
@@ -145,12 +145,13 @@ class OpenAiProvider {
             textBlocks.push(block.content);
             break;
           case 'tool_use':
+            const args = typeof block.content === 'string' ? block.content : JSON.stringify(block.content);
             const toolCall = {
               id: block.toolUseId,
               type: 'function',
               function: {
                 name: block.tool,
-                arguments: block.content
+                arguments: args
               }
             };
 
