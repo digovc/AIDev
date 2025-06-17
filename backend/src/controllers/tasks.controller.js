@@ -78,13 +78,12 @@ class TasksController extends CrudControllerBase {
     task.status = 'done';
     await tasksStore.update(task.id, task);
 
-    console.log(`Completing task ${taskId}. Will check queue after stopping.`);
+    console.log(`Completing task ${ taskId }. Will check queue after stopping.`);
     await taskRunnerService.stopTask(taskId);
     // O processamento da próxima tarefa é feito no método stopTask
 
     res.json({ success: true, message: 'Task completed', task });
   }
-
 
   async stopTask(req, res) {
     const taskId = req.params.taskId;

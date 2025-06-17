@@ -1,13 +1,15 @@
 const fs = require('fs').promises;
 const path = require('path');
-const DESCRIPTION = require('./file-edit.txt');
 const projectsStore = require("../stores/projects.store");
+const { readFileSync } = require("node:fs");
 
 class FileEditTool {
+  DESCRIPTION = readFileSync(path.join(__dirname, "./file-edit.txt"), "utf8");
+
   getDefinition() {
     return {
       name: "fileEdit",
-      description: DESCRIPTION,
+      description: this.DESCRIPTION,
       input_schema: {
         type: "object",
         required: ["filePath", "oldString"],

@@ -13,9 +13,7 @@ class TaskRunnerService {
   taskQueue = [];
 
   async runTask(taskId) {
-    if (this.executingTasks.includes(taskId) || this.taskQueue.includes(taskId)) {
-      return;
-    }
+    if (this.executingTasks.includes(taskId) || this.taskQueue.includes(taskId)) return;
 
     // Se já existir tarefa em execução, adiciona à fila
     if (this.executingTasks.length > 0) {
@@ -119,7 +117,7 @@ class TaskRunnerService {
 
   async createSystemMessage(task, conversation) {
     const project = await projectsStore.getById(task.projectId);
-    const runTaskPrompt = './assets/prompts/run-task.md';
+    const runTaskPrompt = './assets/prompts/task.md';
     const systemPrompt = await promptParserService.parsePrompt(runTaskPrompt, { project, task });
     const now = new Date();
 

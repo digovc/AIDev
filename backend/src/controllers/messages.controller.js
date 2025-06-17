@@ -31,13 +31,9 @@ class MessagesController extends CrudControllerBase {
     const message = req.body;
     await this.store.create(message);
     const conversation = await conversationsStore.getById(message.conversationId);
-
-    if (conversation.taskId) {
-      await taskRunnerService.runTask(conversation.taskId);
-    } else {
-      await agentService.continueConversation(conversation);
-    }
-
+    if (!conversation) throw new Error("Conversation not found");
+    if (!conversation.taskId) throw new Error("Conversation has no task");
+    await taskRunnerService.runTask(conversation.taskId);
     res.status(201).json(message);
   }
 

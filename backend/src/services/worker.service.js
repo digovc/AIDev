@@ -1,4 +1,4 @@
-const agentTool = require("../tools/agent.tool");
+const CancelationToken = require("./cancelation.token");
 const alibabaProvider = require('../providers/alibaba.provider');
 const anthropicProvider = require('../providers/anthropic.provider');
 const assistantsStore = require('../stores/assistants.store');
@@ -10,46 +10,40 @@ const fileWriteTool = require("../tools/file-write.tool");
 const globTool = require("../tools/glob.tool");
 const googleProvider = require('../providers/google.provider');
 const lsTool = require("../tools/ls.tool");
-const messagesStore = require('../stores/messages.store');
 const openAIProvider = require('../providers/open-ai.provider');
 const openRouterProvider = require('../providers/open-router.provider');
-const socketIOService = require("./socket-io.service");
-const taskListTool = require("../tools/task-list.tool");
-const taskWriteTool = require("../tools/task-write.tool");
-const todoReadTool = require("../tools/todo-read.tool");
-const todoWriteTool = require("../tools/todo-write.tool");
+const promptParserService = require("./prompt-parser.service");
+const reportTool = require("../tools/report.tool");
 const toolFormatterService = require("./tool-formatter.service");
 
 const TOOLS = [
-  agentTool,
   fileEditTool,
   fileMultiEditTool,
   fileReadTool,
   fileWriteTool,
   globTool,
   lsTool,
-  taskListTool,
-  taskWriteTool,
-  todoReadTool,
-  todoWriteTool,
+  reportTool,
 ];
 
-class AgentService {
-  async sendMessage(conversation, cancelationToken) {
+class WorkerService {
+  async job(conversation, prompt) {
+    const systemMessage = await this.getSystemMessage(prompt);
+    const messages = [systemMessage]
+    return new Promise((resolve, reject) => {
+      try {
+        this.runJob(conversation, messages, resolve, reject)
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  async runJob(conversation, messages, resolve, reject) {
     if (!conversation?.assistantId) throw new Error("Conversation has no assistant");
-
-    const messages = await messagesStore.getByConversationId(conversation.id);
-
-    const assistantMessage = {
-      id: `${ new Date().getTime() }`,
-      conversationId: conversation.id,
-      sender: 'assistant',
-      blocks: [],
-    };
-
-    await messagesStore.create(assistantMessage);
-
     const assistant = await assistantsStore.getById(conversation.assistantId);
+    if (!assistant) throw new Error("Assistant not found");
+    if (!assistant.provider) throw new Error("Assistant has no provider");
 
     let providerService = openAIProvider;
 
@@ -71,32 +65,42 @@ class AgentService {
         break;
     }
 
-    // Formatar as definições de ferramentas de acordo com o provedor em uso
     const toolDefinitions = TOOLS.map(tool => {
       const baseDefinition = tool.getDefinition();
       return toolFormatterService.formatToolForProvider(baseDefinition, assistant.provider);
     });
+
+    const assistantMessage = {
+      id: `${ new Date().getTime() }`,
+      sender: 'assistant',
+      blocks: [],
+    };
+
+    messages.push(assistantMessage);
+    const cancelationToken = new CancelationToken();
 
     await providerService.chatCompletion(
       assistant,
       messages,
       cancelationToken,
       toolDefinitions,
-      (event) => this.receiveStream(conversation, cancelationToken, assistantMessage, event));
+      (event) => this.receiveStream(conversation, assistantMessage, messages, event, resolve, reject)
+    );
   }
 
-  async logError(conversation, error) {
-    const errorMessage = {
-      id: new Date().getTime(),
-      conversationId: conversation.id,
-      sender: 'log',
-      timestamp: new Date().toISOString(),
-      blocks: [{ type: 'text', content: `Erro ao continuar a conversa: ${ error.message }` }]
-    }
-    await messagesStore.create(errorMessage);
+  async getSystemMessage(prompt) {
+    const workerPrompt = './assets/prompts/worker.md';
+    const systemPrompt = await promptParserService.parsePrompt(workerPrompt, { prompt });
+    const now = new Date();
+
+    return {
+      id: `${ now.getTime() }`,
+      sender: 'user_system',
+      blocks: [{ id: `${ now.getTime() + 1 }`, type: 'text', content: systemPrompt }]
+    };
   }
 
-  async receiveStream(conversation, cancelationToken, assistantMessage, event) {
+  async receiveStream(conversation, assistantMessage, messages, event, resolve, reject) {
     try {
       const type = event.type;
 
@@ -106,23 +110,26 @@ class AgentService {
         case 'block_delta':
           return this.appendBlockContent(conversation, assistantMessage, event.delta);
         case 'message_stop':
-          return await this.finishMessage(conversation, cancelationToken, assistantMessage);
+          return await this.finishMessage(conversation, assistantMessage, resolve, reject);
       }
-    } catch (e) {
-      const message = `Erro ao processar stream: ${ e.message }`;
-      cancelationToken.cancel();
-      await this.logError(conversation, { message });
+    } catch (error) {
+      reject(error);
     }
   }
 
-  async finishMessage(conversation, cancelationToken, assistantMessage) {
-    await messagesStore.update(assistantMessage.id, assistantMessage);
-
+  async finishMessage(conversation, assistantMessage, resolve, reject) {
     if (assistantMessage.blocks.some(b => b.type === 'tool_use')) {
-      await this.useTool(conversation, cancelationToken, assistantMessage);
+      await this.useTool(conversation, assistantMessage, resolve, reject);
     } else {
-      return cancelationToken?.cancel();
+      const report = this.getReportFromMessage(assistantMessage);
+      resolve(report);
     }
+  }
+
+  getReportFromMessage(assistantMessage) {
+    if (!assistantMessage?.blocks?.length) return { report: '*** No report generated by worker agent ***' };
+    const textBlocks = assistantMessage.blocks.filter(b => b.type === 'text').map(b => b.content);
+    return { report: textBlocks.join('\n') };
   }
 
   async createBlock(assistantMessage, event) {
@@ -136,25 +143,15 @@ class AgentService {
     };
 
     assistantMessage.blocks.push(block);
-    socketIOService.io.emit('block-created', block);
-    await messagesStore.update(assistantMessage.id, assistantMessage);
   }
 
   async appendBlockContent(conversation, assistantMessage, content) {
     const lastBlock = assistantMessage.blocks[assistantMessage.blocks.length - 1];
     lastBlock.content += content ?? '';
-
-    socketIOService.io.emit('block-delta', {
-      id: lastBlock.id,
-      taskId: conversation.taskId,
-      messageId: lastBlock.messageId,
-      delta: content ?? ''
-    });
   }
 
-  async useTool(conversation, cancelationToken, assistantMessage) {
+  async useTool(conversation, assistantMessage, resolve, reject) {
     const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
-
     const toolResults = [];
 
     for (const toolBlock of toolUseBlocks) {
@@ -167,7 +164,12 @@ class AgentService {
         }
 
         result = await tool.executeTool(conversation, toolBlock.content);
-        await new Promise(resolve => setTimeout(resolve, 1));
+
+        if (toolBlock.tool === 'report') {
+          return resolve(result);
+        }
+
+        await new Promise(x => setTimeout(x, 100));
       } catch (e) {
         result = { error: e.message, isError: true };
       }
@@ -182,7 +184,6 @@ class AgentService {
 
     const toolMessage = {
       id: `${ new Date().getTime() }`,
-      conversationId: conversation.id,
       sender: 'tool',
       blocks: toolResults.map(result => ({
         type: 'tool_result',
@@ -193,9 +194,8 @@ class AgentService {
       }))
     };
 
-    await messagesStore.create(toolMessage);
-    await this.sendMessage(conversation, cancelationToken);
+    await this.runJob(conversation, toolMessage, resolve, reject);
   }
 }
 
-module.exports = new AgentService();
+module.exports = new WorkerService();

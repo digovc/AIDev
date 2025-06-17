@@ -1,13 +1,15 @@
 const fs = require('fs').promises;
 const path = require('path');
-const DESCRIPTION = require('./file-multi-edit.txt');
 const projectsStore = require("../stores/projects.store");
+const { readFileSync } = require("node:fs");
 
 class FileMultiEditTool {
+  DESCRIPTION = readFileSync(path.join(__dirname, "./file-multi-edit.txt"), "utf8");
+
   getDefinition() {
     return {
       name: "fileMultiEdit",
-      description: DESCRIPTION,
+      description: this.DESCRIPTION,
       input_schema: {
         type: "object",
         required: ["filePath", "edits"],

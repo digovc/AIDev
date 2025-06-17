@@ -1,11 +1,14 @@
 const tasksStore = require('../stores/tasks.store');
-const DESCRIPTION = require('./todo-read.txt');
+const { readFileSync } = require("node:fs");
+const { join } = require("node:path");
 
 class TodoReadTool {
+  DESCRIPTION = readFileSync(join(__dirname, "./todo-read.txt"), "utf8");
+
   getDefinition() {
     return {
       name: "todoRead",
-      description: DESCRIPTION,
+      description: this.DESCRIPTION,
     }
   };
 

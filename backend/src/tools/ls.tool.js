@@ -2,13 +2,14 @@ const fs = require('fs').promises;
 const path = require('path');
 const ignore = require('ignore');
 const projectsStore = require('../stores/projects.store');
-const DESCRIPTION = require('./ls.txt');
+const { readFileSync } = require("node:fs");
 
 class LsTool {
+  DESCRIPTION = readFileSync(path.join(__dirname, "./ls.txt"), "utf8");
   getDefinition() {
     return {
       name: "ls",
-      description: DESCRIPTION,
+      description: this.DESCRIPTION,
       input_schema: {
         type: "object",
         required: ["path"],

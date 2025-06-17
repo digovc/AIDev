@@ -1,11 +1,14 @@
 const tasksStore = require('../stores/tasks.store');
-const DESCRIPTION = require('./todo-write.txt');
+const { readFileSync } = require("node:fs");
+const { join } = require("node:path");
 
 class TodoWriteTool {
+  DESCRIPTION = readFileSync(join(__dirname, "./todo-write.txt"), "utf8");
+
   getDefinition() {
     return {
       name: "todoWrite",
-      description: DESCRIPTION,
+      description: this.DESCRIPTION,
       input_schema: {
         type: "object",
         required: ["items"],

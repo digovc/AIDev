@@ -1,13 +1,14 @@
 const fs = require('fs').promises;
 const path = require('path');
 const projectsStore = require('../stores/projects.store');
-const DESCRIPTION = require('./file-read.txt');
+const { readFileSync } = require("node:fs");
 
 class FileReadTool {
+  DESCRIPTION = readFileSync(path.join(__dirname, "./file-read.txt"), "utf8");
   getDefinition() {
     return {
       name: "fileRead",
-      description: DESCRIPTION,
+      description: this.DESCRIPTION,
       input_schema: {
         type: "object",
         required: ["file"],

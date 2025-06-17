@@ -1,14 +1,15 @@
 const path = require('path');
 const fg = require('fast-glob');
 const ignore = require('ignore');
-const DESCRIPTION = require('./glob.txt');
 const projectsStore = require("../stores/projects.store");
+const { readFileSync } = require("node:fs");
 
 class GlobTool {
+  DESCRIPTION = readFileSync(path.join(__dirname, "./glob.txt"), "utf8");
   getDefinition() {
     return {
       name: "glob",
-      description: DESCRIPTION,
+      description: this.DESCRIPTION,
       input_schema: {
         type: "object",
         required: ["pattern"],

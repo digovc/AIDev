@@ -1,13 +1,14 @@
 const fs = require('fs').promises;
 const path = require('path');
-const DESCRIPTION = require('./file-write.txt');
 const projectsStore = require("../stores/projects.store");
+const { readFileSync } = require("node:fs");
 
 class FileWriteTool {
+  DESCRIPTION = readFileSync(path.join(__dirname, "./file-write.txt"), "utf8");
   getDefinition() {
     return {
       name: "fileWrite",
-      description: DESCRIPTION,
+      description: this.DESCRIPTION,
       input_schema: {
         type: "object",
         required: ["filePath", "content"],
