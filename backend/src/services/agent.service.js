@@ -1,4 +1,4 @@
-const agentTool = require("../tools/agent.tool");
+const agentTool = require("../tools/worker.tool");
 const alibabaProvider = require('../providers/alibaba.provider');
 const anthropicProvider = require('../providers/anthropic.provider');
 const assistantsStore = require('../stores/assistants.store');

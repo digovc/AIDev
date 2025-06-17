@@ -1,0 +1,25 @@
+Launch a worker that has access to the following tools:
+- glob
+- ls
+- fileRead
+- fileWrite
+- fileEdit
+- fileMultiEdit
+
+When to use the worker tool:
+- If you are searching for a keyword or file and are not confident that you will find the right match in the first few tries, use the `worker` tool to perform the search for you.
+- If you are searching for a keyword like "config" or "logger", or for questions like "which file does X?", the `worker` tool is strongly recommended.
+- You MUST use multiple `worker` tool to perform steps in parallel, such as creating a new file, scaffolding a code pattern within the project, and so on.
+
+When NOT to use the Agent tool:
+- If you want to read a specific file path, use the `fileRead` or `glob` tool instead of the `worker` tool, to find the match more quickly
+- If you are searching for a specific class definition like "class Foo", use the `glob` tool instead, to find the match more quickly
+- If you are searching for code within a specific file or set of 2-3 files, use the `fileRead` tool instead of the `worker` tool, to find the match more quickly
+
+Usage notes:
+- Launch multiple workers concurrently to maximize performance; to do that, use a single message with multiple tool uses
+- When the worker is done, it will return a report back to you.
+- Each worker invocation is stateless. You will not be able to send additional messages to the worker, nor will the worker be able to communicate with you outside its final report.
+- Your prompt should contain a highly detailed task description for the worker to perform autonomously, and you should specify exactly what information the worker should return back to you in its final report.
+- The worker's outputs should generally be trusted
+- Clearly tell the worker whether you expect it to write code or just to do research (search, file reads, etc.), since it is not aware of the user's intent

@@ -2,12 +2,12 @@ const workerService = require("../services/worker.service");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 
-class AgentTool {
+class WorkerTool {
   DESCRIPTION = readFileSync(join(__dirname, "./agent.txt"), "utf8");
 
   getDefinition() {
     return {
-      name: "agent",
+      name: "worker",
       description: this.DESCRIPTION,
       input_schema: {
         type: "object",
@@ -15,7 +15,7 @@ class AgentTool {
         properties: {
           prompt: {
             type: "string",
-            description: "The prompt to send to the agent"
+            description: "The prompt to send to the worker"
           }
         }
       }
@@ -29,9 +29,9 @@ class AgentTool {
     try {
       return await workerService.job(conversation, input.prompt, cancelationToken);
     } catch (error) {
-      throw new Error(`Error on agent job: ${ error }`);
+      throw new Error(`Error on worker: ${ error }`);
     }
   }
 }
 
-module.exports = new AgentTool();
+module.exports = new WorkerTool();

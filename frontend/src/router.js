@@ -60,6 +60,11 @@ const router = createRouter({
               name: 'task-diff',
               component: () => import('./pages/project/task/diff/DiffComponent.vue'),
             },
+            {
+              path: 'agentes',
+              name: 'task-agents',
+              component: () => import('./pages/project/task/AgentsPlaceholder.vue'),
+            },
           ]
         }
       ]
