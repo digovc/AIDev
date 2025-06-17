@@ -1,6 +1,7 @@
 const tasksStore = require('../stores/tasks.store');
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
+const socketIOService = require('../services/socket-io.service');
 
 class TodoWriteTool {
   DESCRIPTION = readFileSync(join(__dirname, "./todo-write.txt"), "utf8");
@@ -66,9 +67,7 @@ class TodoWriteTool {
     }
 
     await tasksStore.update(taskId, task);
-
-    const socketIOService = require('../services/socket-io.service');
-    socketIOService.emitEvent('todoUpdated', { taskId });
+    socketIOService.io.emit('todo-updated', { taskId });
 
     return {
       success: true,

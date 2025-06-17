@@ -19,10 +19,6 @@ class SocketIOService {
       this.emit('disconnected');
     });
 
-    this.socket.on('todoUpdated', (data) => {
-      this.emit('todoUpdatedInClient', data);
-    });
-
     this.socket.on('connect_error', (error) => {
       console.error('Socket connection error:', error);
     });

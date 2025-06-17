@@ -61,8 +61,7 @@ const loadTodoItems = async () => {
 onMounted(async () => {
   await loadTodoItems();
 
-  socketIOService.on('todoUpdatedInClient', async (data) => {
-    console.log('Todo list updated in real-time:', data);
+  socketIOService.socket.on('todo-updated', async (data) => {
     await loadTodoItems();
   });
 });
