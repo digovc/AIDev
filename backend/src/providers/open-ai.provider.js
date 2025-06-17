@@ -6,16 +6,8 @@ class OpenAiProvider {
     cancelationToken.throwIfCanceled();
 
     const formattedMessages = this.getMessages(messages);
-    const settings = await settingsStore.getSettings();
-    const apiKey = settings.openai.apiKey;
-
-    if (!apiKey) {
-      throw new Error('OpenAI API key is required');
-    }
-
-    const openai = new OpenAI({
-      apiKey: apiKey,
-    });
+    const apiKey = await this.getApiKey();
+    const openai = this.createOpenAIClient(apiKey);
 
     await streamCallback({ type: 'message_start', inputTokens: 0 });
 
@@ -26,7 +18,7 @@ class OpenAiProvider {
       tools: tools,
     });
 
-    const currentBlock = {}
+    const currentBlock = {};
 
     for await (const chunk of stream) {
       cancelationToken.throwIfCanceled();
@@ -34,6 +26,20 @@ class OpenAiProvider {
     }
 
     await streamCallback({ type: 'message_stop' });
+  }
+
+  // Permite override para leitura de apiKey
+  async getApiKey() {
+    const settings = await settingsStore.getSettings();
+    if (!settings.openai?.apiKey) {
+      throw new Error('OpenAI API key is required');
+    }
+    return settings.openai.apiKey;
+  }
+
+  // Permite override para customização do client OpenAI
+  createOpenAIClient(apiKey) {
+    return new OpenAI({ apiKey });
   }
 
   async translateStreamEvent(chunk, currentBlock, streamCallback) {
@@ -128,7 +134,6 @@ class OpenAiProvider {
           role: 'system',
           content: this.getTextContent(message.blocks)
         });
-
         continue;
       }
 
@@ -154,7 +159,6 @@ class OpenAiProvider {
                 arguments: args
               }
             };
-
             formattedMessage.tool_calls = formattedMessage.tool_calls ?? [];
             formattedMessage.tool_calls.push(toolCall);
             break;
@@ -198,4 +202,4 @@ class OpenAiProvider {
   }
 }
 
-module.exports = new OpenAiProvider();
+module.exports = OpenAiProvider;
