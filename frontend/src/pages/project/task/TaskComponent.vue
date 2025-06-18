@@ -149,9 +149,21 @@ const handleTabDetails = () => {
   router.push({ name: 'task-details', params: route.params });
 };
 
+const handleTabPlan = () => {
+  if (task.value?.id) {
+    router.push({ name: 'task-plan', params: route.params });
+  }
+};
+
 const handleTabHistory = () => {
   if (task.value?.id) {
     router.push({ name: 'task-chat', params: route.params });
+  }
+};
+
+const handleTabAgents = () => {
+  if (task.value?.id) {
+    router.push({ name: 'task-agents', params: route.params });
   }
 };
 
@@ -164,19 +176,23 @@ const handleTabChanges = () => {
 onMounted(async () => {
   await loadTask();
   socketIOService.socket.on('task-updated', taskUpdated);
-  shortcutService.on('execute', handleExecute);
   shortcutService.on('close', handleClose);
+  shortcutService.on('execute', handleExecute);
+  shortcutService.on('tab-agents', handleTabAgents);
+  shortcutService.on('tab-changes', handleTabChanges);
   shortcutService.on('tab-details', handleTabDetails);
   shortcutService.on('tab-history', handleTabHistory);
-  shortcutService.on('tab-changes', handleTabChanges);
+  shortcutService.on('tab-plan', handleTabPlan);
 });
 
 onUnmounted(() => {
   socketIOService.socket.off('task-updated', taskUpdated);
-  shortcutService.off('execute', handleExecute);
   shortcutService.off('close', handleClose);
+  shortcutService.off('execute', handleExecute);
+  shortcutService.off('tab-agents', handleTabAgents);
+  shortcutService.off('tab-changes', handleTabChanges);
   shortcutService.off('tab-details', handleTabDetails);
   shortcutService.off('tab-history', handleTabHistory);
-  shortcutService.off('tab-changes', handleTabChanges);
+  shortcutService.off('tab-plan', handleTabPlan);
 });
 </script>

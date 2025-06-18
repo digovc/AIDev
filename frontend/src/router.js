@@ -61,12 +61,12 @@ const router = createRouter({
               component: () => import('./pages/project/task/diff/DiffComponent.vue'),
             },
             {
-              path: 'agentes',
+              path: 'workers',
               name: 'task-agents',
               component: () => import('./pages/project/task/workers/Workers.vue'),
             },
             {
-              path: 'plano',
+              path: 'plan',
               name: 'task-plan',
               component: () => import('./pages/project/task/PlanComponent.vue')
             },

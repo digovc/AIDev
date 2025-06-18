@@ -95,7 +95,8 @@ class AnthropicProvider {
           content.push({ type: 'text', text: block.content });
           break;
         case 'tool_use':
-          content.push({ type: 'tool_use', id: block.toolUseId, name: block.tool, input: JSON.parse(block.content) });
+          const input = typeof block.content === 'string' ? JSON.parse(block.content) : block.content;
+          content.push({ type: 'tool_use', id: block.toolUseId, name: block.tool, input: input });
           break;
         case 'tool_result':
           content.push({

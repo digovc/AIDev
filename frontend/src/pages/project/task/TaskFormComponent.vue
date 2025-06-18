@@ -157,7 +157,7 @@ const saveAndRunTask = async () => {
     await saveTask();
     await tasksApi.runTask(task.id);
     await nextTick();
-    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }/chat`);
+    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }/plan`);
   } catch (error) {
     console.error('Erro ao executar tarefa:', error);
     alert('Ocorreu um erro ao executar a tarefa. Por favor, tente novamente.');

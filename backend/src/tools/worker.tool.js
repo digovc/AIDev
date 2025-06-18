@@ -31,6 +31,7 @@ class WorkerTool {
     if (!task) throw new Error("Task not found");
 
     let worker = {
+      prompt: input.prompt,
       id: `${ new Date().getTime() }`,
       taskId: conversation.taskId,
       status: 'running',

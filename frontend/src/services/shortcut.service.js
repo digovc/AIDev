@@ -28,6 +28,10 @@ class ShortcutService {
       this._runCommand('tab-plan', event);
     } else if (event.key === '3' && event.ctrlKey) {
       this._runCommand('tab-history', event);
+    } else if (event.key === '4' && event.ctrlKey) {
+      this._runCommand('tab-agents', event);
+    } else if (event.key === '5' && event.ctrlKey) {
+      this._runCommand('tab-changes', event);
     }
   }
 
