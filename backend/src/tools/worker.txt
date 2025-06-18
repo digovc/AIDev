@@ -16,6 +16,8 @@ When NOT to use the Agent tool:
 - If you want to read a specific file path, use the `fileRead` or `glob` tool instead of the `worker` tool, to find the match more quickly
 - If you are searching for a specific class definition like "class Foo", use the `glob` tool instead, to find the match more quickly
 - If you are searching for code within a specific file or set of 2-3 files, use the `fileRead` tool instead of the `worker` tool, to find the match more quickly
+- To perform some action that is not possible with the `worker` available tools. Call the `worker` only if the action is possible with the available tools
+- Workers can not be used to test any implementation
 
 Usage notes:
 - Launch multiple workers concurrently to maximize performance; to do that, use a single message with multiple tool uses

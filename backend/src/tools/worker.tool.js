@@ -47,8 +47,8 @@ class WorkerTool {
       return await workerService.job(conversation, input.prompt, worker, cancelationToken);
     } catch (error) {
       status = 'failed';
-      const task = await tasksStore.getById(task.id);
-      const worker = task.workers.find(w => w.id === worker.id);
+      task = await tasksStore.getById(task.id);
+      worker = task.workers.find(w => w.id === worker.id);
       worker.status = 'finished';
       throw new Error(`Error on worker: ${ error }`);
     } finally {
