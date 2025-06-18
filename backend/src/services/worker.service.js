@@ -15,8 +15,8 @@ const openRouterProvider = require('../providers/open-router.provider');
 const projectsStore = require("../stores/projects.store");
 const promptParserService = require("./prompt-parser.service");
 const reportTool = require("../tools/report.tool");
+const tasksStore = require("../stores/tasks.store");
 const toolFormatterService = require("./tool-formatter.service");
-const workerManager = require("./worker.manager");
 
 const TOOLS = [
   fileEditTool,
@@ -30,25 +30,29 @@ const TOOLS = [
 ];
 
 class WorkerService {
-  async job(conversation, prompt, cancelationToken) {
+  async job(conversation, prompt, worker, cancelationToken) {
     cancelationToken.throwIfCanceled();
-    workerManager.workerStarted(conversation);
-    workerManager.workerRunning(conversation);
-
     const systemMessage = await this.getSystemMessage(conversation, prompt);
     const messages = [systemMessage]
     return new Promise((resolve, reject) => {
       try {
-        this.runJob(conversation, messages, cancelationToken, resolve, reject)
+        this.runJob(conversation, worker, messages, cancelationToken, resolve, reject)
       } catch (error) {
         reject(error);
       }
     });
   }
 
-  async runJob(conversation, messages, cancelationToken, resolve, reject) {
+  async runJob(conversation, worker, messages, cancelationToken, resolve, reject) {
     cancelationToken.throwIfCanceled();
-    workerManager.workerSessionMessagesCount(conversation, messages.length);
+
+    const task = await tasksStore.getById(conversation.taskId);
+    if (!task) throw new Error("Task not found");
+    const oldWorker = task.workers.find(w => w.id === worker.id);
+    if (!oldWorker) throw new Error("Worker already started");
+    oldWorker.status = 'running';
+    oldWorker.messagesCount = messages.length;
+    await tasksStore.update(task.id, task);
 
     if (messages.length > 50) throw new Error("Worker job caused too many conversation turns (50 max)");
     if (!conversation?.assistantId) throw new Error("Conversation has no assistant");
@@ -96,6 +100,7 @@ class WorkerService {
       toolDefinitions,
       (event) => this.receiveStream(
         conversation,
+        worker,
         messages,
         assistantMessage,
         event,
@@ -118,7 +123,7 @@ class WorkerService {
     };
   }
 
-  async receiveStream(conversation, messages, assistantMessage, event, cancelationToken, resolve, reject) {
+  async receiveStream(conversation, worker, messages, assistantMessage, event, cancelationToken, resolve, reject) {
     try {
       cancelationToken.throwIfCanceled();
       const type = event.type;
@@ -129,16 +134,16 @@ class WorkerService {
         case 'block_delta':
           return this.appendBlockContent(conversation, assistantMessage, event.delta);
         case 'message_stop':
-          return await this.finishMessage(conversation, messages, assistantMessage, cancelationToken, resolve, reject);
+          return await this.finishMessage(conversation, worker, messages, assistantMessage, cancelationToken, resolve, reject);
       }
     } catch (error) {
       reject(error);
     }
   }
 
-  async finishMessage(conversation, messages, assistantMessage, cancelationToken, resolve, reject) {
+  async finishMessage(conversation, worker, messages, assistantMessage, cancelationToken, resolve, reject) {
     if (assistantMessage.blocks.some(b => b.type === 'tool_use')) {
-      await this.useTool(conversation, messages, assistantMessage, cancelationToken, resolve, reject);
+      await this.useTool(conversation, worker, messages, assistantMessage, cancelationToken, resolve, reject);
     } else {
       const report = this.getReportFromMessage(assistantMessage);
       resolve(report);
@@ -169,7 +174,7 @@ class WorkerService {
     lastBlock.content += content ?? '';
   }
 
-  async useTool(conversation, messages, assistantMessage, cancelationToken, resolve, reject) {
+  async useTool(conversation, worker, messages, assistantMessage, cancelationToken, resolve, reject) {
     const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
     const toolResults = [];
 
@@ -214,7 +219,7 @@ class WorkerService {
     };
 
     messages.push(toolMessage);
-    await this.runJob(conversation, messages, cancelationToken, resolve, reject);
+    await this.runJob(conversation, worker, messages, cancelationToken, resolve, reject);
   }
 }
 

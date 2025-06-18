@@ -212,24 +212,23 @@ const duplicateTask = async () => {
   try {
     loading.value = true;
 
-    // Criar uma cópia da tarefa atual, removendo o ID para criar uma nova
+    task.todo = []
+    task.workers = []
+
     const duplicatedTaskData = {
       title: `${ task.title } (Cópia)`,
       description: task.description,
-      status: 'backlog', // Define status como backlog para a nova tarefa
-      references: [...task.references], // Copia as referências
+      status: 'backlog',
+      references: [...task.references],
       projectId: props.project.id,
       assistantId: task.assistantId
     };
 
-    // Criar nova tarefa
     const result = await tasksApi.createTask(duplicatedTaskData);
     const duplicatedTask = result.data;
 
-    // Navegar para a página de edição da nova tarefa
     emits('task-duplicated', duplicatedTask);
     await router.push(`/projects/${ props.project.id }/tasks/${ duplicatedTask.id }`);
-
     setTimeout(() => titleInput.value.focus(), 100);
   } catch (error) {
     console.error('Erro ao duplicar tarefa:', error);

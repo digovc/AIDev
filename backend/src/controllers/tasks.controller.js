@@ -1,7 +1,6 @@
 const CrudControllerBase = require('./crud-controller.base');
 const tasksStore = require('../stores/tasks.store');
 const taskRunnerService = require('../services/task-runner.service');
-const workerManager = require('../services/worker.manager');
 
 class TasksController extends CrudControllerBase {
   constructor() {
@@ -14,10 +13,6 @@ class TasksController extends CrudControllerBase {
     });
 
     super.registerEndpoints(router);
-
-    router.get(`/${ this.modelName }/:taskId/workers`, (req, res) => {
-      this.listWorkers(req, res).catch((e) => this.errorHandler(e, res));
-    });
 
     router.get(`/${ this.modelName }/project/:projectId`, (req, res) => {
       this.getByProjectId(req, res).catch((e) => this.errorHandler(e, res));
@@ -38,16 +33,6 @@ class TasksController extends CrudControllerBase {
     router.post(`/${ this.modelName }/archive`, (req, res) => {
       this.archiveTasks(req, res).catch((e) => this.errorHandler(e, res));
     });
-  }
-
-  async listWorkers(req, res) {
-    const { taskId } = req.params;
-    if (!taskId) {
-      return res.status(400).json({ success: false, message: 'Task ID is required' });
-    }
-    const activeSet = workerManager.activeWorkers.get(taskId) || new Set();
-    const workers = Array.from(activeSet);
-    res.json({ success: true, workers });
   }
 
   async runTask(req, res) {

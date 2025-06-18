@@ -14,7 +14,6 @@ class ShortcutService {
   }
 
   handleKeyDown(event) {
-    console.log(event);
     if (event.key === 'Escape') {
       this._runCommand('close', event);
     } else if (event.key === 'E' && event.ctrlKey && event.shiftKey) {

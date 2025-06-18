@@ -41,7 +41,7 @@ const statusLabel = (status) => {
     case 'pending':
       return 'Pendente';
     case 'in_progress':
-      return 'Em Progresso';
+      return 'Em progresso';
     case 'completed':
       return 'Concluído';
     default:
