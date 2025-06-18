@@ -23,10 +23,11 @@ class GoogleProvider {
       model: assistant.model || 'gemini-2.5-flash',
       contents: formattedMessages,
       config: {
+        temperature: 1,
+        topP: 1,
         tools: [{ functionDeclarations: toolsFormatted }],
         thinkingConfig: {
-          includeThoughts: true,
-          thinkingBudget: 4096,
+          includeThoughts: true
         },
       }
     });

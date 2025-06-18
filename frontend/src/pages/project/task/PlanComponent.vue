@@ -1,12 +1,14 @@
 <template>
-  <div class="p-4">
-    <h3 class="text-lg font-bold mb-4">Planejamento</h3>
-    <ul class="space-y-2">
+  <div class="p-4 h-full">
+    <ul v-if="todoItems.length" class="space-y-2">
       <li v-for="(item, index) in todoItems" :key="index" class="flex items-center justify-between p-2 bg-gray-800 rounded">
         <span>{{ item.content }}</span>
         <span :class="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
       </li>
     </ul>
+    <div v-else class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
+      Nenhum plano definido
+    </div>
   </div>
 </template>
 
