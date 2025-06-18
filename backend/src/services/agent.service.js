@@ -1,22 +1,45 @@
+const OpenAIProvider = require('../providers/open-ai.provider');
+const agentTool = require("../tools/worker.tool");
 const alibabaProvider = require('../providers/alibaba.provider');
 const anthropicProvider = require('../providers/anthropic.provider');
-const openAIProvider = require('../providers/open-ai.provider');
-const deepSeekProvider = require('../providers/deep-seek.provider');
-const googleProvider = require('../providers/google.provider');
-const openRouterProvider = require('../providers/open-router.provider');
-const listFilesTool = require("../tools/list-files.tool");
-const listTasksTool = require("../tools/list-tasks.tool");
-const messagesStore = require('../stores/messages.store');
-const readFileTool = require("../tools/read-file.tool");
-const socketIOService = require("./socket-io.service");
-const toolFormatterService = require("./tool-formatter.service");
-const writeFileTool = require("../tools/write-file.tool");
-const writeTaskTool = require("../tools/write-task.tool");
 const assistantsStore = require('../stores/assistants.store');
-const CancelationToken = require("./cancelation.token");
+const deepSeekProvider = require('../providers/deep-seek.provider');
+const fileEditTool = require("../tools/file-edit.tool");
+const fileMultiEditTool = require("../tools/file-multi-edit.tool");
+const fileReadTool = require("../tools/file-read.tool");
+const fileWriteTool = require("../tools/file-write.tool");
+const globTool = require("../tools/glob.tool");
+const googleProvider = require('../providers/google.provider');
+const grepTool = require("../tools/grep.tool");
+const lsTool = require("../tools/ls.tool");
+const messagesStore = require('../stores/messages.store');
+const openRouterProvider = require('../providers/open-router.provider');
+const socketIOService = require("./socket-io.service");
+const taskListTool = require("../tools/task-list.tool");
+const taskWriteTool = require("../tools/task-write.tool");
+const todoReadTool = require("../tools/todo-read.tool");
+const todoWriteTool = require("../tools/todo-write.tool");
+const toolFormatterService = require("./tool-formatter.service");
+
+const TOOLS = [
+  agentTool,
+  fileEditTool,
+  fileMultiEditTool,
+  fileReadTool,
+  fileWriteTool,
+  globTool,
+  grepTool,
+  lsTool,
+  taskListTool,
+  taskWriteTool,
+  todoReadTool,
+  todoWriteTool,
+];
 
 class AgentService {
   async sendMessage(conversation, cancelationToken) {
+    if (!conversation?.assistantId) throw new Error("Conversation has no assistant");
+
     const messages = await messagesStore.getByConversationId(conversation.id);
 
     const assistantMessage = {
@@ -28,20 +51,9 @@ class AgentService {
 
     await messagesStore.create(assistantMessage);
 
-    const tools = [
-      listFilesTool,
-      listTasksTool,
-      readFileTool,
-      writeFileTool,
-      writeTaskTool
-    ];
+    const assistant = await assistantsStore.getById(conversation.assistantId);
 
-    const assistant = await assistantsStore.getById(conversation.assistantId) || {
-      provider: 'openai',
-      model: 'gpt-4o-2024-08-06'
-    };
-
-    let providerService = openAIProvider;
+    let providerService = new OpenAIProvider();
 
     switch (assistant.provider) {
       case 'alibaba':
@@ -62,20 +74,17 @@ class AgentService {
     }
 
     // Formatar as definições de ferramentas de acordo com o provedor em uso
-    const toolDefinitions = tools.map(tool => {
+    const toolDefinitions = TOOLS.map(tool => {
       const baseDefinition = tool.getDefinition();
       return toolFormatterService.formatToolForProvider(baseDefinition, assistant.provider);
     });
 
-    await providerService.chatCompletion(assistant, messages, cancelationToken, toolDefinitions, (event) => this.receiveStream(conversation, cancelationToken, assistantMessage, tools, event));
-  }
-
-  async continueConversation(conversation) {
-    try {
-      await this.sendMessage(conversation, new CancelationToken(null, () => false));
-    } catch (e) {
-      await this.logError(conversation, e);
-    }
+    await providerService.chatCompletion(
+      assistant,
+      messages,
+      cancelationToken,
+      toolDefinitions,
+      (event) => this.receiveStream(conversation, cancelationToken, assistantMessage, event));
   }
 
   async logError(conversation, error) {
@@ -89,33 +98,30 @@ class AgentService {
     await messagesStore.create(errorMessage);
   }
 
-  async receiveStream(conversation, cancelationToken, assistantMessage, tools, event) {
+  async receiveStream(conversation, cancelationToken, assistantMessage, event) {
     try {
       const type = event.type;
 
       switch (type) {
-        case 'message_start':
-          assistantMessage.inputTokens = event.inputTokens;
-          break;
-        case 'message_stop':
-          await this.finishMessage(conversation, cancelationToken, assistantMessage, tools);
-          break;
         case 'block_start':
           return this.createBlock(assistantMessage, event);
         case 'block_delta':
           return this.appendBlockContent(conversation, assistantMessage, event.delta);
+        case 'message_stop':
+          return await this.finishMessage(conversation, cancelationToken, assistantMessage);
       }
     } catch (e) {
       const message = `Erro ao processar stream: ${ e.message }`;
+      cancelationToken.cancel();
       await this.logError(conversation, { message });
     }
   }
 
-  async finishMessage(conversation, cancelationToken, assistantMessage, tools) {
+  async finishMessage(conversation, cancelationToken, assistantMessage) {
     await messagesStore.update(assistantMessage.id, assistantMessage);
 
     if (assistantMessage.blocks.some(b => b.type === 'tool_use')) {
-      await this.useTool(conversation, cancelationToken, assistantMessage, tools);
+      await this.useTool(conversation, cancelationToken, assistantMessage);
     } else {
       return cancelationToken?.cancel();
     }
@@ -148,13 +154,13 @@ class AgentService {
     });
   }
 
-  async useTool(conversation, cancelationToken, assistantMessage, tools) {
+  async useTool(conversation, cancelationToken, assistantMessage) {
     const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
 
     const toolResults = [];
 
     for (const toolBlock of toolUseBlocks) {
-      const tool = tools.find(tool => tool.getDefinition().name === toolBlock.tool);
+      const tool = TOOLS.find(tool => tool.getDefinition().name === toolBlock.tool);
       let result;
 
       try {
@@ -162,8 +168,8 @@ class AgentService {
           toolBlock.content = JSON.parse(toolBlock.content);
         }
 
-        result = await tool.executeTool(conversation, toolBlock.content);
-        await new Promise(resolve => setTimeout(resolve, 1));
+        result = await tool.executeTool(conversation, toolBlock.content, cancelationToken);
+        await new Promise(resolve => setTimeout(resolve, 100));
       } catch (e) {
         result = { error: e.message, isError: true };
       }
@@ -176,7 +182,6 @@ class AgentService {
       });
     }
 
-    // Criar mensagem de resultado das ferramentas
     const toolMessage = {
       id: `${ new Date().getTime() }`,
       conversationId: conversation.id,
@@ -191,13 +196,7 @@ class AgentService {
     };
 
     await messagesStore.create(toolMessage);
-
-    try {
-      await this.sendMessage(conversation, cancelationToken);
-    } catch (error) {
-      cancelationToken.cancel();
-      await this.logError(conversation, error);
-    }
+    await this.sendMessage(conversation, cancelationToken);
   }
 }
 

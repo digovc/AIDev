@@ -157,7 +157,7 @@ const saveAndRunTask = async () => {
     await saveTask();
     await tasksApi.runTask(task.id);
     await nextTick();
-    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }/chat`);
+    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }/plan`);
   } catch (error) {
     console.error('Erro ao executar tarefa:', error);
     alert('Ocorreu um erro ao executar a tarefa. Por favor, tente novamente.');
@@ -212,24 +212,23 @@ const duplicateTask = async () => {
   try {
     loading.value = true;
 
-    // Criar uma cópia da tarefa atual, removendo o ID para criar uma nova
+    task.todo = []
+    task.workers = []
+
     const duplicatedTaskData = {
       title: `${ task.title } (Cópia)`,
       description: task.description,
-      status: 'backlog', // Define status como backlog para a nova tarefa
-      references: [...task.references], // Copia as referências
+      status: 'backlog',
+      references: [...task.references],
       projectId: props.project.id,
       assistantId: task.assistantId
     };
 
-    // Criar nova tarefa
     const result = await tasksApi.createTask(duplicatedTaskData);
     const duplicatedTask = result.data;
 
-    // Navegar para a página de edição da nova tarefa
     emits('task-duplicated', duplicatedTask);
     await router.push(`/projects/${ props.project.id }/tasks/${ duplicatedTask.id }`);
-
     setTimeout(() => titleInput.value.focus(), 100);
   } catch (error) {
     console.error('Erro ao duplicar tarefa:', error);
@@ -281,12 +280,13 @@ const taskUpdated = (updatedTask) => {
 };
 
 const handleExecute = () => {
+  console.log('handleExecute');
   saveAndRunTask();
 };
 
 onMounted(async () => {
   socketIOService.socket.on('task-updated', taskUpdated);
-  shortcutService.on('execute', handleExecute);
+  shortcutService.on('execute', handleExecute, 1);
 
   await loadTask();
   await loadAssistants();

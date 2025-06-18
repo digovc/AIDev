@@ -21,6 +21,16 @@ class CancelationToken {
 
     return this._cancel;
   }
+
+  throwIfCanceled() {
+    if (this.isCanceled()) {
+      throw new Error("Canceled");
+    }
+  }
+
+  reset() {
+    this._cancel = false;
+  }
 }
 
 module.exports = CancelationToken;

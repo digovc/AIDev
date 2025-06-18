@@ -3,47 +3,46 @@ const settingsStore = require('../stores/settings.store');
 
 class OpenAiProvider {
   async chatCompletion(assistant, messages, cancelationToken, tools, streamCallback) {
-    if (cancelationToken.isCanceled()) {
-      return;
-    }
+    cancelationToken.throwIfCanceled();
 
     const formattedMessages = this.getMessages(messages);
-    const settings = await settingsStore.getSettings();
-    const apiKey = settings.openai.apiKey;
+    const apiKey = await this.getApiKey();
+    const openai = this.createOpenAIClient(apiKey);
 
-    if (!apiKey) {
-      throw new Error('OpenAI API key is required');
-    }
+    await streamCallback({ type: 'message_start', inputTokens: 0 });
 
-    const openai = new OpenAI({
-      apiKey: apiKey,
+    const stream = await openai.chat.completions.create({
+      messages: formattedMessages,
+      model: assistant.model,
+      stream: true,
+      tools: tools,
     });
 
-    streamCallback({ type: 'message_start', inputTokens: 0 });
+    const currentBlock = {};
 
-    try {
-      const stream = await openai.chat.completions.create({
-        messages: formattedMessages,
-        model: assistant.model,
-        stream: true,
-        tools: tools,
-      });
-
-      const currentBlock = {}
-
-      for await (const chunk of stream) {
-        if (cancelationToken.isCanceled()) {
-          throw new Error('Stream canceled');
-        }
-
-        this.translateStreamEvent(chunk, currentBlock, streamCallback);
-      }
-    } finally {
-      streamCallback({ type: 'message_stop' });
+    for await (const chunk of stream) {
+      cancelationToken.throwIfCanceled();
+      await this.translateStreamEvent(chunk, currentBlock, streamCallback);
     }
+
+    await streamCallback({ type: 'message_stop' });
   }
 
-  translateStreamEvent(chunk, currentBlock, streamCallback) {
+  // Permite override para leitura de apiKey
+  async getApiKey() {
+    const settings = await settingsStore.getSettings();
+    if (!settings.openai?.apiKey) {
+      throw new Error('OpenAI API key is required');
+    }
+    return settings.openai.apiKey;
+  }
+
+  // Permite override para customização do client OpenAI
+  createOpenAIClient(apiKey) {
+    return new OpenAI({ apiKey });
+  }
+
+  async translateStreamEvent(chunk, currentBlock, streamCallback) {
     if (!chunk.choices || !chunk.choices.length) return;
     const choice = chunk.choices[0];
 
@@ -71,21 +70,21 @@ class OpenAiProvider {
     if (!currentBlock.isOpen) {
       currentBlock.isOpen = true;
 
-      if (!delta.tool_calls || !delta.tool_calls.length) {
-        const type = delta.content != null ? 'text' : 'reasoning';
+      if (!delta.tool_calls?.length) {
+        const type = delta.reasoning_content != null ? 'reasoning' : 'text';
         currentBlock.type = type;
         currentBlock.toolUseId = undefined;
         const content = delta.content ?? delta.reasoning_content ?? '';
-        return streamCallback({ type: 'block_start', blockType: type, content: content });
+        return await streamCallback({ type: 'block_start', blockType: type, content: content });
       }
 
-      if (delta.tool_calls && delta.tool_calls.length) {
+      if (delta.tool_calls?.length) {
         const toolCall = delta.tool_calls[0];
 
         currentBlock.type = 'tool_use';
         currentBlock.toolUseId = toolCall.id;
 
-        return streamCallback({
+        return await streamCallback({
           type: 'block_start',
           blockType: 'tool_use',
           tool: toolCall.function.name,
@@ -96,24 +95,24 @@ class OpenAiProvider {
     }
 
     if (currentBlock.isOpen && currentBlock.type === 'reasoning' && delta.reasoning_content) {
-      return streamCallback({ type: 'block_delta', delta: delta.reasoning_content });
+      return await streamCallback({ type: 'block_delta', delta: delta.reasoning_content });
     }
 
     if (currentBlock.isOpen && currentBlock.type === 'text' && delta.content) {
-      return streamCallback({ type: 'block_delta', delta: delta.content });
+      return await streamCallback({ type: 'block_delta', delta: delta.content });
     }
 
     if (currentBlock.isOpen && currentBlock.type === 'tool_use' && delta.tool_calls?.length && !delta.tool_calls[0].id) {
       const toolCall = delta.tool_calls[0];
-      return streamCallback({ type: 'block_delta', delta: toolCall.function.arguments });
+      return await streamCallback({ type: 'block_delta', delta: toolCall.function.arguments });
     }
 
     if (currentBlock.isOpen && currentBlock.type === 'tool_use' && delta.tool_calls?.length && currentBlock.toolUseId !== delta.tool_calls[0].id) {
       const toolCall = delta.tool_calls[0];
       currentBlock.toolUseId = toolCall.id;
-      streamCallback({ type: 'block_stop' });
+      await streamCallback({ type: 'block_stop' });
 
-      return streamCallback({
+      return await streamCallback({
         type: 'block_start',
         blockType: 'tool_use',
         tool: toolCall.function.name,
@@ -127,15 +126,14 @@ class OpenAiProvider {
     const formattedMessages = [];
 
     for (const message of messages) {
-      if (!message.blocks?.length) continue;
       if (message.sender === 'log') continue;
+      if (!message.blocks?.length) continue;
 
       if (message.sender === 'system') {
         formattedMessages.push({
           role: 'system',
           content: this.getTextContent(message.blocks)
         });
-
         continue;
       }
 
@@ -152,16 +150,16 @@ class OpenAiProvider {
             textBlocks.push(block.content);
             break;
           case 'tool_use':
+            const args = typeof block.content === 'string' ? block.content : JSON.stringify(block.content);
             const toolCall = {
               id: block.toolUseId,
               type: 'function',
               function: {
                 name: block.tool,
-                arguments: block.content
+                arguments: args
               }
             };
-
-            formattedMessage.tool_calls = formattedMessage.tool_calls || [];
+            formattedMessage.tool_calls = formattedMessage.tool_calls ?? [];
             formattedMessage.tool_calls.push(toolCall);
             break;
           case 'tool_result':
@@ -204,4 +202,4 @@ class OpenAiProvider {
   }
 }
 
-module.exports = new OpenAiProvider();
+module.exports = OpenAiProvider;

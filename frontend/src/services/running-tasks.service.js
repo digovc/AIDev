@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import { socketIOService } from "@/services/socket.io.js";
+import { tasksApi } from "@/api/tasks.api";
 
 class RunningTasksService {
   _runningTasks = ref([]);
@@ -20,10 +21,27 @@ class RunningTasksService {
       if (this._runningTasks.value.includes(taskId)) return;
       this._runningTasks.value.push(taskId);
     });
+
+    socketIOService.on('connected', async () => {
+      const runningTasks = await tasksApi.getRunningTasks();
+      this.setRunningTasks(runningTasks.data);
+    });
+
+    socketIOService.on('disconnected', () => {
+      this.clearRunningTasks();
+    });
   }
 
   isRunning(taskId) {
     return this._runningTasks.value.includes(taskId);
+  }
+
+  clearRunningTasks() {
+    this._runningTasks.value = [];
+  }
+
+  setRunningTasks(taskIds) {
+    this._runningTasks.value = taskIds;
   }
 }
 

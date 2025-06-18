@@ -55,7 +55,6 @@ class StoreBase {
 
     // Prepare data before saving
     await this.prepareBeforeSave(updatedItem);
-
     await fs.writeFile(itemFilePath, JSON.stringify(updatedItem, null, 2));
 
     socketIOService.io.emit(`${ this.modelPrefix }-updated`, updatedItem);

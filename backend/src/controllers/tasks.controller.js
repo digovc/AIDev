@@ -8,6 +8,10 @@ class TasksController extends CrudControllerBase {
   }
 
   registerEndpoints(router) {
+    router.get(`/${ this.modelName }/running`, (req, res) => {
+      this.listRunningTasks(req, res).catch((e) => this.errorHandler(e, res));
+    });
+
     super.registerEndpoints(router);
 
     router.get(`/${ this.modelName }/project/:projectId`, (req, res) => {
@@ -74,7 +78,7 @@ class TasksController extends CrudControllerBase {
     task.status = 'done';
     await tasksStore.update(task.id, task);
 
-    console.log(`Completing task ${taskId}. Will check queue after stopping.`);
+    console.log(`Completing task ${ taskId }. Will check queue after stopping.`);
     await taskRunnerService.stopTask(taskId);
     // O processamento da próxima tarefa é feito no método stopTask
 
@@ -99,6 +103,11 @@ class TasksController extends CrudControllerBase {
     task.status = 'backlog';
     await tasksStore.update(task.id, task);
     res.json({ success: true, message: 'Stopping task' });
+  }
+
+  async listRunningTasks(req, res) {
+    const runningTaskIds = taskRunnerService.executingTasks;
+    res.json(runningTaskIds);
   }
 
   async getByProjectId(req, res) {

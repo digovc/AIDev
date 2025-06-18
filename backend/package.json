@@ -13,11 +13,12 @@
   "license": "ISC",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.53.0",
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^1.4.0",
     "chokidar": "^3.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "fast-glob": "^3.3.3",
     "ignore": "^7.0.3",
     "multi-llm-ts": "^2.15.2",
     "nunjucks": "^3.2.4",

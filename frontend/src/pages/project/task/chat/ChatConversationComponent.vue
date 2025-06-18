@@ -2,7 +2,7 @@
   <div class="relative h-full">
     <div class="absolute inset-0 overflow-y-auto" ref="messagesContainer" @scroll="handleScroll">
       <div v-if="conversation && messages && messages.length > 0" class="pr-2">
-        <ChatMessageComponent v-for="message in messages" :key="message.id" :message="message"/>
+        <ChatMessageComponent v-for="message in messages" :key="message.id" :message="message" @delete="handleDeleteMessage"/>
       </div>
       <div v-else class="text-gray-500 italic h-full flex items-center justify-center">
         Histórico de mensagens aparecerá aqui
@@ -21,6 +21,7 @@ import ChatMessageComponent from './ChatMessageComponent.vue';
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { messagesApi } from '@/api/messages.api.js';
 import { socketIOService } from "@/services/socket.io.js";
+import { conversationsApi } from "@/api/conversations.api.js";
 
 const props = defineProps({
   conversation: {
@@ -37,6 +38,11 @@ const loadMessages = async () => {
   const result = await messagesApi.getMessagesByConversationId(props.conversation.id);
   messages.value = result.data;
   await scrollToBottom();
+};
+
+const handleDeleteMessage = async (messageId) => {
+  await conversationsApi.deleteMessage(messageId);
+  messages.value = messages.value.filter(message => message.id !== messageId);
 };
 
 const scrollToBottom = async (immediate = true) => {

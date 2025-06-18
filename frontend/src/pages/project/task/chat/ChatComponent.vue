@@ -1,6 +1,6 @@
 <template>
   <div v-if="task" class="flex flex-col h-full">
-    <div class="flex-grow mb-4 relative">
+    <div class="flex-grow relative">
       <ChatConversationComponent :conversation="conversation" v-if="conversation"/>
       <div v-else class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">
         Nenhuma mensagem trocada

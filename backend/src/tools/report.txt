@@ -1,0 +1,8 @@
+Finish current job and generate a report for manager
+
+Usage:
+- This tool is used to finish the current job and generate a report for the manager.
+- The report should be a concise summary of the job's results, including any errors or issues encountered.
+- You should always use this tool to generate the report, when the job is complete or when an error occurs.
+- You should use this tool only once in the conversation, and only after the job is complete or when an error occurs.
+- This should be the last tool used in the conversation.

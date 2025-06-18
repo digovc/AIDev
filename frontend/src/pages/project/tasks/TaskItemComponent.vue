@@ -6,7 +6,7 @@
     <div class="flex-grow">
       <div class="text-xs font-bold">{{ task.title }}</div>
     </div>
-    <div class="flex space-x-4 justify-end w-full md:w-auto">
+    <div class="flex space-x-4 items-center justify-end w-full md:w-auto">
       <button v-if="task.status !== 'running'" @click="$emit('play', task.id)" class="text-gray-400 hover:text-gray-200" title="Iniciar" tabindex="-1">
         <FontAwesomeIcon :icon="faPlay" class="h-6 w-6"/>
       </button>

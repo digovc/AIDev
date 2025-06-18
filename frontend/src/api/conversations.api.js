@@ -21,6 +21,10 @@ class ConversationsApi extends ApiBase {
   async sendMessage(conversationId, messageData) {
     return this.client.post(`${ this.baseUrl }/${ conversationId }/messages`, messageData);
   }
+
+  async deleteMessage(messageId) {
+    return this.client.delete(`/messages/${ messageId }`);
+  }
 }
 
 export const conversationsApi = new ConversationsApi();

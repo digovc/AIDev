@@ -41,6 +41,14 @@ class TasksApi extends ApiBase {
   async completeTask(taskId) {
     return this.client.post(`${ this.baseUrl }/complete/${ taskId }`);
   }
+
+  async getWorkers(taskId) {
+    return this.client.get(`${ this.baseUrl }/${ taskId }/workers`);
+  }
+
+  async getRunningTasks() {
+    return this.client.get(`${ this.baseUrl }/running`);
+  }
 }
 
 export const tasksApi = new TasksApi();
