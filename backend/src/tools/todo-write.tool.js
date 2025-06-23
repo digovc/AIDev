@@ -19,7 +19,7 @@ class TodoWriteTool {
             type: "array",
             items: {
               type: "object",
-              required: ["id"],
+              required: ["id", "status"],
               properties: {
                 id: {
                   type: "string",

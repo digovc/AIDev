@@ -8,7 +8,7 @@ Use this tool proactively in these scenarios:
 1. Complex multistep tasks - When a task requires 3 or more distinct steps or actions
 2. Non-trivial and complex tasks - Tasks that require careful planning or multiple operations
 3. User explicitly requests to-do list - When the user directly asks you to use the to-do list
-4. User provides multiple operations within this task - When users provide a list of things to be done (numbered or comma-separated)
+4. User provides multiple operations within this task - When users provide a list of things to be done
 5. After receiving new instructions - Immediately capture user requirements as to-dos. Feel free to edit the to-do list based on new information.
 6. After completing a step - Mark it completes and add any new follow-up step if needed
 7. When you start working on a new step, mark the to-do as in_progress. Ideally you should only have one item in to-do as in_progress at a time.
@@ -23,6 +23,7 @@ Skip using this tool when:
 4. The task is purely conversational or informational
 
 NOTE that you should not use this tool if there is only one trivial task to do. In this case you are better off just doing the task directly.
+NOTE to change existing items, you can send just the item id and the new status.
 
 ## Items States and Management
 
