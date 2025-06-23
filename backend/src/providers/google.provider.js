@@ -19,27 +19,43 @@ class GoogleProvider {
 
     const toolsFormatted = this.formatTools(tools);
 
-    const result = await genAI.models.generateContentStream({
-      model: assistant.model || 'gemini-2.5-flash',
-      contents: formattedMessages,
-      config: {
-        temperature: 1,
-        topP: 1,
-        tools: [{ functionDeclarations: toolsFormatted }],
-        thinkingConfig: {
-          includeThoughts: true
-        },
+    let retryCount = 0;
+    let waitTime = 1000; // 1 second
+    let result;
+
+    while (retryCount < 5) {
+      try {
+        result = await genAI.models.generateContentStream({
+          model: assistant.model || 'gemini-2.5-flash',
+          contents: formattedMessages,
+          config: {
+            temperature: 1,
+            topP: 1,
+            tools: [{ functionDeclarations: toolsFormatted }],
+            thinkingConfig: {
+              includeThoughts: true
+            },
+          }
+        });
+
+        const currentBlock = {};
+
+        for await (const chunk of result) {
+          cancelationToken.throwIfCanceled();
+          await this.translateStreamEvent(chunk, currentBlock, streamCallback);
+        }
+
+        streamCallback({ type: 'message_stop' });
+        break; // Success, exit retry loop
+      } catch (error) {
+        retryCount++;
+        if (retryCount >= 5) {
+          throw error; // Max retries reached, rethrow the error
+        }
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        waitTime *= 2; // Double the wait time for the next retry
       }
-    });
-
-    const currentBlock = {};
-
-    for await (const chunk of result) {
-      cancelationToken.throwIfCanceled();
-      await this.translateStreamEvent(chunk, currentBlock, streamCallback);
     }
-
-    streamCallback({ type: 'message_stop' });
   }
 
   async translateStreamEvent(chunk, currentBlock, streamCallback) {
