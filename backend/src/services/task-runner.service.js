@@ -10,25 +10,17 @@ const tasksStore = require('../stores/tasks.store');
 class TaskRunnerService {
   executingTasks = [];
   cancelationTokens = [];
-  taskQueue = [];
 
   async runTask(taskId) {
+    // Verifica se a tarefa já está em execução ou na fila
     if (this.executingTasks.includes(taskId)) return;
-    if (this.taskQueue.includes(taskId)) return;
 
-    // Se já existir tarefa em execução, adiciona à fila
-    if (this.executingTasks.length > 0) {
-      this.taskQueue.push(taskId);
-      console.log(`Task ${ taskId } added to queue. Current queue:`, this.taskQueue);
-      socketIOService.io.emit('task-queued', taskId);
-      return;
-    }
-
-    // Se não houver tarefas em execução, inicia esta tarefa
+    // Inicia a tarefa diretamente (permite execução paralela)
     await this.startTask(taskId);
   }
 
   async startTask(taskId) {
+    // Adiciona a tarefa à lista de execução
     this.executingTasks.push(taskId);
     const cancelationToken = this.getCancelationToken(taskId);
     socketIOService.io.emit('task-executing', taskId);
@@ -46,7 +38,8 @@ class TaskRunnerService {
     } catch (error) {
       await this.logError(task, conversation, cancelationToken, error);
     } finally {
-      await this.processNextInQueue();
+      // Remove a tarefa da lista de execução quando completa
+      await this.taskCompletion(taskId);
     }
   }
 
@@ -63,23 +56,16 @@ class TaskRunnerService {
 
   async stopTask(taskId) {
     this.executingTasks = this.executingTasks.filter(t => t !== taskId);
-    this.taskQueue = this.taskQueue.filter(t => t !== taskId);
 
     const cancelationTokens = this.cancelationTokens.filter(t => t.taskId === taskId);
     cancelationTokens.forEach(t => t.cancel());
     socketIOService.io.emit('task-not-executing', taskId);
-
-    // Se a tarefa parada estava em execução, processa a próxima da fila
-    await this.processNextInQueue();
   }
 
-  async processNextInQueue() {
-    // Se a fila não estiver vazia e não houver tarefas em execução
-    if (this.taskQueue.length > 0 && this.executingTasks.length === 0) {
-      const nextTaskId = this.taskQueue.shift(); // Remove e retorna o primeiro elemento da fila
-      console.log(`Starting next task from queue: ${ nextTaskId }`);
-      await this.startTask(nextTaskId);
-    }
+  async taskCompletion(taskId) {
+    // Remove a tarefa da lista de execução
+    this.executingTasks = this.executingTasks.filter(t => t !== taskId);
+    console.log(`Task ${ taskId } completed. Remaining executing tasks:`, this.executingTasks);
   }
 
   async logError(task, conversation, cancelationToken, error) {
@@ -93,9 +79,6 @@ class TaskRunnerService {
 
     await messagesStore.create(errorMessage);
     cancelationToken.cancel();
-
-    // Certifica que a próxima tarefa seja processada mesmo em caso de erro
-    await this.processNextInQueue();
   }
 
   async getTaksConversation(task) {
