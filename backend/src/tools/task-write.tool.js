@@ -37,9 +37,9 @@ class TaskWriteTool {
 
   async executeTool(conversation, input) {
     if (input.id) {
-      return this.update_task(conversation, input);
+      return this.updateTask(conversation, input);
     } else {
-      return this.create_task(conversation, input);
+      return this.createTask(conversation, input);
     }
   }
 

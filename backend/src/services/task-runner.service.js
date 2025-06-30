@@ -56,14 +56,8 @@ class TaskRunnerService {
 
   async stopTask(taskId) {
     this.executingTasks = this.executingTasks.filter(t => t !== taskId);
-
     const cancelationTokens = this.cancelationTokens.filter(t => t.taskId === taskId);
     cancelationTokens.forEach(t => t.cancel());
-
-    const task = await tasksStore.getById(taskId);
-    task.status = 'backlog';
-    await tasksStore.update(task.id, task);
-
     socketIOService.io.emit('task-not-executing', taskId);
   }
 

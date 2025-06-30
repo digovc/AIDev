@@ -80,7 +80,6 @@ class TasksController extends CrudControllerBase {
 
     console.log(`Completing task ${ taskId }. Will check queue after stopping.`);
     await taskRunnerService.stopTask(taskId);
-    // O processamento da próxima tarefa é feito no método stopTask
 
     res.json({ success: true, message: 'Task completed', task });
   }
@@ -91,6 +90,15 @@ class TasksController extends CrudControllerBase {
     if (!taskId) {
       return res.status(400).json({ success: false, message: 'Task ID is required' });
     }
+
+    const task = await tasksStore.getById(taskId);
+
+    if (!task) {
+      return res.status(404).json({ success: false, message: 'Task not found' });
+    }
+
+    task.status = 'done';
+    await tasksStore.update(task.id, task);
 
     taskRunnerService.stopTask(taskId).catch(console.error);
     res.json({ success: true, message: 'Stopping task' });
