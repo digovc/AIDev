@@ -170,7 +170,7 @@ const handleNew = () => {
 };
 
 const handleClose = () => {
-  router.push(`/projects/${ props.project.id }`);
+  router.push('/home');
 };
 
 onMounted(async () => {
