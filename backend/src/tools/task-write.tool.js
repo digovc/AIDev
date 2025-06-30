@@ -35,7 +35,7 @@ class TaskWriteTool {
     };
   }
 
-  async execute_tool(conversation, input) {
+  async executeTool(conversation, input) {
     if (input.id) {
       return this.update_task(conversation, input);
     } else {
@@ -43,7 +43,7 @@ class TaskWriteTool {
     }
   }
 
-  async create_task(conversation, input) {
+  async createTask(conversation, input) {
     if (!input.title) throw new Error("To create a task the 'title' field is required");
 
     const task = {
@@ -62,7 +62,7 @@ class TaskWriteTool {
     }
   }
 
-  async update_task(conversation, input) {
+  async updateTask(conversation, input) {
     const task = await tasksStore.getById(input.id);
     if (!task) throw new Error("Task not found");
 

@@ -21,7 +21,7 @@ class TaskListTool {
     }
   };
 
-  async execute_tool(conversation, input) {
+  async executeTool(conversation, input) {
     input.status = input.status ?? '';
 
     if (!['', 'backlog', 'running'].includes(input.status)) {
@@ -29,11 +29,11 @@ class TaskListTool {
     }
 
     if (['backlog', 'running'].includes(input.status)) {
-      return await tasksStore.getByProjectId(conversation.project_id, input.status);
+      return await tasksStore.getByProjectId(conversation.projectId, input.status);
     }
 
-    const backlogTasks = await tasksStore.getByProjectId(conversation.project_id, 'backlog');
-    const runningTasks = await tasksStore.getByProjectId(conversation.project_id, 'running');
+    const backlogTasks = await tasksStore.getByProjectId(conversation.projectId, 'backlog');
+    const runningTasks = await tasksStore.getByProjectId(conversation.projectId, 'running');
 
     return backlogTasks.concat(runningTasks);
   }

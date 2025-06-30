@@ -31,7 +31,7 @@ class LsTool {
   }
 
   async executeTool(conversation, input) {
-    const project = await projectsStore.getById(conversation.project_id);
+    const project = await projectsStore.getById(conversation.projectId);
     const basePath = path.join(project.path, input.path);
 
     // Verifica se o caminho existe
