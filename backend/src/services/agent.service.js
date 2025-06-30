@@ -6,7 +6,7 @@ const assistantsStore = require('../stores/assistants.store');
 const deepSeekProvider = require('../providers/deep-seek.provider');
 const fileEditTool = require("../tools/file-edit.tool");
 const fileMultiEditTool = require("../tools/file-multi-edit.tool");
-const fileReadTool = require("../tools/file-read.tool");
+const file_read_tool = require("../tools/file-read.tool");
 const fileWriteTool = require("../tools/file-write.tool");
 const globTool = require("../tools/glob.tool");
 const googleProvider = require('../providers/google.provider');
@@ -15,7 +15,7 @@ const lsTool = require("../tools/ls.tool");
 const messagesStore = require('../stores/messages.store');
 const openRouterProvider = require('../providers/open-router.provider');
 const socketIOService = require("./socket-io.service");
-const taskListTool = require("../tools/task-list.tool");
+const task_list_tool = require("../tools/task-list.tool");
 const taskWriteTool = require("../tools/task-write.tool");
 const todoReadTool = require("../tools/todo-read.tool");
 const todoWriteTool = require("../tools/todo-write.tool");
@@ -25,12 +25,12 @@ const TOOLS = [
   agentTool,
   fileEditTool,
   fileMultiEditTool,
-  fileReadTool,
+  file_read_tool,
   fileWriteTool,
   globTool,
   grepTool,
   lsTool,
-  taskListTool,
+  task_list_tool,
   taskWriteTool,
   todoReadTool,
   todoWriteTool,

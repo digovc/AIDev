@@ -27,11 +27,11 @@ class GrepTool {
             type: 'array',
             items: { type: 'string' }
           },
-          caseSensitive: {
+          case_sensitive: {
             description: 'Boolean flag for case-sensitive search',
             type: 'boolean'
           },
-          maxResults: {
+          max_results: {
             description: 'Maximum number of matches to return',
             type: 'integer'
           }
@@ -46,8 +46,8 @@ class GrepTool {
     const project = await projectsStore.getById(conversation.projectId);
     const basePath = input.path ? path.join(project.path, input.path) : project.path;
 
-    const caseSensitive = input.caseSensitive === true;
-    const maxResults = typeof input.maxResults === 'number' ? input.maxResults : 100;
+    const caseSensitive = input.case_sensitive === true;
+    const maxResults = typeof input.max_results === 'number' ? input.max_results : 100;
     const ignoreGlobs = Array.isArray(input.ignore) ? input.ignore : [];
 
     // Build ripgrep arguments

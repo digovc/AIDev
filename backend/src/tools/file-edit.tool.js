@@ -49,18 +49,18 @@ class FileEditTool {
       content = await fs.readFile(filePath, 'utf8');
     } catch (error) {
       if (error.code !== 'ENOENT') {
-        throw `Error editing file ${ input.file }: ${ error.message }`;
+        throw `Error editing file ${ input.file_path }: ${ error.message }`;
       }
     }
 
     if (!content.includes(input.old_string)) {
-      throw new Error(`File ${ input.file } does not contain oldString`);
+      throw new Error(`File ${ input.file_path } does not contain old_string`);
     }
 
     if (input.replace_all) {
-      content = content.replaceAll(input.old_string, input.new_string);
+      content = content.replaceAll(input.old_string, input.new_string || '');
     } else {
-      content = content.replace(input.old_string, input.new_string);
+      content = content.replace(input.old_string, input.new_string || '');
     }
 
     const directory = path.dirname(filePath);
@@ -69,7 +69,7 @@ class FileEditTool {
 
     return {
       success: true,
-      message: `File ${ input.file } edited successfully.`
+      message: `File ${ input.file_path } edited successfully.`
     };
   }
 }

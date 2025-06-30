@@ -31,7 +31,7 @@ class LsTool {
   }
 
   async executeTool(conversation, input) {
-    const project = await projectsStore.getById(conversation.projectId);
+    const project = await projectsStore.getById(conversation.project_id);
     const basePath = path.join(project.path, input.path);
 
     // Verifica se o caminho existe
@@ -74,7 +74,7 @@ class LsTool {
         entries.push({
           name: entry.name,
           path: entryPath,
-          isDirectory: entryStats.isDirectory(),
+          is_directory: entryStats.isDirectory(),
           size: entryStats.isDirectory() ? 0 : entryStats.size,
           mtime: entryStats.mtime
         });
@@ -94,7 +94,7 @@ class LsTool {
       entries: limitedEntries.map(entry => ({
         name: entry.name,
         path: entry.path,
-        is_directory: entry.isDirectory,
+        is_directory: entry.is_directory,
         size: entry.size,
         mtime: entry.mtime.toISOString()
       })),

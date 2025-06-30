@@ -8,7 +8,7 @@ class TodoWriteTool {
 
   getDefinition() {
     return {
-      name: "todoWrite",
+      name: "todo_write",
       description: this.DESCRIPTION,
       input_schema: {
         type: "object",

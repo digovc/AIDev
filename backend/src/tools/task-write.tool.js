@@ -3,7 +3,7 @@ const tasksStore = require('../stores/tasks.store');
 class TaskWriteTool {
   getDefinition() {
     return {
-      name: "taskWrite",
+      name: "task_write",
       description: "Adds or updates a project task",
       input_schema: {
         type: "object",
@@ -35,15 +35,15 @@ class TaskWriteTool {
     };
   }
 
-  async executeTool(conversation, input) {
+  async execute_tool(conversation, input) {
     if (input.id) {
-      return this.updateTask(conversation, input);
+      return this.update_task(conversation, input);
     } else {
-      return this.createTask(conversation, input);
+      return this.create_task(conversation, input);
     }
   }
 
-  async createTask(conversation, input) {
+  async create_task(conversation, input) {
     if (!input.title) throw new Error("To create a task the 'title' field is required");
 
     const task = {
@@ -62,7 +62,7 @@ class TaskWriteTool {
     }
   }
 
-  async updateTask(conversation, input) {
+  async update_task(conversation, input) {
     const task = await tasksStore.getById(input.id);
     if (!task) throw new Error("Task not found");
 

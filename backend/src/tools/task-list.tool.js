@@ -3,7 +3,7 @@ const tasksStore = require('../stores/tasks.store');
 class TaskListTool {
   getDefinition() {
     return {
-      name: "taskList",
+      name: "task_list",
       description: "Lists the tasks of the project",
       input_schema: {
         type: "object",
@@ -21,7 +21,7 @@ class TaskListTool {
     }
   };
 
-  async executeTool(conversation, input) {
+  async execute_tool(conversation, input) {
     input.status = input.status ?? '';
 
     if (!['', 'backlog', 'running'].includes(input.status)) {
@@ -29,11 +29,11 @@ class TaskListTool {
     }
 
     if (['backlog', 'running'].includes(input.status)) {
-      return await tasksStore.getByProjectId(conversation.projectId, input.status);
+      return await tasksStore.getByProjectId(conversation.project_id, input.status);
     }
 
-    const backlogTasks = await tasksStore.getByProjectId(conversation.projectId, 'backlog');
-    const runningTasks = await tasksStore.getByProjectId(conversation.projectId, 'running');
+    const backlogTasks = await tasksStore.getByProjectId(conversation.project_id, 'backlog');
+    const runningTasks = await tasksStore.getByProjectId(conversation.project_id, 'running');
 
     return backlogTasks.concat(runningTasks);
   }

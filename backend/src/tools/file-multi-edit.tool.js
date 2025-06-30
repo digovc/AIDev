@@ -8,13 +8,13 @@ class FileMultiEditTool {
 
   getDefinition() {
     return {
-      name: "fileMultiEdit",
+      name: "file_multi_edit",
       description: this.DESCRIPTION,
       input_schema: {
         type: "object",
-        required: ["filePath", "edits"],
+        required: ["file_path", "edits"],
         properties: {
-          filePath: {
+          file_path: {
             description: "The path to the file to modify",
             type: "string"
           },
@@ -23,17 +23,17 @@ class FileMultiEditTool {
             description: "List of edit operations to perform",
             items: {
               type: "object",
-              required: ["oldString", "newString"],
+              required: ["old_string", "new_string"],
               properties: {
                 old_string: {
                   description: "The text to replace",
                   type: "string"
                 },
-                newString: {
+                new_string: {
                   description: "The text to replace it with",
                   type: "string"
                 },
-                replaceAll: {
+                replace_all: {
                   description: "Replace all occurences of oldString (default false)",
                   type: "boolean"
                 }
@@ -46,14 +46,14 @@ class FileMultiEditTool {
   }
 
   async executeTool(conversation, input) {
-    if (!input.filePath) throw new Error("The parameter filePath is required");
+    if (!input.file_path) throw new Error("The parameter file_path is required");
     if (!input.edits || !Array.isArray(input.edits)) {
       throw new Error("The parameter edits must be a non-empty array");
     }
 
     const project = await projectsStore.getById(conversation.projectId);
     const projectPath = project.path;
-    const filePath = path.resolve(projectPath, input.filePath);
+    const filePath = path.resolve(projectPath, input.file_path);
 
     // Read original file content
     let originalContent = '';
@@ -61,7 +61,7 @@ class FileMultiEditTool {
       originalContent = await fs.readFile(filePath, 'utf8');
     } catch (error) {
       if (error.code !== 'ENOENT') {
-        throw new Error(`Error reading file ${ input.filePath }: ${ error.message }`);
+        throw new Error(`Error reading file ${ input.file_path }: ${ error.message }`);
       }
     }
 
@@ -69,21 +69,21 @@ class FileMultiEditTool {
     let modifiedContent = originalContent;
     for (let i = 0; i < input.edits.length; i++) {
       const edit = input.edits[i];
-      const { oldString, newString } = edit;
-      const replaceAll = !!edit.replaceAll;
+      const { old_string, new_string } = edit;
+      const replace_all = !!edit.replace_all;
 
-      if (oldString === newString) {
-        throw new Error(`Edit #${ i + 1 }: oldString and newString are identical`);
+      if (old_string === new_string) {
+        throw new Error(`Edit #${ i + 1 }: old_string and new_string are identical`);
       }
 
-      if (!modifiedContent.includes(oldString)) {
-        throw new Error(`Edit #${ i + 1 }: oldString not found in file content`);
+      if (!modifiedContent.includes(old_string)) {
+        throw new Error(`Edit #${ i + 1 }: old_string not found in file content`);
       }
 
-      if (replaceAll) {
-        modifiedContent = modifiedContent.replaceAll(oldString, newString);
+      if (replace_all) {
+        modifiedContent = modifiedContent.replaceAll(old_string, new_string || '');
       } else {
-        modifiedContent = modifiedContent.replace(oldString, newString);
+        modifiedContent = modifiedContent.replace(old_string, new_string || '');
       }
     }
 
@@ -94,7 +94,7 @@ class FileMultiEditTool {
 
     return {
       success: true,
-      message: `File ${ input.filePath } edited successfully.`
+      message: `File ${ input.file_path } edited successfully.`
     };
   }
 }
