@@ -1,9 +1,9 @@
 Searches for a regular expression pattern in project files.
-Returns a list of matches, each with file path, line number, column number, and matching text.
+Returns a list of matches: file path, line number, column number, and matching text.
 
-- Fast recursive search powered by ripgrep CLI.
-- pattern: The regex pattern to search for (required).
-- path: Directory to search in relative to project root (optional, defaults to project root).
-- ignore: List of glob patterns to ignore (optional).
-- caseSensitive: Boolean flag for case-sensitive search (optional, default false).
-- maxResults: Maximum number of matches to return (optional, default 100).
+*   **Fast:** Powered by ripgrep CLI.
+*   **`pattern` (required):** The regex pattern to search for.
+*   **`path` (optional):** Directory to search (defaults to project root).
+*   **`ignore` (optional):** List of glob patterns to ignore.
+*   **`case_sensitive` (optional):** Boolean for case-sensitive search (default `false`).
+*   **`max_results` (optional):** Maximum matches to return (default `100`).

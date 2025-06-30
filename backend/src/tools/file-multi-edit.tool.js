@@ -25,7 +25,7 @@ class FileMultiEditTool {
               type: "object",
               required: ["oldString", "newString"],
               properties: {
-                oldString: {
+                old_string: {
                   description: "The text to replace",
                   type: "string"
                 },

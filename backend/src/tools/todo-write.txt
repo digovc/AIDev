@@ -1,49 +1,40 @@
-Use this tool to create and manage a structured to-do list for your current task.
-This helps you track progress, organize complex tasks, and demonstrate thoroughness to the user.
-It also helps the user understand the progress of the task and overall progress of their requests.
+Manages a structured to-do list for your task.
+Tracks progress, organizes complex tasks, and improves user understanding.
 
-## When to Use This Tool
-Use this tool proactively in these scenarios:
+**When to Use:**
+*   **Complex Tasks:** When a task has 3+ distinct steps.
+*   **Non-trivial Tasks:** For tasks requiring planning or multiple operations.
+*   **User Request:** When the user explicitly asks for a to-do list.
+*   **Multiple Operations:** When users provide a list of actions.
+*   **New Instructions:** Immediately capture user requirements as to-dos. Update as needed.
+*   **After Step Completion:** Mark completed and add follow-ups.
+*   **Starting a Step:** Set to-do status to `in_progress` (only one at a time).
+*   **Prioritization:** Complete existing tasks before starting new ones.
 
-1. Complex multistep tasks - When a task requires 3 or more distinct steps or actions
-2. Non-trivial and complex tasks - Tasks that require careful planning or multiple operations
-3. User explicitly requests to-do list - When the user directly asks you to use the to-do list
-4. User provides multiple operations within this task - When users provide a list of things to be done
-5. After receiving new instructions - Immediately capture user requirements as to-dos. Feel free to edit the to-do list based on new information.
-6. After completing a step - Mark it completes and add any new follow-up step if needed
-7. When you start working on a new step, mark the to-do as in_progress. Ideally you should only have one item in to-do as in_progress at a time.
-8. Complete existing tasks before starting new ones.
+**When NOT to Use:**
+*   **Single/Trivial Tasks:** If the task is simple and fast (less than 3 trivial steps).
+*   **Conversational/Informational Tasks:** For non-actionable interactions.
 
-## When NOT to Use This Tool
+**Note:** If only one trivial task, execute it directly.
+To change existing items, send `item_id` and new `status`.
 
-Skip using this tool when:
-1. There is only a single, straightforward task
-2. The task is trivial and tracking it provides no organizational benefit
-3. The task can be completed in less than 3 trivial steps
-4. The task is purely conversational or informational
+**Items States and Management:**
+1.  **Item States:**
+    *   `pending`: Not yet started.
+    *   `in_progress`: Currently working on (one item limit).
+    *   `completed`: Finished successfully.
+    *   `cancelled`: No longer needed.
 
-NOTE that you should not use this tool if there is only one trivial task to do. In this case you are better off just doing the task directly.
-NOTE to change existing items, you can send just the item id and the new status.
+2.  **To-Do Management:**
+    *   Update status in real-time.
+    *   Mark complete IMMEDIATELY (no batching).
+    *   One `in_progress` item at a time.
+    *   Complete current items before new ones.
+    *   Cancel irrelevant tasks.
 
-## Items States and Management
+3.  **Item Breakdown:**
+    *   Create specific, actionable items.
+    *   Break complex tasks into smaller steps.
+    *   Use clear, descriptive names.
 
-1. **Items States**: Use these states to track progress:
-   - pending: Item not yet started
-   - in_progress: Currently working on (limit to ONE item at a time)
-   - completed: Item finished successfully
-   - cancelled: Item no longer needed
-
-2. **TO-DO Management**:
-   - Update item status in real-time as you work
-   - Mark items complete IMMEDIATELY after finishing (don't batch completions)
-   - Only have ONE item in_progress at any time
-   - Complete current items before starting new ones
-   - Cancel tasks that become irrelevant
-
-3. **Item Breakdown**:
-   - Create specific, actionable items
-   - Break complex tasks into smaller, manageable steps
-   - Use clear, descriptive items names
-
-When in doubt, use this tool. Being proactive with to-do management demonstrates attentiveness and ensures you complete all requirements successfully.
-
+When unsure, use this tool. Proactive to-do management ensures all requirements are met.

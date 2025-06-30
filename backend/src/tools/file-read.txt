@@ -1,9 +1,9 @@
-Reads a file content from the project.
-You can access any file within the project directory.
-It is okay to read a file that does not exist; an error will be returned.
+Reads file content from the project.
+Access any file in the project directory.
+Non-existent files return an error.
 
-Usage:
-- By default, it reads up to 1000 lines starting from the beginning of the file
-- You can optionally specify a line offset and limit (especially handy for long files), but it's recommended to read the whole file by not providing these parameters
-- Any lines longer than 1000 characters will be truncated
-- You have the capability to call multiple tools in a single response. It is always better to speculatively read multiple files as a batch that are potentially useful.
+**Usage:**
+*   Reads up to 1000 lines by default.
+*   Optionally specify `offset` and `limit` for long files; otherwise, read the whole file.
+*   Lines over 1000 characters are truncated.
+*   Call multiple tools in one response. Speculatively read multiple useful files as a batch.

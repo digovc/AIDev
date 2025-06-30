@@ -1,15 +1,15 @@
-Use this tool to read the current to-do list for this task.
-This tool should be used proactively and frequently to ensure that you are aware of the status of the current to-do list assigned to the current task.
+Reads the current to-do list for this task.
+Use this tool proactively and frequently to track task status.
 
-You should make use of this tool as often as possible, especially in the following situations:
-- Before starting new items to prioritize work
-- When the user asks about previous steps or plans
-- Whenever you're uncertain about what to do next
-- After completing a to-do item to update your understanding of remaining work
-- After every few messages to ensure you're on track
+**When to use:**
+*   Before starting new items for prioritization.
+*   When the user asks about previous steps or plans.
+*   When uncertain about next steps.
+*   After completing a to-do item.
+*   After every few messages to stay on track.
 
-Usage:
-- This tool takes in no parameters. So leave the input blank or empty
-- Returns a list of to-do items with their status assigned to the current task
-- Use this information to track progress and plan next steps
-- If no to-dos exist yet, an empty list will be returned
+**Usage:**
+*   Takes no parameters.
+*   Returns a list of to-do items with their status.
+*   Use this information to track progress and plan next steps.
+*   Returns an empty list if no to-dos exist.

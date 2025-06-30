@@ -1,5 +1,5 @@
 Lists files and directories in a given path.
 
-- The path parameter is optional and defaults to the project root.
-- You can optionally provide an array of glob patterns to ignore with the ignore parameter.
-- You should prefer the `glob` tool if you need a deep search.
+*   `path` (optional): Defaults to project root.
+*   `ignore` (optional): Array of glob patterns to ignore.
+*   For deep searches, use `glob`.
