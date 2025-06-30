@@ -1,5 +1,5 @@
 <template>
-  <dialog ref="dialogRef" class="p-0 rounded-lg shadow-lg bg-gray-900 text-white">
+  <dialog ref="dialogRef" class="p-0 rounded-lg shadow-lg bg-gray-900 text-white" @click="handleClick">
     <div class="w-full h-full flex flex-col gap-2">
       <div class="flex justify-between items-center p-2 text-gray-300">
         <div class="text-sm cursor-pointer hover:text-gray-100" @click="copyPathToClipboard">
@@ -144,6 +144,12 @@ const close = () => {
 
   dialogRef.value.close();
 };
+
+const handleClick = (event) => {
+  if (event.target === dialogRef.value) {
+    close();
+  }
+}
 
 defineExpose({
   open
