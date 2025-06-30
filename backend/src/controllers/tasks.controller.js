@@ -114,16 +114,9 @@ class TasksController extends CrudControllerBase {
     const projectId = req.params.projectId;
     const tasks = await tasksStore.getByProjectId(projectId);
     const executingTasks = taskRunnerService.executingTasks;
-    const queuedTasks = taskRunnerService.taskQueue;
 
     tasks.forEach(t => {
       t.isExecuting = executingTasks.includes(t.id);
-      t.isQueued = queuedTasks.includes(t.id);
-
-      // Incluir posição na fila se a tarefa estiver em fila
-      if (t.isQueued) {
-        t.queuePosition = queuedTasks.indexOf(t.id) + 1; // Posição na fila (1-based)
-      }
     });
 
     res.json(tasks);
