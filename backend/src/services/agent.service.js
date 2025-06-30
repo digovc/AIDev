@@ -154,32 +154,59 @@ class AgentService {
     });
   }
 
-  async useTool(conversation, cancelationToken, assistantMessage) {
-    const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
-
-    const toolResults = [];
-
-    for (const toolBlock of toolUseBlocks) {
-      const tool = TOOLS.find(tool => tool.getDefinition().name === toolBlock.tool);
-      let result;
-
-      try {
-        if (typeof toolBlock.content === 'string') {
-          toolBlock.content = JSON.parse(toolBlock.content);
-        }
-
-        result = await tool.executeTool(conversation, toolBlock.content, cancelationToken);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      } catch (e) {
-        result = { error: e.message, isError: true };
+  async processToolBlock(toolBlock, conversation, cancelationToken) {
+    const tool = TOOLS.find(tool => tool.getDefinition().name === toolBlock.tool);
+    try {
+      if (typeof toolBlock.content === 'string') {
+        toolBlock.content = JSON.parse(toolBlock.content);
       }
-
-      toolResults.push({
+      const result = await tool.executeTool(conversation, toolBlock.content, cancelationToken);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return {
         tool: toolBlock.tool,
         toolUseId: toolBlock.toolUseId,
         result: result,
         isError: result.isError
-      });
+      };
+    } catch (e) {
+      return {
+        tool: toolBlock.tool,
+        toolUseId: toolBlock.toolUseId,
+        result: { error: e.message, isError: true },
+        isError: true
+      };
+    }
+  }
+
+  async useTool(conversation, cancelationToken, assistantMessage) {
+    const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
+    const toolResults = [];
+
+    // Separate worker and non-worker tools
+    const workerBlocks = [];
+    const nonWorkerBlocks = [];
+    
+    for (const toolBlock of toolUseBlocks) {
+      if (toolBlock.tool === 'worker') {
+        workerBlocks.push(toolBlock);
+      } else {
+        nonWorkerBlocks.push(toolBlock);
+      }
+    }
+
+    // Process non-worker tools sequentially
+    for (const toolBlock of nonWorkerBlocks) {
+      const result = await this.processToolBlock(toolBlock, conversation, cancelationToken);
+      toolResults.push(result);
+    }
+
+    // Process worker tools in parallel
+    if (workerBlocks.length > 0) {
+      const workerPromises = workerBlocks.map(toolBlock => 
+        this.processToolBlock(toolBlock, conversation, cancelationToken)
+      );
+      const workerResults = await Promise.all(workerPromises);
+      toolResults.push(...workerResults);
     }
 
     const toolMessage = {
