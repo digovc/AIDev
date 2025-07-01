@@ -1,9 +1,10 @@
 Performs exact string replacements in files.
 
-Usage:
-- You must use your `fileRead` tool at least once in the conversation before editing. This tool will error if you attempt an edit without reading the file.
-- When editing text from `fileRead` tool output, ensure you preserve the exact indentation (tabs/spaces) as it appears in the original file.
-- The edit will FAIL if `oldString` is not unique in the file. Either provide a larger string with more surrounding context to make it unique or use `replaceAll` to change every instance of `oldString`.
-- Use `replaceAll` for replacing and renaming strings across the file. This parameter is useful if you want to rename a variable for instance.
-- If you want to make a multi changes in the same file prefer using the `fileMultiEdit` tool instead.
-- To delete some text from a file just omit the `newString` parameter.
+**Usage:**
+
+*   **Read first:** Always read the file with `file_read` before editing. Edits to unread files will fail.
+*   **Exact match:** `old_string` must match the file's exact content, including all whitespace.
+*   **Unique `old_string`:** If `old_string` is not unique, the edit will fail. Provide more context to make it unique, or use `replace_all`.
+*   **`replace_all` for mass changes:** Use `replace_all` to replace all occurrences. Ideal for renaming variables.
+*   **Multiple edits:** For multiple changes in one file, use `file_multi_edit`.
+*   **Delete text:** To delete, provide `old_string` and omit `new_string`.

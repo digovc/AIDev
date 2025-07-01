@@ -56,7 +56,12 @@ class GlobTool {
     const project = await projectsStore.getById(conversation.projectId);
     const basePath = input.path ? path.join(project.path, input.path) : project.path;
     const rootGitIgnorePath = path.join(project.path, '.gitignore');
-    const ignoreContent = fs.readFileSync(rootGitIgnorePath, 'utf8');
+
+    let ignoreContent = '';
+
+    if (fs.existsSync(rootGitIgnorePath)) {
+      ignoreContent = fs.readFileSync(rootGitIgnorePath, 'utf8');
+    }
 
     const ignorePatterns = ignoreContent.split('\n')
       .filter(x => !x.startsWith('#'))
@@ -83,8 +88,7 @@ class GlobTool {
 
     const processedFiles = [];
     for (const file of files) {
-      const relativePath = path.relative(basePath, file);
-      if (ig.ignores(relativePath)) continue;
+      if (ig.ignores(file)) continue;
       processedFiles.push(file);
     }
 

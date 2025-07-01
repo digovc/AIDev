@@ -1,6 +1,6 @@
 Writes a file to the project folder.
 
-Usage:
-- This tool will overwrite the existing file if there is one at the provided path.
-- If this is an existing file, you MUST use the `fileRead` tool first to read the file's contents. This tool will fail if you did not read a existing file first.
-- ALWAYS prefer editing existing files in the codebase. NEVER write new files unless explicitly required.
+**Usage:**
+*   **Overwrites:** This tool overwrites existing files.
+*   **Read Before Overwriting:** For existing files, you MUST use `file_read` first. The tool will fail otherwise.
+*   **Prefer Edits:** Always prefer editing existing files. ONLY write new files if explicitly required.

@@ -8,7 +8,7 @@ class TodoWriteTool {
 
   getDefinition() {
     return {
-      name: "todoWrite",
+      name: "todo_write",
       description: this.DESCRIPTION,
       input_schema: {
         type: "object",
@@ -19,7 +19,7 @@ class TodoWriteTool {
             type: "array",
             items: {
               type: "object",
-              required: ["id"],
+              required: ["id", "status"],
               properties: {
                 id: {
                   type: "string",
@@ -27,7 +27,7 @@ class TodoWriteTool {
                 },
                 content: {
                   type: "string",
-                  description: "Brief description of the task"
+                  description: "Brief description of the task. Send this only on create or update."
                 },
                 status: {
                   type: "string",

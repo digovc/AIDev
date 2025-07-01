@@ -3,7 +3,7 @@ const tasksStore = require('../stores/tasks.store');
 class TaskWriteTool {
   getDefinition() {
     return {
-      name: "taskWrite",
+      name: "task_write",
       description: "Adds or updates a project task",
       input_schema: {
         type: "object",

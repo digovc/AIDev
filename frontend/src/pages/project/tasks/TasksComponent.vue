@@ -169,16 +169,22 @@ const handleNew = () => {
   showTaskForm();
 };
 
+const handleClose = () => {
+  router.push('/home');
+};
+
 onMounted(async () => {
   await loadTasks()
   socketIOService.socket.on('task-created', taskCreated);
   socketIOService.socket.on('task-updated', taskUpdated);
   shortcutService.on('new', handleNew);
+  shortcutService.on('close', handleClose);
 });
 
 onUnmounted(() => {
   socketIOService.socket.off('task-created', taskCreated);
   socketIOService.socket.off('task-updated', taskUpdated);
   shortcutService.off('new', handleNew);
+  shortcutService.off('close', handleClose);
 });
 </script>

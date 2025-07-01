@@ -7,7 +7,7 @@ class TodoReadTool {
 
   getDefinition() {
     return {
-      name: "todoRead",
+      name: "todo_read",
       description: this.DESCRIPTION,
       input_schema: {
         type: "object",

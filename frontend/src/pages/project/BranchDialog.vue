@@ -1,5 +1,5 @@
 <template>
-  <dialog ref="dialogRef" class="p-0 rounded-lg shadow-lg bg-gray-900 text-white">
+  <dialog ref="dialogRef" class="p-0 rounded-lg shadow-lg bg-gray-900 text-white" @click="handleClick">
     <div class="p-6 w-full h-full flex flex-col space-y-4">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-white">Selecionar Branch</h2>
@@ -66,6 +66,12 @@ const open = async () => {
 const close = () => {
   dialogRef.value.close();
 };
+
+const handleClick = (event) => {
+  if (event.target === dialogRef.value) {
+    close();
+  }
+}
 
 defineExpose({
   open

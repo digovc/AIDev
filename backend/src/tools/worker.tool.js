@@ -2,6 +2,7 @@ const workerService = require("../services/worker.service");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const tasksStore = require("../stores/tasks.store");
+const { v4: uuidv4 } = require('uuid');
 
 class WorkerTool {
   DESCRIPTION = readFileSync(join(__dirname, "./worker.txt"), "utf8");
@@ -32,7 +33,7 @@ class WorkerTool {
 
     let worker = {
       prompt: input.prompt,
-      id: `${ new Date().getTime() }`,
+      id: uuidv4(),
       taskId: conversation.taskId,
       status: 'running',
       messagesCount: 0,
@@ -42,19 +43,28 @@ class WorkerTool {
     task.workers.push(worker);
     await tasksStore.update(task.id, task);
     let status = 'completed';
+    let result = {};
 
     try {
-      return await workerService.job(conversation, input.prompt, worker, cancelationToken);
+      result = await workerService.job(conversation, input.prompt, worker, cancelationToken);
+      return result;
     } catch (error) {
       status = 'failed';
       task = await tasksStore.getById(task.id);
       worker = task.workers.find(w => w.id === worker.id);
+
       worker.status = 'finished';
+      worker.error = true;
+      worker.report = error.message;
+
       throw new Error(`Error on worker: ${ error }`);
     } finally {
       task = await tasksStore.getById(task.id);
       worker = task.workers.find(w => w.id === worker.id);
+
       worker.status = status;
+      worker.report = result.report;
+
       await tasksStore.update(task.id, task);
     }
   }

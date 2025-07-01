@@ -3,7 +3,7 @@ const tasksStore = require('../stores/tasks.store');
 class TaskListTool {
   getDefinition() {
     return {
-      name: "taskList",
+      name: "task_list",
       description: "Lists the tasks of the project",
       input_schema: {
         type: "object",

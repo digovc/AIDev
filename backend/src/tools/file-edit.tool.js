@@ -8,26 +8,26 @@ class FileEditTool {
 
   getDefinition() {
     return {
-      name: "fileEdit",
+      name: "file_edit",
       description: this.DESCRIPTION,
       input_schema: {
         type: "object",
-        required: ["filePath", "oldString"],
+        required: ["file_path", "old_string"],
         properties: {
-          filePath: {
+          file_path: {
             description: "The path to the file to modify",
             type: "string"
           },
-          oldString: {
+          old_string: {
             description: "The text to replace",
             type: "string"
           },
-          newString: {
+          new_string: {
             description: "The text to replace it with",
             type: "string"
           },
-          replaceAll: {
-            description: "Replace all occurences of oldString (default false)",
+          replace_all: {
+            description: "Replace all occurences of old_string (default false)",
             type: "boolean"
           }
         }
@@ -36,12 +36,12 @@ class FileEditTool {
   };
 
   async executeTool(conversation, input) {
-    if (!input.filePath) throw new Error("The parameter file_path is required");
-    if (!input.oldString) throw new Error("The parameter old_string is required");
+    if (!input.file_path) throw new Error("The parameter file_path is required");
+    if (!input.old_string) throw new Error("The parameter old_string is required");
 
     const project = await projectsStore.getById(conversation.projectId);
     const projectPath = project.path;
-    const filePath = path.resolve(projectPath, input.filePath);
+    const filePath = path.resolve(projectPath, input.file_path);
 
     let content = '';
 
@@ -49,18 +49,18 @@ class FileEditTool {
       content = await fs.readFile(filePath, 'utf8');
     } catch (error) {
       if (error.code !== 'ENOENT') {
-        throw `Error editing file ${ input.file }: ${ error.message }`;
+        throw `Error editing file ${ input.file_path }: ${ error.message }`;
       }
     }
 
-    if (!content.includes(input.oldString)) {
-      throw new Error(`File ${ input.file } does not contain oldString`);
+    if (!content.includes(input.old_string)) {
+      throw new Error(`File ${ input.file_path } does not contain old_string`);
     }
 
-    if (input.replaceAll) {
-      content = content.replaceAll(input.oldString, input.newString);
+    if (input.replace_all) {
+      content = content.replaceAll(input.old_string, input.new_string || '');
     } else {
-      content = content.replace(input.oldString, input.newString);
+      content = content.replace(input.old_string, input.new_string || '');
     }
 
     const directory = path.dirname(filePath);
@@ -69,7 +69,7 @@ class FileEditTool {
 
     return {
       success: true,
-      message: `File ${ input.file } edited successfully.`
+      message: `File ${ input.file_path } edited successfully.`
     };
   }
 }

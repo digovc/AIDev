@@ -1,5 +1,5 @@
 <template>
-  <dialog ref="dialogRef" class="p-0 rounded-lg shadow-lg bg-gray-900">
+  <dialog ref="dialogRef" class="p-0 rounded-lg shadow-lg bg-gray-900" @click="handleClick">
     <div class="p-6 w-full">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-white">{{ isEditing ? 'Editar Assistente' : 'Novo Assistente' }}</h2>
@@ -117,6 +117,12 @@ const close = () => {
   dialogRef.value.close();
   resetForm();
 };
+
+const handleClick = (event) => {
+  if (event.target === dialogRef.value) {
+    close();
+  }
+}
 
 defineExpose({
   open

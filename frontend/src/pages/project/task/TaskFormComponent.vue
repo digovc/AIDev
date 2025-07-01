@@ -157,7 +157,7 @@ const saveAndRunTask = async () => {
     await saveTask();
     await tasksApi.runTask(task.id);
     await nextTick();
-    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }/plan`);
+    await router.push(`/projects/${ props.project.id }/tasks/${ task.id }/chat`);
   } catch (error) {
     console.error('Erro ao executar tarefa:', error);
     alert('Ocorreu um erro ao executar a tarefa. Por favor, tente novamente.');
@@ -216,7 +216,7 @@ const duplicateTask = async () => {
     task.workers = []
 
     const duplicatedTaskData = {
-      title: `${ task.title } (Cópia)`,
+      title: task.title,
       description: task.description,
       status: 'backlog',
       references: [...task.references],

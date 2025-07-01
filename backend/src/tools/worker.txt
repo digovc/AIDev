@@ -1,28 +1,27 @@
-Launch a worker that has access to the following tools:
-- glob
-- grep
-- ls
-- fileRead
-- fileWrite
-- fileEdit
-- fileMultiEdit
+Launches a worker with access to:
+- `glob`
+- `grep`
+- `ls`
+- `file_read`
+- `file_write`
+- `file_edit`
+- `file_multi_edit`
 
-When to use the worker tool:
-- If you are searching for a keyword or file and are not confident that you will find the right match in the first few tries, use the `worker` tool to perform the search for you.
-- If you are searching for a keyword like "config" or "logger", or for questions like "which file does X?", the `worker` tool is strongly recommended.
-- You MUST use multiple `worker` tool to perform steps in parallel, such as creating a new file, scaffolding a code pattern within the project, and so on.
+**When to Use:**
+*   **Uncertain Searches:** For keyword or file searches where the exact match is unknown.
+*   **Specific Keywords:** Recommended for keywords like "config" or "logger," or questions like "which file does X?"
+*   **Parallel Tasks:** MUST use multiple workers for parallel steps (e.g., creating files, scaffolding code).
 
-When NOT to use the Agent tool:
-- If you want to read a specific file path, use the `fileRead` or `glob` tool instead of the `worker` tool, to find the match more quickly
-- If you are searching for a specific class definition like "class Foo", use the `glob` tool instead, to find the match more quickly
-- If you are searching for code within a specific file or set of 2-3 files, use the `fileRead` tool instead of the `worker` tool, to find the match more quickly
-- To perform some action that is not possible with the `worker` available tools. Call the `worker` only if the action is possible with the available tools
-- Workers can not be used to test any implementation
+**When NOT to Use:**
+*   **Specific File Read:** Use `file_read` or `glob` for faster results.
+*   **Class Definitions:** Use `glob` to find "class Foo" definitions.
+*   **Code Search in Few Files:** Use `file_read` for code within 2-3 specific files.
+*   **Unsupported Actions:** Only call if the `worker` can perform the action with its available tools.
+*   **Testing Implementations:** Workers CANNOT BE USED for testing or verification.
 
-Usage notes:
-- Launch multiple workers concurrently to maximize performance; to do that, use a single message with multiple tool uses
-- When the worker is done, it will return a report back to you.
-- Each worker invocation is stateless. You will not be able to send additional messages to the worker, nor will the worker be able to communicate with you outside its final report.
-- Your prompt should contain a highly detailed task description for the worker to perform autonomously, and you should specify exactly what information the worker should return back to you in its final report.
-- The worker's outputs should generally be trusted
-- Clearly tell the worker whether you expect it to write code or just to do research (search, file reads, etc.), since it is not aware of the user's intent
+**Usage Notes:**
+*   **Concurrency:** Launch multiple workers concurrently using a single message with multiple tool calls for maximum performance.
+*   **Stateless:** Each worker invocation is stateless. No further messages can be sent to or from the worker after its final report.
+*   **Detailed Prompts:** Provide highly detailed task descriptions, specifying exactly what information the worker should return in its report.
+*   **Trust Outputs:** Worker outputs should generally be trusted.
+*   **Explicit Intent:** Clearly state if the worker should write code or only perform research (search, file reads, etc.), as it is not aware of user intent.

@@ -19,8 +19,7 @@
       <div v-if="tasks.length === 0" class="text-sm text-gray-400 italic">
         Nenhuma tarefa {{ emptyMessage }}
       </div>
-      <TaskItemComponent v-for="task in tasks" :key="task.id" :task="task" @play="$emit('play', $event)" @play-now="$emit('play-now',
-       $event)" @stop="$emit('stop', $event)" @edit="$emit('edit', $event)" @archive="$emit('archive', $event)" @done="$emit('done', $event)"/>
+      <TaskItemComponent v-for="task in tasks" :key="task.id" :task="task" @play="$emit('play', $event)" @play-now="$emit('play-now', $event)" @stop="$emit('stop', $event)" @edit="$emit('edit', $event)" @archive="$emit('archive', $event)" @done="$emit('done', $event)"/>
     </div>
   </div>
 </template>

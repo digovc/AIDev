@@ -6,7 +6,7 @@ const assistantsStore = require('../stores/assistants.store');
 const deepSeekProvider = require('../providers/deep-seek.provider');
 const fileEditTool = require("../tools/file-edit.tool");
 const fileMultiEditTool = require("../tools/file-multi-edit.tool");
-const fileReadTool = require("../tools/file-read.tool");
+const file_read_tool = require("../tools/file-read.tool");
 const fileWriteTool = require("../tools/file-write.tool");
 const globTool = require("../tools/glob.tool");
 const googleProvider = require('../providers/google.provider');
@@ -15,7 +15,7 @@ const lsTool = require("../tools/ls.tool");
 const messagesStore = require('../stores/messages.store');
 const openRouterProvider = require('../providers/open-router.provider');
 const socketIOService = require("./socket-io.service");
-const taskListTool = require("../tools/task-list.tool");
+const task_list_tool = require("../tools/task-list.tool");
 const taskWriteTool = require("../tools/task-write.tool");
 const todoReadTool = require("../tools/todo-read.tool");
 const todoWriteTool = require("../tools/todo-write.tool");
@@ -25,12 +25,12 @@ const TOOLS = [
   agentTool,
   fileEditTool,
   fileMultiEditTool,
-  fileReadTool,
+  file_read_tool,
   fileWriteTool,
   globTool,
   grepTool,
   lsTool,
-  taskListTool,
+  task_list_tool,
   taskWriteTool,
   todoReadTool,
   todoWriteTool,
@@ -154,32 +154,60 @@ class AgentService {
     });
   }
 
-  async useTool(conversation, cancelationToken, assistantMessage) {
-    const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
-
-    const toolResults = [];
-
-    for (const toolBlock of toolUseBlocks) {
-      const tool = TOOLS.find(tool => tool.getDefinition().name === toolBlock.tool);
-      let result;
-
-      try {
-        if (typeof toolBlock.content === 'string') {
-          toolBlock.content = JSON.parse(toolBlock.content);
-        }
-
-        result = await tool.executeTool(conversation, toolBlock.content, cancelationToken);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      } catch (e) {
-        result = { error: e.message, isError: true };
+  async processToolBlock(toolBlock, conversation, cancelationToken) {
+    const tool = TOOLS.find(tool => tool.getDefinition().name === toolBlock.tool);
+    try {
+      if (typeof toolBlock.content === 'string') {
+        toolBlock.content = JSON.parse(toolBlock.content);
       }
 
-      toolResults.push({
+      const result = await tool.executeTool(conversation, toolBlock.content, cancelationToken);
+
+      return {
         tool: toolBlock.tool,
         toolUseId: toolBlock.toolUseId,
         result: result,
         isError: result.isError
-      });
+      };
+    } catch (e) {
+      return {
+        tool: toolBlock.tool,
+        toolUseId: toolBlock.toolUseId,
+        result: { error: e.message, isError: true },
+        isError: true
+      };
+    }
+  }
+
+  async useTool(conversation, cancelationToken, assistantMessage) {
+    const toolUseBlocks = assistantMessage.blocks.filter(b => b.type === 'tool_use');
+    const toolResults = [];
+
+    // Separate worker and non-worker tools
+    const workerBlocks = [];
+    const nonWorkerBlocks = [];
+
+    for (const toolBlock of toolUseBlocks) {
+      if (toolBlock.tool === 'worker') {
+        workerBlocks.push(toolBlock);
+      } else {
+        nonWorkerBlocks.push(toolBlock);
+      }
+    }
+
+    // Process non-worker tools sequentially
+    for (const toolBlock of nonWorkerBlocks) {
+      const result = await this.processToolBlock(toolBlock, conversation, cancelationToken);
+      toolResults.push(result);
+    }
+
+    // Process worker tools in parallel
+    if (workerBlocks.length > 0) {
+      const workerPromises = workerBlocks.map(toolBlock =>
+        this.processToolBlock(toolBlock, conversation, cancelationToken)
+      );
+      const workerResults = await Promise.all(workerPromises);
+      toolResults.push(...workerResults);
     }
 
     const toolMessage = {

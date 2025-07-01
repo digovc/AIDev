@@ -7,10 +7,10 @@
       <div class="text-xs font-bold">{{ task.title }}</div>
     </div>
     <div class="flex space-x-4 items-center justify-end w-full md:w-auto">
-      <button v-if="task.status !== 'running'" @click="$emit('play', task.id)" class="text-gray-400 hover:text-gray-200" title="Iniciar" tabindex="-1">
+      <button v-if="!task.isExecuting" @click="$emit('play', task.id)" class="text-gray-400 hover:text-gray-200" title="Iniciar" tabindex="-1">
         <FontAwesomeIcon :icon="faPlay" class="h-6 w-6"/>
       </button>
-      <button v-if="task.status === 'running'" @click="$emit('stop', task.id)" class="text-gray-400 hover:text-gray-200" title="Parar" tabindex="-1">
+      <button v-if="task.isExecuting" @click="$emit('stop', task.id)" class="text-gray-400 hover:text-gray-200" title="Parar" tabindex="-1">
         <FontAwesomeIcon :icon="faStop" class="h-6 w-6"/>
       </button>
       <button v-if="task.status !== 'done'" @click.stop="$emit('done', task.id)" class="text-gray-400 hover:text-gray-200" title="Concluir" tabindex="-1">

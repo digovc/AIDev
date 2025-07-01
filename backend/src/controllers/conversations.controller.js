@@ -13,12 +13,6 @@ class ConversationsController extends CrudControllerBase {
       this.getByProjectId(req, res).catch((e) => this.errorHandler(e, res));
     });
   }
-
-  async getByProjectId(req, res) {
-    const projectId = req.params.projectId;
-    const conversations = await conversationsStore.getByProjectId(projectId);
-    res.json(conversations);
-  }
 }
 
 module.exports = new ConversationsController();
