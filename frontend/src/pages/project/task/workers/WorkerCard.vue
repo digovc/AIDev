@@ -13,6 +13,12 @@
     <div class="mt-2">
       <span class="text-sm text-gray-500">Prompt: {{ worker.prompt }}</span>
     </div>
+    <div class="mt-2" v-if="worker.report">
+      <span class="text-sm text-gray-500">Report: {{ worker.report }}</span>
+    </div>
+    <div class="mt-2" v-if="worker.error">
+      <span class="text-sm text-gray-500">Error: {{ worker.error ? 'Yes' : 'No' }}</span>
+    </div>
   </div>
 </template>
 

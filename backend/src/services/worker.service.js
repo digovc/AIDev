@@ -192,8 +192,6 @@ class WorkerService {
         if (toolBlock.tool === 'report') {
           return resolve(result);
         }
-
-        await new Promise(x => setTimeout(x, 100));
       } catch (e) {
         result = { error: e.message, isError: true };
       }

@@ -43,19 +43,28 @@ class WorkerTool {
     task.workers.push(worker);
     await tasksStore.update(task.id, task);
     let status = 'completed';
+    let result = {};
 
     try {
-      return await workerService.job(conversation, input.prompt, worker, cancelationToken);
+      result = await workerService.job(conversation, input.prompt, worker, cancelationToken);
+      return result;
     } catch (error) {
       status = 'failed';
       task = await tasksStore.getById(task.id);
       worker = task.workers.find(w => w.id === worker.id);
+
       worker.status = 'finished';
+      worker.error = true;
+      worker.report = error.message;
+
       throw new Error(`Error on worker: ${ error }`);
     } finally {
       task = await tasksStore.getById(task.id);
       worker = task.workers.find(w => w.id === worker.id);
+
       worker.status = status;
+      worker.report = result.report;
+
       await tasksStore.update(task.id, task);
     }
   }
