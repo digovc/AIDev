@@ -17,7 +17,7 @@ Launches a worker with access to:
 *   **Class Definitions:** Use `glob` to find "class Foo" definitions.
 *   **Code Search in Few Files:** Use `file_read` for code within 2-3 specific files.
 *   **Unsupported Actions:** Only call if the `worker` can perform the action with its available tools.
-*   **Testing Implementations:** Workers cannot be used for testing.
+*   **Testing Implementations:** Workers CANNOT BE USED for testing or verification.
 
 **Usage Notes:**
 *   **Concurrency:** Launch multiple workers concurrently using a single message with multiple tool calls for maximum performance.

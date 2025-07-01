@@ -160,8 +160,9 @@ class AgentService {
       if (typeof toolBlock.content === 'string') {
         toolBlock.content = JSON.parse(toolBlock.content);
       }
+
       const result = await tool.executeTool(conversation, toolBlock.content, cancelationToken);
-      await new Promise(resolve => setTimeout(resolve, 100));
+
       return {
         tool: toolBlock.tool,
         toolUseId: toolBlock.toolUseId,
@@ -185,7 +186,7 @@ class AgentService {
     // Separate worker and non-worker tools
     const workerBlocks = [];
     const nonWorkerBlocks = [];
-    
+
     for (const toolBlock of toolUseBlocks) {
       if (toolBlock.tool === 'worker') {
         workerBlocks.push(toolBlock);
@@ -202,7 +203,7 @@ class AgentService {
 
     // Process worker tools in parallel
     if (workerBlocks.length > 0) {
-      const workerPromises = workerBlocks.map(toolBlock => 
+      const workerPromises = workerBlocks.map(toolBlock =>
         this.processToolBlock(toolBlock, conversation, cancelationToken)
       );
       const workerResults = await Promise.all(workerPromises);

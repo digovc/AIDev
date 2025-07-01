@@ -1,6 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const socketIOService = require("../services/socket-io.service");
+const memoryCache = require("../services/memory.cache");
 
 class StoreBase {
   constructor(modelName, modelPrefix) {
@@ -24,8 +25,8 @@ class StoreBase {
     const fileName = `${ this.modelPrefix }_${ data.id }.json`;
     const filePath = path.join(dataDir, fileName);
 
+    memoryCache.set(data.id, data);
     await fs.writeFile(filePath, JSON.stringify(data, null, 2));
-
     socketIOService.io.emit(`${ this.modelPrefix }-created`, data);
 
     return data;
@@ -34,29 +35,20 @@ class StoreBase {
   async update(id, data) {
     const itemFilePath = await this.getItemFilePath(id);
 
-    try {
-      await fs.access(itemFilePath);
-    } catch (error) {
-      throw new Error(`${ this.modelPrefix } not found`);
-    }
+    const existingItem = await this.getById(id);
 
-    const existingContent = await fs.readFile(itemFilePath, 'utf8');
-    const existingItem = JSON.parse(existingContent);
-
-    // Update item data
     const updatedItem = {
       ...existingItem,
       ...data,
       updatedAt: new Date().toISOString()
     };
 
-    // Ensure ID doesn't change
     updatedItem.id = id;
 
     // Prepare data before saving
     await this.prepareBeforeSave(updatedItem);
+    memoryCache.set(id, updatedItem);
     await fs.writeFile(itemFilePath, JSON.stringify(updatedItem, null, 2));
-
     socketIOService.io.emit(`${ this.modelPrefix }-updated`, updatedItem);
 
     return updatedItem;
@@ -67,10 +59,16 @@ class StoreBase {
   }
 
   async getById(id) {
+    const cachedItem = memoryCache.get(id);
+    if (cachedItem) return cachedItem;
+
     const filePath = await this.getItemFilePath(id);
     try {
       const content = await fs.readFile(filePath, 'utf8');
-      return JSON.parse(content);
+      const item = JSON.parse(content);
+      // Store in cache
+      memoryCache.set(id, item);
+      return item;
     } catch (error) {
       return null;
     }
@@ -84,7 +82,7 @@ class StoreBase {
     for (const file of files) {
       if (file.startsWith(`${ this.modelPrefix }_`) && file.endsWith('.json')) {
         const id = file.replace(`${ this.modelPrefix }_`, '').replace('.json', '');
-        const item = await this.getById(id); // getById already handles locking
+        const item = await this.getById(id);
         if (item) items.push(item);
       }
     }
@@ -111,6 +109,8 @@ class StoreBase {
     }
 
     await fs.unlink(itemFilePath);
+    // Remove from cache
+    memoryCache.delete(id);
     return true;
   }
 

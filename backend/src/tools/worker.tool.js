@@ -2,6 +2,7 @@ const workerService = require("../services/worker.service");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const tasksStore = require("../stores/tasks.store");
+const { v4: uuidv4 } = require('uuid');
 
 class WorkerTool {
   DESCRIPTION = readFileSync(join(__dirname, "./worker.txt"), "utf8");
@@ -32,7 +33,7 @@ class WorkerTool {
 
     let worker = {
       prompt: input.prompt,
-      id: `${ new Date().getTime() }`,
+      id: uuidv4(),
       taskId: conversation.taskId,
       status: 'running',
       messagesCount: 0,

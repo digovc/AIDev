@@ -49,7 +49,7 @@ class WorkerService {
     const task = await tasksStore.getById(conversation.taskId);
     if (!task) throw new Error("Task not found");
     const oldWorker = task.workers.find(w => w.id === worker.id);
-    if (oldWorker) throw new Error("Worker already started");
+    if (!oldWorker) throw new Error("Worker already started");
     oldWorker.status = 'running';
     oldWorker.messagesCount = messages.length;
     await tasksStore.update(task.id, task);

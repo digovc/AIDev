@@ -23,7 +23,8 @@
     "multi-llm-ts": "^2.15.2",
     "nunjucks": "^3.2.4",
     "openai": "^5.1.1",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
