@@ -1,7 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
 const socketIOService = require("../services/socket-io.service");
-const lockService = require('../services/lock.service');
 
 class StoreBase {
   constructor(modelName, modelPrefix) {
@@ -18,63 +17,49 @@ class StoreBase {
     // Add creation timestamp
     data.createdAt = now.toISOString();
 
-    // Acquire lock for the resource ID
-    await lockService.acquire(data.id);
+    // Prepare data before saving
+    await this.prepareBeforeSave(data);
 
-    try {
-      // Prepare data before saving
-      await this.prepareBeforeSave(data);
+    const dataDir = await this.getDataDir();
+    const fileName = `${ this.modelPrefix }_${ data.id }.json`;
+    const filePath = path.join(dataDir, fileName);
 
-      const dataDir = await this.getDataDir();
-      const fileName = `${ this.modelPrefix }_${ data.id }.json`;
-      const filePath = path.join(dataDir, fileName);
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2));
 
-      await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+    socketIOService.io.emit(`${ this.modelPrefix }-created`, data);
 
-      socketIOService.io.emit(`${ this.modelPrefix }-created`, data);
-
-      return data;
-    } finally {
-      // Release the lock
-      lockService.release(data.id);
-    }
+    return data;
   }
 
   async update(id, data) {
-    await lockService.acquire(id);
+    const itemFilePath = await this.getItemFilePath(id);
 
     try {
-      const itemFilePath = await this.getItemFilePath(id);
-
-      try {
-        await fs.access(itemFilePath);
-      } catch (error) {
-        throw new Error(`${ this.modelPrefix } not found`);
-      }
-
-      const existingContent = await fs.readFile(itemFilePath, 'utf8');
-      const existingItem = JSON.parse(existingContent);
-
-      // Update item data
-      const updatedItem = {
-        ...existingItem,
-        ...data,
-        updatedAt: new Date().toISOString()
-      };
-
-      // Ensure ID doesn't change
-      updatedItem.id = id;
-
-      // Prepare data before saving
-      await this.prepareBeforeSave(updatedItem);
-      await fs.writeFile(itemFilePath, JSON.stringify(updatedItem, null, 2));
-
-      socketIOService.io.emit(`${ this.modelPrefix }-updated`, updatedItem);
-
-      return updatedItem;
-    } finally {
-      lockService.release(id);
+      await fs.access(itemFilePath);
+    } catch (error) {
+      throw new Error(`${ this.modelPrefix } not found`);
     }
+
+    const existingContent = await fs.readFile(itemFilePath, 'utf8');
+    const existingItem = JSON.parse(existingContent);
+
+    // Update item data
+    const updatedItem = {
+      ...existingItem,
+      ...data,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Ensure ID doesn't change
+    updatedItem.id = id;
+
+    // Prepare data before saving
+    await this.prepareBeforeSave(updatedItem);
+    await fs.writeFile(itemFilePath, JSON.stringify(updatedItem, null, 2));
+
+    socketIOService.io.emit(`${ this.modelPrefix }-updated`, updatedItem);
+
+    return updatedItem;
   }
 
   async prepareBeforeSave(data) {
@@ -82,18 +67,12 @@ class StoreBase {
   }
 
   async getById(id) {
-    await lockService.acquire(id);
-
+    const filePath = await this.getItemFilePath(id);
     try {
-      const filePath = await this.getItemFilePath(id);
-      try {
-        const content = await fs.readFile(filePath, 'utf8');
-        return JSON.parse(content);
-      } catch (error) {
-        return null;
-      }
-    } finally {
-      lockService.release(id);
+      const content = await fs.readFile(filePath, 'utf8');
+      return JSON.parse(content);
+    } catch (error) {
+      return null;
     }
   }
 
@@ -124,21 +103,15 @@ class StoreBase {
   }
 
   async delete(id) {
-    await lockService.acquire(id);
-
+    const itemFilePath = await this.getItemFilePath(id);
     try {
-      const itemFilePath = await this.getItemFilePath(id);
-      try {
-        await fs.access(itemFilePath);
-      } catch (error) {
-        throw new Error(`${ this.modelPrefix } not found`);
-      }
-
-      await fs.unlink(itemFilePath);
-      return true;
-    } finally {
-      lockService.release(id);
+      await fs.access(itemFilePath);
+    } catch (error) {
+      throw new Error(`${ this.modelPrefix } not found`);
     }
+
+    await fs.unlink(itemFilePath);
+    return true;
   }
 
   async getDataDir() {
