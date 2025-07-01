@@ -27,7 +27,7 @@ class TodoWriteTool {
                 },
                 content: {
                   type: "string",
-                  description: "Brief description of the task"
+                  description: "Brief description of the task. Send this only on create or update."
                 },
                 status: {
                   type: "string",
