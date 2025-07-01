@@ -1,9 +1,15 @@
 <template>
-  <div class="p-4 h-full">
+  <div class="pt-4 h-full">
     <ul v-if="todoItems.length" class="space-y-2">
-      <li v-for="(item, index) in todoItems" :key="index" class="flex items-center justify-between p-2 bg-gray-800 rounded">
-        <span>{{ item.content }}</span>
-        <span :class="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+      <li v-for="(item, index) in todoItems" :key="index" class="p-2 bg-gray-800 rounded">
+        <div class="md:flex gap-4 items-center justify-between space-y-4 md:space-y-0">
+          <div class="">
+            {{ item.content }}
+          </div>
+          <div :class="statusClass(item.status)" class="text-right">
+            {{ statusLabel(item.status) }}
+          </div>
+        </div>
       </li>
     </ul>
     <div v-else class="text-center text-gray-400 h-full flex justify-center items-center italic text-sm">

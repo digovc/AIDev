@@ -1,10 +1,10 @@
 <template>
-  <div class="group bg-gray-800 rounded-lg p-2 flex justify-between items-center mb-2 gap-2 cursor-pointer hover:bg-gray-700">
-    <div class="text-xs text-gray-300">
+  <div class="group bg-gray-800 rounded-lg p-2 flex mb-2 gap-4 cursor-pointer hover:bg-gray-700">
+    <div class="text-xs text-gray-300 grow truncate text-left" dir="rtl">
       {{ file.path }}
     </div>
-    <div class="flex items-center">
-      <div class="text-xs font-mono pr-2" :class="statusClass">
+    <div class="flex items-center gap-4">
+      <div class="text-xs font-mono" :class="statusClass">
         {{ statusText }}
       </div>
       <div v-if="file.status === 'M'" @click.stop="rollbackFile" class="text-gray-400 hover:text-white" title="'Rollback'">

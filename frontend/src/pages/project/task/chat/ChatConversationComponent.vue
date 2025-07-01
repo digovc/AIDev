@@ -1,7 +1,7 @@
 <template>
   <div class="relative h-full">
     <div class="absolute inset-0 overflow-y-auto" ref="messagesContainer" @scroll="handleScroll">
-      <div v-if="conversation && messages && messages.length > 0" class="pr-2">
+      <div v-if="conversation && messages && messages.length > 0" class="pr-1">
         <ChatMessageComponent v-for="message in messages" :key="message.id" :message="message" @delete="handleDeleteMessage"/>
       </div>
       <div v-else class="text-gray-500 italic h-full flex items-center justify-center">

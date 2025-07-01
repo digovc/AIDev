@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center">
       <div class="flex items-center space-x-2">
         <h1 class="text-lg font-bold">{{ project?.name }}</h1>
-        <div class="text-gray-300 text-xs">
+        <div class="text-gray-300 text-xs hidden md:block">
           {{ project?.path }}
         </div>
         <button @click="editProject" class="text-gray-400 hover:text-gray-200 text-sm">

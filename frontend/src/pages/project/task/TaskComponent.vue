@@ -1,12 +1,12 @@
 <template>
   <div class="bg-gray-900 rounded-lg shadow-md p-2 flex flex-col">
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2 sm:gap-4">
       <div class="flex items-center space-x-4">
-        <h2 class="text-lg font-bold">{{ taskTitle }}</h2>
+        <h2 class="md:text-lg font-bold">{{ taskTitle }}</h2>
         <FontAwesomeIcon :icon="faCog" class="text-gray-200 animate-spin" v-if="isRunning"/>
       </div>
 
-      <div class="flex gap-4 text-gray-400 text-lg">
+      <div class="flex gap-6 text-gray-400 text-lg justify-center">
         <button v-if="!isRunning && task?.id" @click="runTask" :disabled="loading">
           <FontAwesomeIcon :icon="faPlay" class="text-green-500 hover:text-green-300"/>
         </button>
@@ -60,10 +60,10 @@ const tabs = computed(() => {
 
   if (task.value?.id) {
     baseTabs.push(
-        { title: 'Plano', route: 'task-plan', params },
-        { title: 'Histórico', route: 'task-chat', params },
-        { title: 'Agentes', route: 'task-agents', params },
-        { title: 'Alterações', route: 'task-diff', params },
+        { title: 'Plan', route: 'task-plan', params },
+        { title: 'Chat', route: 'task-chat', params },
+        { title: 'Workers', route: 'task-agents', params },
+        { title: 'Diff', route: 'task-diff', params },
     );
   }
 
