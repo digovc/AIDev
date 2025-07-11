@@ -110,18 +110,14 @@ class GitService {
     try {
       const { task, projectPath } = await this._getTaskAndProjectPath(taskId);
 
-      // Switch to a branch formatted as 'task-<task-id>'
       const branchName = `task-${ taskId }`;
       await execAsync(`git checkout ${ branchName } || git checkout -b ${ branchName }`, { cwd: projectPath });
 
-      // Add all changes (modified, added, or deleted files)
       await execAsync('git add -A', { cwd: projectPath });
 
-      // Create a commit with the task title as the message
-      const commitMessage = task.title;
+      const commitMessage = `[${ task.id }] ${ task.description }`;
       await execAsync(`git commit -m "${ commitMessage }"`, { cwd: projectPath });
 
-      // Push the changes to the remote repository
       await execAsync(`git push origin ${ branchName }`, { cwd: projectPath });
 
       return { success: true };

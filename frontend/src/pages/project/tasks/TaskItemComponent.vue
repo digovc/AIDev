@@ -4,7 +4,7 @@
       #{{ task.id }}
     </div>
     <div class="flex-grow">
-      <div class="text-xs font-bold">{{ task.title }}</div>
+      <div class="text-xs font-bold">{{ task.description }}</div>
     </div>
     <div class="flex space-x-4 items-center justify-end pt-4 md:pt-0 w-full md:w-auto">
       <button v-if="!task.isExecuting" @click="$emit('play', task.id)" class="text-gray-400 hover:text-gray-200" title="Iniciar" tabindex="-1">

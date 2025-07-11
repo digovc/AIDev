@@ -2,11 +2,10 @@
   <div class="bg-gray-900 rounded-lg flex flex-col space-y-2">
     <form class="flex flex-col grow space-y-2">
       <div class="mb-4">
-        <label for="title" class="form-label">Título</label>
-        <input type="text" id="title" v-model="task.title" class="form-input" required ref="titleInput"/>
+        <label for="description" class="form-label">Descrição</label>
+        <textarea id="description" ref="descriptionInput" v-model="task.description" rows="15" class="form-input"></textarea>
       </div>
 
-      <!-- Adicione esta nova seção para listar as referências -->
       <div class="grow flex flex-col">
         <div class="flex justify-between items-center pr-2">
           <label class="form-label">Referências</label>
@@ -20,11 +19,6 @@
         <div v-else class="space-y-2 pt-4 grow">
           <ReferenceComponent v-for="(ref, index) in task.references" :key="index" :reference="ref" @remove="removeReference(index)" @view="openFileViewDialog(ref)"/>
         </div>
-      </div>
-
-      <div class="mb-4">
-        <label for="description" class="form-label">Descrição</label>
-        <textarea id="description" v-model="task.description" rows="15" class="form-input"></textarea>
       </div>
 
       <div class="pt-4">
@@ -90,14 +84,13 @@ const loading = ref(false);
 const referencesDialog = ref(null);
 const route = useRoute();
 const router = useRouter();
-const titleInput = ref(null);
+const descriptionInput = ref(null);
 
 const fileViewDialog = ref(null);
 const selectedFile = ref({});
 
 const task = reactive({
   id: null,
-  title: '',
   description: '',
   status: 'backlog',
   references: [],
@@ -229,7 +222,7 @@ const duplicateTask = async () => {
 
     emits('task-duplicated', duplicatedTask);
     await router.push(`/projects/${ props.project.id }/tasks/${ duplicatedTask.id }`);
-    setTimeout(() => titleInput.value.focus(), 100);
+    setTimeout(() => descriptionInput.value.focus(), 100);
   } catch (error) {
     console.error('Erro ao duplicar tarefa:', error);
     alert('Ocorreu um erro ao duplicar a tarefa. Por favor, tente novamente.');
@@ -290,7 +283,7 @@ onMounted(async () => {
 
   await loadTask();
   await loadAssistants();
-  await titleInput.value.focus();
+  await descriptionInput.value.focus();
 });
 
 onUnmounted(() => {

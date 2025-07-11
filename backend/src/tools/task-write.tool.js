@@ -7,14 +7,10 @@ class TaskWriteTool {
       description: "Adds or updates a project task",
       input_schema: {
         type: "object",
-        required: ["title", "description"],
+        required: ["description"],
         properties: {
           id: {
             description: "Task ID (required for update)",
-            type: "string"
-          },
-          title: {
-            description: "Task title (required for creation)",
             type: "string"
           },
           description: {
@@ -44,11 +40,10 @@ class TaskWriteTool {
   }
 
   async createTask(conversation, input) {
-    if (!input.title) throw new Error("To create a task the 'title' field is required");
+    if (!input.description) throw new Error("To create a task the 'description' field is required");
 
     const task = {
       projectId: conversation.projectId,
-      title: input.title,
       description: input.description ?? "",
       status: input.status || "backlog"
     };
@@ -68,7 +63,6 @@ class TaskWriteTool {
 
     task.description = task.description ?? "";
 
-    if (input.title) task.title = input.title;
     if (input.description) task.description += `\n\n${ input.description }`;
     if (input.status) task.status = input.status;
 
