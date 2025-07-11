@@ -4,6 +4,7 @@ const anthropicProvider = require('../providers/anthropic.provider');
 const assistantsStore = require('../stores/assistants.store');
 const deepSeekProvider = require('../providers/deep-seek.provider');
 const moonshotProvider = require('../providers/moonshot.provider');
+const xaiProvider = require('../providers/xai.provider');
 const fileEditTool = require("../tools/file-edit.tool");
 const fileMultiEditTool = require("../tools/file-multi-edit.tool");
 const fileReadTool = require("../tools/file-read.tool");
@@ -81,6 +82,9 @@ class WorkerService {
         break;
       case 'openrouter':
         providerService = openRouterProvider;
+        break;
+      case 'xai':
+        providerService = xaiProvider;
         break;
     }
 

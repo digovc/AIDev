@@ -29,6 +29,7 @@
             <option value="moonshot">Moonshot</option>
             <option value="openai">OpenAI</option>
             <option value="openrouter">OpenRouter</option>
+            <option value="xai">xAI (Grok)</option>
           </select>
         </div>
 

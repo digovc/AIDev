@@ -70,6 +70,15 @@
         <input v-if="settings.moonshot.enabled" type="text" id="moonshotApiKey" v-model="settings.moonshot.apiKey" placeholder="Cole sua API Key do Moonshot" class="form-input w-full"/>
       </div>
 
+      <div class="mb-6">
+        <div class="flex items-center mb-3">
+          <input type="checkbox" id="xaiEnabled" v-model="settings.xai.enabled" class="mr-2 bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-600"/>
+          <label for="xaiEnabled">Ativar xAI (Grok)</label>
+        </div>
+
+        <input v-if="settings.xai.enabled" type="text" id="xaiApiKey" v-model="settings.xai.apiKey" placeholder="Cole sua API Key do xAI" class="form-input w-full"/>
+      </div>
+
       <div class="flex justify-end space-x-3">
         <button type="button" @click="resetSettings" class="btn btn-secondary">
           Cancelar
@@ -116,6 +125,10 @@ const settings = reactive({
   moonshot: {
     enabled: false,
     apiKey: ''
+  },
+  xai: {
+    enabled: false,
+    apiKey: ''
   }
 });
 
@@ -146,6 +159,8 @@ const resetSettings = () => {
   settings.alibaba.apiKey = '';
   settings.moonshot.enabled = false;
   settings.moonshot.apiKey = '';
+  settings.xai.enabled = false;
+  settings.xai.apiKey = '';
 };
 
 onMounted(async () => {
