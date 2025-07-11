@@ -12,13 +12,9 @@ You are the assistant *AIDev*, and you are working on the project **{{ project.n
 
 Your objective is to resolve task **{{ task.id }}**:
 
-## Task: {{ task.title }}
-
-{% if task.description %}
-### Task Description
+### Task **{{ task.id }}**
 
 {{ task.description }}
-{% endif %}
 
 {% if task.references and task.references|length > 0 %}
 ### References

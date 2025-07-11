@@ -2,7 +2,7 @@
   <div class="bg-gray-900 rounded-lg shadow-md p-2 flex flex-col">
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2 sm:gap-4">
       <div class="flex items-center space-x-4">
-        <h2 class="md:text-lg font-bold">{{ taskTitle }}</h2>
+        <h2 class="md:text-lg font-bold">{{ taskDescription }}</h2>
         <FontAwesomeIcon :icon="faCog" class="text-gray-200 animate-spin" v-if="isRunning"/>
       </div>
 
@@ -76,8 +76,7 @@ watch(() => route.params.taskId, async (newTaskId) => {
   }
 });
 
-const taskTitle = computed(() => {
-  if (task.value?.title) return `Tarefa ${ task.value.title }`;
+const taskDescription = computed(() => {
   if (task.value?.id) return `Tarefa ${ task.value.id }`;
   return 'Nova tarefa';
 });
