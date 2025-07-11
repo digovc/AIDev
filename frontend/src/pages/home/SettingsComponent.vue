@@ -61,6 +61,15 @@
         <input v-if="settings.alibaba.enabled" type="text" id="alibabaApiKey" v-model="settings.alibaba.apiKey" placeholder="Cole sua API Key do Alibaba" class="form-input w-full"/>
       </div>
 
+      <div class="mb-6">
+        <div class="flex items-center mb-3">
+          <input type="checkbox" id="moonshotEnabled" v-model="settings.moonshot.enabled" class="mr-2 bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-600"/>
+          <label for="moonshotEnabled">Ativar Moonshot</label>
+        </div>
+
+        <input v-if="settings.moonshot.enabled" type="text" id="moonshotApiKey" v-model="settings.moonshot.apiKey" placeholder="Cole sua API Key do Moonshot" class="form-input w-full"/>
+      </div>
+
       <div class="flex justify-end space-x-3">
         <button type="button" @click="resetSettings" class="btn btn-secondary">
           Cancelar
@@ -103,6 +112,10 @@ const settings = reactive({
   alibaba: {
     enabled: false,
     apiKey: ''
+  },
+  moonshot: {
+    enabled: false,
+    apiKey: ''
   }
 });
 
@@ -131,6 +144,8 @@ const resetSettings = () => {
   settings.gemini.apiKey = '';
   settings.alibaba.enabled = false;
   settings.alibaba.apiKey = '';
+  settings.moonshot.enabled = false;
+  settings.moonshot.apiKey = '';
 };
 
 onMounted(async () => {

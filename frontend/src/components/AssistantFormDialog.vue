@@ -26,6 +26,7 @@
             <option value="anthropic">Anthropic</option>
             <option value="deepseek">DeepSeek</option>
             <option value="google">Google</option>
+            <option value="moonshot">Moonshot</option>
             <option value="openai">OpenAI</option>
             <option value="openrouter">OpenRouter</option>
           </select>

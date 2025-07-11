@@ -4,6 +4,7 @@ const alibabaProvider = require('../providers/alibaba.provider');
 const anthropicProvider = require('../providers/anthropic.provider');
 const assistantsStore = require('../stores/assistants.store');
 const deepSeekProvider = require('../providers/deep-seek.provider');
+const moonshotProvider = require('../providers/moonshot.provider');
 const fileEditTool = require("../tools/file-edit.tool");
 const fileMultiEditTool = require("../tools/file-multi-edit.tool");
 const file_read_tool = require("../tools/file-read.tool");
@@ -67,6 +68,9 @@ class AgentService {
         break;
       case 'deepseek':
         providerService = deepSeekProvider;
+        break;
+      case 'moonshot':
+        providerService = moonshotProvider;
         break;
       case 'openrouter':
         providerService = openRouterProvider;
