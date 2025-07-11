@@ -27,12 +27,12 @@ class TodoWriteTool {
                 },
                 content: {
                   type: "string",
-                  description: "Brief description of the task. Send this only on create or update."
+                  description: "Brief description of the task. Send this only once on item creation."
                 },
                 status: {
                   type: "string",
                   enum: ["pending", "in_progress", "completed"],
-                  description: "Current status of the task (default: pending)"
+                  description: "Current status of the task"
                 }
               }
             }

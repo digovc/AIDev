@@ -77,7 +77,6 @@ watch(() => route.params.taskId, async (newTaskId) => {
 });
 
 const taskDescription = computed(() => {
-  if (task.value?.description) return `Tarefa ${ task.value.description }`;
   if (task.value?.id) return `Tarefa ${ task.value.id }`;
   return 'Nova tarefa';
 });
