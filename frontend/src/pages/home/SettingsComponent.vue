@@ -1,46 +1,46 @@
 <template>
   <div class="rounded-lg shadow-md p-4">
-    <h1 class="text-2xl font-bold mb-6">Configurações de Provedores LLM</h1>
+    <h1 class="text-2xl font-bold mb-6">Configurações</h1>
 
     <form @submit.prevent="saveSettings">
-      
+
       <div class="mb-6">
         <div class="flex items-center mb-3">
           <input type="checkbox" id="anthropicEnabled" v-model="settings.anthropic.enabled" class="mr-2 bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-600"/>
           <label for="anthropicEnabled">Ativar Anthropic</label>
         </div>
 
-        <input v-if="settings.anthropic.enabled" type="text" id="anthropicApiKey" v-model="settings.anthropic.apiKey" placeholder="Cole sua API Key do Anthropic" class="form-input w-full"/>
+        <input v-if="settings.anthropic.enabled" type="password" id="anthropicApiKey" v-model="settings.anthropic.apiKey" placeholder="Cole sua API Key do Anthropic" class="form-input w-full"/>
       </div>
 
-      
+
       <div class="mb-6">
         <div class="flex items-center mb-3">
           <input type="checkbox" id="openaiEnabled" v-model="settings.openai.enabled" class="mr-2 bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-600"/>
           <label for="openaiEnabled">Ativar OpenAI</label>
         </div>
 
-        <input v-if="settings.openai.enabled" type="text" id="openaiApiKey" v-model="settings.openai.apiKey" placeholder="Cole sua API Key do OpenAI" class="form-input w-full"/>
+        <input v-if="settings.openai.enabled" type="password" id="openaiApiKey" v-model="settings.openai.apiKey" placeholder="Cole sua API Key do OpenAI" class="form-input w-full"/>
       </div>
 
-      
+
       <div class="mb-6">
         <div class="flex items-center mb-3">
           <input type="checkbox" id="deepseekEnabled" v-model="settings.deepseek.enabled" class="mr-2 bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-600"/>
           <label for="deepseekEnabled">Ativar DeepSeek</label>
         </div>
 
-        <input v-if="settings.deepseek.enabled" type="text" id="deepseekApiKey" v-model="settings.deepseek.apiKey" placeholder="Cole sua API Key do DeepSeek" class="form-input w-full"/>
+        <input v-if="settings.deepseek.enabled" type="password" id="deepseekApiKey" v-model="settings.deepseek.apiKey" placeholder="Cole sua API Key do DeepSeek" class="form-input w-full"/>
       </div>
 
-      
+
       <div class="mb-6">
         <div class="flex items-center mb-3">
           <input type="checkbox" id="geminiEnabled" v-model="settings.gemini.enabled" class="mr-2 bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-600"/>
           <label for="geminiEnabled">Ativar Google Gemini</label>
         </div>
 
-        <input v-if="settings.gemini.enabled" type="text" id="geminiApiKey" v-model="settings.gemini.apiKey" placeholder="Cole sua API Key do Google Gemini" class="form-input w-full"/>
+        <input v-if="settings.gemini.enabled" type="password" id="geminiApiKey" v-model="settings.gemini.apiKey" placeholder="Cole sua API Key do Google Gemini" class="form-input w-full"/>
       </div>
 
       <div class="mb-6">
@@ -49,7 +49,7 @@
           <label for="openrouterEnabled">Ativar OpenRouter</label>
         </div>
 
-        <input v-if="settings.openrouter.enabled" type="text" id="openrouterApiKey" v-model="settings.openrouter.apiKey" placeholder="Cole sua API Key do OpenRouter" class="form-input w-full"/>
+        <input v-if="settings.openrouter.enabled" type="password" id="openrouterApiKey" v-model="settings.openrouter.apiKey" placeholder="Cole sua API Key do OpenRouter" class="form-input w-full"/>
       </div>
 
       <div class="mb-6">
@@ -58,7 +58,7 @@
           <label for="alibabaEnabled">Ativar Alibaba</label>
         </div>
 
-        <input v-if="settings.alibaba.enabled" type="text" id="alibabaApiKey" v-model="settings.alibaba.apiKey" placeholder="Cole sua API Key do Alibaba" class="form-input w-full"/>
+        <input v-if="settings.alibaba.enabled" type="password" id="alibabaApiKey" v-model="settings.alibaba.apiKey" placeholder="Cole sua API Key do Alibaba" class="form-input w-full"/>
       </div>
 
       <div class="mb-6">
@@ -67,7 +67,7 @@
           <label for="moonshotEnabled">Ativar Moonshot</label>
         </div>
 
-        <input v-if="settings.moonshot.enabled" type="text" id="moonshotApiKey" v-model="settings.moonshot.apiKey" placeholder="Cole sua API Key do Moonshot" class="form-input w-full"/>
+        <input v-if="settings.moonshot.enabled" type="password" id="moonshotApiKey" v-model="settings.moonshot.apiKey" placeholder="Cole sua API Key do Moonshot" class="form-input w-full"/>
       </div>
 
       <div class="mb-6">
@@ -76,7 +76,7 @@
           <label for="xaiEnabled">Ativar xAI (Grok)</label>
         </div>
 
-        <input v-if="settings.xai.enabled" type="text" id="xaiApiKey" v-model="settings.xai.apiKey" placeholder="Cole sua API Key do xAI" class="form-input w-full"/>
+        <input v-if="settings.xai.enabled" type="password" id="xaiApiKey" v-model="settings.xai.apiKey" placeholder="Cole sua API Key do xAI" class="form-input w-full"/>
       </div>
 
       <div class="flex justify-end space-x-3">
