@@ -13,6 +13,7 @@ const fileWriteTool = require("../tools/file-write.tool");
 const globTool = require("../tools/glob.tool");
 const googleProvider = require('../providers/google.provider');
 const grepTool = require("../tools/grep.tool");
+const groqProvider = require('../providers/groq.provider');
 const lsTool = require("../tools/ls.tool");
 const messagesStore = require('../stores/messages.store');
 const openRouterProvider = require('../providers/open-router.provider');
@@ -69,6 +70,9 @@ class AgentService {
         break;
       case 'deepseek':
         providerService = deepSeekProvider;
+        break;
+      case 'groq':
+        providerService = groqProvider;
         break;
       case 'moonshot':
         providerService = moonshotProvider;

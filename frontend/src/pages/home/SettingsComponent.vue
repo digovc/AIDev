@@ -79,6 +79,15 @@
         <input v-if="settings.xai.enabled" type="password" id="xaiApiKey" v-model="settings.xai.apiKey" placeholder="Cole sua API Key do xAI" class="form-input w-full"/>
       </div>
 
+      <div class="mb-6">
+        <div class="flex items-center mb-3">
+          <input type="checkbox" id="groqEnabled" v-model="settings.groq.enabled" class="mr-2 bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-600"/>
+          <label for="groqEnabled">Ativar Groq</label>
+        </div>
+
+        <input v-if="settings.groq.enabled" type="password" id="groqApiKey" v-model="settings.groq.apiKey" placeholder="Cole sua API Key do Groq" class="form-input w-full"/>
+      </div>
+
       <div class="flex justify-end space-x-3">
         <button type="button" @click="resetSettings" class="btn btn-secondary">
           Cancelar
@@ -129,6 +138,10 @@ const settings = reactive({
   xai: {
     enabled: false,
     apiKey: ''
+  },
+  groq: {
+    enabled: false,
+    apiKey: ''
   }
 });
 
@@ -161,6 +174,8 @@ const resetSettings = () => {
   settings.moonshot.apiKey = '';
   settings.xai.enabled = false;
   settings.xai.apiKey = '';
+  settings.groq.enabled = false;
+  settings.groq.apiKey = '';
 };
 
 onMounted(async () => {
