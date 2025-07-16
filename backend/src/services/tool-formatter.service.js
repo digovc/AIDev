@@ -1,6 +1,7 @@
 class ToolFormatterService {
   formatToolForProvider(toolDefinition, provider) {
-    if (['alibaba', 'deepseek', 'moonshot', 'openai'].includes(provider)) {
+    const openAiCompatibleProviders = ['alibaba', 'deepseek', 'moonshot', 'openai', 'xai', "groq"];
+    if (openAiCompatibleProviders.includes(provider)) {
       return this.formatToolForOpenAI(toolDefinition);
     } else if (provider === 'google') {
       return this.formatToolForGoogle(toolDefinition);
